@@ -23,11 +23,16 @@ def create_blank_surface(dimensions):
     surface.fill(COLOR_BACKGROUND)
     return surface
 
+def scale_location(location, scale_factor):
+    return (int(location[0] * scale_factor), int(location[1] * scale_factor))
+
 class GalaxyDisplay():
 
     def __init__(self, game, player, dimensions):
         self.game = game
         self.player = player
+        self.scale_factor = 1.0
+        self.pan = [0, 0]
         self.display_dimensions = dimensions
         self.player_surface = pygame.Surface(dimensions)
         self.refresh_player_surface()
@@ -36,6 +41,11 @@ class GalaxyDisplay():
         self.ship_surface = create_blank_surface(dimensions)
         self.refresh_ship_surface()
 
+    def set_scale_factor(self, new_scale_factor, center):
+        self.pan = [self.pan[0] + (self.scale_factor - new_scale_factor) * (center[0] / self.scale_factor - self.pan[0]), 
+                    self.pan[1] + (self.scale_factor - new_scale_factor) * (center[1] / self.scale_factor - self.pan[1])]
+        self.scale_factor = new_scale_factor
+
     def refresh_primary_surface(self):
         self.primary_surface.fill(COLOR_BACKGROUND)
         for i in range(len(self.game.galaxy.stars)):
@@ -43,15 +53,15 @@ class GalaxyDisplay():
             star_color = COLOR_UNEXPLORED_STAR
             if self.player.explored_stars[i]:
                 if s.ruler != None:
-                    pygame.draw.circle(self.primary_surface, s.ruler.color, s.location, int(1.5 * GALAXY_STAR_RADIUS))
+                    pygame.draw.circle(self.primary_surface, s.ruler.color, scale_location(s.location, self.scale_factor), int(1.5 * self.scale_factor * GALAXY_STAR_RADIUS))
                 star_color = COLOR_STAR
-            pygame.draw.circle(self.primary_surface, star_color, s.location, GALAXY_STAR_RADIUS)
+            pygame.draw.circle(self.primary_surface, star_color, scale_location(s.location, self.scale_factor), int(self.scale_factor * GALAXY_STAR_RADIUS))
             # pygame.draw.circle(surface, (255, 255, 255), s.location, radii, 1)
             numPlanets = len(s.planets)
             for p in range(numPlanets):
                 angle = p * 2 * math.pi / numPlanets
                 planetCenter = (int(s.location[0] + GALAXY_STAR_RADIUS * math.cos(angle)), int(s.location[1] + GALAXY_STAR_RADIUS * math.sin(angle)))
-                pygame.draw.circle(self.primary_surface, galaxy.MINERAL_COLORS[s.planets[p].mineral], planetCenter, GALAXY_PLANET_RADIUS)
+                pygame.draw.circle(self.primary_surface, galaxy.MINERAL_COLORS[s.planets[p].mineral], scale_location(planetCenter, self.scale_factor), int(self.scale_factor * GALAXY_PLANET_RADIUS))
 
     def refresh_player_surface(self):
         # TODO: Add connectivity lines between players' colonies
@@ -60,14 +70,14 @@ class GalaxyDisplay():
             s = self.game.galaxy.stars[i]
             if self.player.explored_stars[i]:
                 if s.ruler != None:
-                    pygame.draw.circle(self.player_surface, s.ruler.color, s.location, int(1.5 * GALAXY_STAR_RADIUS))
+                    pygame.draw.circle(self.player_surface, s.ruler.color, scale_location(s.location, self.scale_factor), int(1.5 * self.scale_factor * GALAXY_STAR_RADIUS))
 
     def refresh_ship_surface(self):
         self.ship_surface.fill(COLOR_BACKGROUND)
         for p in self.game.players:
             for s in p.ships:
                 if s.star == None:
-                    ship_display.draw_ship(self.ship_surface, s, s.location)
+                    ship_display.draw_ship(self.ship_surface, s, scale_location(s.location, self.scale_factor))
 
     def draw(self, display, pane_location):
         display.blit(self.player_surface, pane_location)

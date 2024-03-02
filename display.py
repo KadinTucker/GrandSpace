@@ -147,12 +147,12 @@ def main():
 
         # Events
         for event in pygame.event.get():
-            if event.type == pygame.QUIT: #QUIT
+            if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
-            elif event.type == pygame.MOUSEBUTTONDOWN: #MOUSEBUTTONDOWN
+            elif event.type == pygame.MOUSEBUTTONDOWN:
 
-                if event.button == pygame.BUTTON_RIGHT: # RIGHT MOUSE BUTTON
+                if event.button == pygame.BUTTON_RIGHT:
                     if display_mode == 1:
                         ship_selection.exit_star()
                         ship_selection.destination_star = find_star(pygame.mouse.get_pos(), g)
@@ -167,7 +167,7 @@ def main():
                                 ship_selection.exit_star()
                             ship_selection.exit_planet()
 
-                elif event.button == pygame.BUTTON_LEFT: # LEFT MOUSE BUTTON
+                elif event.button == pygame.BUTTON_LEFT:
                     if active_query == 0:
                         doubleclick += 1
                         new_ship = find_ship_galaxy(pygame.mouse.get_pos(), game)
@@ -176,30 +176,37 @@ def main():
                             new_ship.selected = True
                             ship_selection = new_ship
                             active_player = ship_selection.ruler
-                    # elif active_query == 1:
-                    #     star = find_star(pygame.mouse.get_pos(), g)
-                    #     if star != None and active_player.explored_stars[star.id]:
-                    #         active_query = 2
-                    #         display_mode = 2
-                    # elif active_query == 2:
-                    #     planet = find_planet(pygame.mouse.get_pos(), star)
-                    #     if planet != None:
-                    #         ship_selection.destination_planet = planet
-                    #         ship_selection.destination_star = star
-                    #         ship_selection.destination = star.location
-                    #         active_query = 0
-                    #         display_mode = 1
+                
+                elif event.button == pygame.BUTTON_WHEELUP:
+                    if display_mode == 1:
+                        galaxy_displays[active_player.id].set_scale_factor(galaxy_displays[active_player.id].scale_factor + 0.1, pygame.mouse.get_pos())
+                        galaxy_displays[active_player.id].refresh_primary_surface()
+                        galaxy_displays[active_player.id].refresh_player_surface()
 
-            elif event.type == pygame.MOUSEMOTION: #MOUSEMOTION
+                elif event.button == pygame.BUTTON_WHEELDOWN:
+                    if display_mode == 1:
+                        galaxy_displays[active_player.id].set_scale_factor(galaxy_displays[active_player.id].scale_factor - 0.1, pygame.mouse.get_pos())
+                        galaxy_displays[active_player.id].refresh_primary_surface()
+                        galaxy_displays[active_player.id].refresh_player_surface()
+
+            elif event.type == pygame.MOUSEMOTION:
                 doubleclick = 0
-            elif event.type == pygame.KEYDOWN: #KEYDOWN
-                #print(event.key)
-                if event.key == pygame.K_ESCAPE: #ESC 
+
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
                     active_query = 0 
                     display_mode = 1
-                # elif event.key == 101: #E
-                #     active_query = 1
-                #     display_mode = 1
+                elif event.key == pygame.K_EQUALS:
+                    if display_mode == 1:
+                        galaxy_displays[active_player.id].set_scale_factor(galaxy_displays[active_player.id].scale_factor + 0.1, pygame.mouse.get_pos())
+                        galaxy_displays[active_player.id].refresh_primary_surface()
+                        galaxy_displays[active_player.id].refresh_player_surface()
+                elif event.key == pygame.K_MINUS:
+                    if display_mode == 1:
+                        galaxy_displays[active_player.id].set_scale_factor(galaxy_displays[active_player.id].scale_factor - 0.1, pygame.mouse.get_pos())
+                        galaxy_displays[active_player.id].refresh_primary_surface()
+                        galaxy_displays[active_player.id].refresh_player_surface()
+
 
         if doubleclick >= 2:
             star = find_star(pygame.mouse.get_pos(), g)
@@ -222,7 +229,7 @@ def main():
         if display_mode == 1:
             
             galaxy_displays[active_player.id].refresh_ship_surface()
-            galaxy_displays[active_player.id].draw(display, (0, 0))
+            galaxy_displays[active_player.id].draw(display, galaxy_displays[active_player.id].pan)
 
         # SYSTEM DISPLAY
         elif display_mode == 2:
@@ -234,7 +241,7 @@ def main():
 
         if active_query == 1 or active_query == 2:
             display.blit(text_colonise, (GALAXY_SPACE_WIDTH * 2 - GALAXY_MARGIN - 150, GALAXY_SPACE_HEIGHT * 1.72 - GALAXY_MARGIN - 20))
-            #display.blit(text_colonise, (0, 0))
+
 
         display.blit(panel_large, (0, GALAXY_SPACE_HEIGHT * 2 - 58))
         # display.blit(button_diplomacy, (GALAXY_SPACE_WIDTH * 2 - 29, GALAXY_SPACE_HEIGHT * 2 - 55))
