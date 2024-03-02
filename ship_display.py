@@ -6,7 +6,7 @@ import galaxy
 import player
 import ship
 
-IMG_SHIP = pygame.image.load("ufo.png")
+IMG_SHIP = pygame.image.load("assets/ufo.png")
 SHIP_WIDTH = IMG_SHIP.get_width()
 SHIP_HEIGHT = IMG_SHIP.get_height()
 

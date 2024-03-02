@@ -31,7 +31,7 @@ COLOR_STAR = (200, 170, 25)
 COLOR_ARTIFACT_RING = (150, 125, 35)
 COLOR_SHIP_SELECTION = (225, 225, 225)
 
-img_ufo = pygame.image.load("ufo.png")
+img_ufo = pygame.image.load("assets/ufo.png")
 
 def draw_galaxy(surface, g, player):
     for i in range(len(g.stars)):
@@ -178,12 +178,12 @@ def main():
     panel_large = uiframe.get_panel_surface(GALAXY_SPACE_WIDTH * 2 - 6, 52)
     panel_money = uiframe.get_panel_surface(108, 16)
 
-    button_diplomacy = uiframe.create_button("icon-diplomacy.png")
-    button_colonial = uiframe.create_button("icon-colonial.png")
-    button_research = uiframe.create_button("icon-research.png")
-    button_explore = uiframe.create_button("icon-explore.png")
-    button_battle = uiframe.create_button("icon-battle.png")
-    button_ecology = uiframe.create_button("icon-ecology.png")
+    button_diplomacy = uiframe.create_button("assets/icon-diplomacy.png")
+    button_colonial = uiframe.create_button("assets/icon-colonial.png")
+    button_research = uiframe.create_button("assets/icon-research.png")
+    button_explore = uiframe.create_button("assets/icon-explore.png")
+    button_battle = uiframe.create_button("assets/icon-battle.png")
+    button_ecology = uiframe.create_button("assets/icon-ecology.png")
 
     timestamp = pygame.time.get_ticks()
 
@@ -288,7 +288,7 @@ def main():
             display.blit(text_colonise, (GALAXY_SPACE_WIDTH * 2 - GALAXY_MARGIN - 150, GALAXY_SPACE_HEIGHT * 1.72 - GALAXY_MARGIN - 20))
             #display.blit(text_colonise, (0, 0))
 
-        # display.blit(panel_large, (0, GALAXY_SPACE_HEIGHT * 2 - 58))
+        display.blit(panel_large, (0, GALAXY_SPACE_HEIGHT * 2 - 58))
         # display.blit(button_diplomacy, (GALAXY_SPACE_WIDTH * 2 - 29, GALAXY_SPACE_HEIGHT * 2 - 55))
         # display.blit(button_ecology, (GALAXY_SPACE_WIDTH * 2 - 29, GALAXY_SPACE_HEIGHT * 2 - 29))
         # display.blit(button_explore, (GALAXY_SPACE_WIDTH * 2 - 55, GALAXY_SPACE_HEIGHT * 2 - 55))
