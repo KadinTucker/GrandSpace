@@ -13,8 +13,6 @@ SHIP_HEIGHT = IMG_SHIP.get_height()
 COLOR_SHIP_SELECTION = (225, 225, 225)
 
 def draw_ship(surface, ship_obj, position):
-    if ship_obj.selected:
-        pygame.draw.circle(surface, COLOR_SHIP_SELECTION, position, 12)
     pygame.draw.circle(surface, ship_obj.ruler.color, position, 8)
     surface.blit(IMG_SHIP, (position[0] - SHIP_WIDTH / 2, position[1] - SHIP_HEIGHT / 2))
 

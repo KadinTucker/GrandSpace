@@ -10,6 +10,7 @@ import ship
 import font
 import uiframe
 
+import galaxy_display
 import system_display
 
 GALAXY_WIDTH = 14
@@ -33,65 +34,17 @@ COLOR_SHIP_SELECTION = (225, 225, 225)
 
 img_ufo = pygame.image.load("assets/ufo.png")
 
-def draw_galaxy(surface, g, player):
-    for i in range(len(g.stars)):
-        s = g.stars[i]
-        star_color = COLOR_UNEXPLORED_STAR
-        if player.explored_stars[i]:
-            if s.ruler != None:
-                pygame.draw.circle(surface, s.ruler.color, s.location, int(1.5 * GALAXY_STAR_RADIUS))
-            star_color = COLOR_STAR
-        pygame.draw.circle(surface, star_color, s.location, GALAXY_STAR_RADIUS)
-        # pygame.draw.circle(surface, (255, 255, 255), s.location, radii, 1)
-        numPlanets = len(s.planets)
-        for p in range(numPlanets):
-            angle = p * 2 * math.pi / numPlanets
-            planetCenter = (int(s.location[0] + GALAXY_STAR_RADIUS * math.cos(angle)), int(s.location[1] + GALAXY_STAR_RADIUS * math.sin(angle)))
-            pygame.draw.circle(surface, galaxy.MINERAL_COLORS[s.planets[p].mineral], planetCenter, GALAXY_PLANET_RADIUS)
-
-# def draw_system(surface, star):
-#     #ship_at = ship_selection.star == star
-#     surface.fill(COLOR_BACKGROUND)
-#     pygame.draw.circle(surface, COLOR_STAR, (GALAXY_SPACE_WIDTH, GALAXY_SPACE_HEIGHT), SYSTEM_STAR_RADIUS)
-#     num_planets = len(star.planets)
-#     for p in range(num_planets):
-#         angle = p * 2 * math.pi / num_planets - math.pi / 2
-#         planet_center = (int(GALAXY_SPACE_WIDTH + SYSTEM_HORIZONTAL_AXIS * math.cos(angle)), int(GALAXY_SPACE_HEIGHT + SYSTEM_VERTICAL_AXIS * math.sin(angle)))
-#         draw_planet(surface, star.planets[p], planet_center)
-#         # if ship_at and ship_selection.planet == star.planets[p]:
-#         #     draw_ship(surface, ship_selection, planetCenter, True)
-#         #     ship_at = False
-#     # if ship_at:
-#     #     draw_ship(surface, ship_selection, (GALAXY_SPACE_WIDTH, GALAXY_SPACE_HEIGHT), True)
-#     #     ship_at = False
-#     for s in range(len(star.ships)):
-#         if star.ships[s].planet == None:
-#             angle = s * 2 * math.pi / len(star.ships) - math.pi / 2
-#             radius = 15 * (len(star.ships) - 1)
-#             draw_ship(surface, star.ships[s], (int(GALAXY_SPACE_WIDTH + radius * math.cos(angle)), int(GALAXY_SPACE_HEIGHT + radius * math.sin(angle))))
-            
-# def draw_planet(surface, planet, position):
-#     if planet.colony != None:
-#         pygame.draw.circle(surface, planet.colony.ruler.color, position, int(1.5 * SYSTEM_PLANET_RADIUS))
-#     pygame.draw.circle(surface, galaxy.MINERAL_COLORS[planet.mineral], position, SYSTEM_PLANET_RADIUS)
-#     if planet.artifacts > 0:
-#         #pygame.draw.circle(surface, (150, 125, 35), planetCenter, 17, 3)
-#         pygame.draw.circle(surface, COLOR_ARTIFACT_RING, position, SYSTEM_PLANET_RADIUS + SYSTEM_ARTIFACT_RING_WIDTH * 2, SYSTEM_ARTIFACT_RING_WIDTH)
-#         pygame.draw.circle(surface, COLOR_ARTIFACT_RING, position, SYSTEM_PLANET_RADIUS + SYSTEM_ARTIFACT_RING_WIDTH * 4, SYSTEM_ARTIFACT_RING_WIDTH)
-#     for s in range(len(planet.ships)):
-#         angle = s * 2 * math.pi / len(planet.ships) - math.pi / 2
-#         radius = 10 * (len(planet.ships) - 1)
-#         draw_ship(surface, planet.ships[s], (int(position[0] + radius * math.cos(angle)), int(position[1] + radius * math.sin(angle))))
+def generate_galaxy_displays(game):
+    galaxy_displays = []
+    for p in game.players:
+        galaxy_displays.append(galaxy_display.GalaxyDisplay(game, p, (2 * GALAXY_SPACE_WIDTH, 2 * GALAXY_SPACE_HEIGHT)))
+    return galaxy_displays
             
 def generate_system_displays(galaxy):
     system_displays = []
     for s in galaxy.stars:
         system_displays.append(system_display.SystemDisplay(s))
     return system_displays
-
-# def get_system_planet_location(planet_id, num_planets):
-#     angle = planet_id * 2 * math.pi / num_planets - math.pi / 2
-#     return (int(GALAXY_SPACE_WIDTH + SYSTEM_HORIZONTAL_AXIS * math.cos(angle)), int(GALAXY_SPACE_HEIGHT + SYSTEM_VERTICAL_AXIS * math.sin(angle)))
 
 def draw_location_ships(surface, position, ship_list):
     for s in range(len(ship_list)):
@@ -100,8 +53,6 @@ def draw_location_ships(surface, position, ship_list):
         draw_ship(surface, ship_list[s], (int(position[0] + radius * math.cos(angle)), int(position[1] + radius * math.sin(angle))))
 
 def draw_ship(display, ship_obj, position):
-    if ship_obj.selected:
-        pygame.draw.circle(display, COLOR_SHIP_SELECTION, position, 12)
     pygame.draw.circle(display, ship_obj.ruler.color, position, 8)
     display.blit(img_ufo, (position[0] - 10, position[1] - 10))
 
@@ -170,6 +121,7 @@ def main():
     display = pygame.display.set_mode((GALAXY_SPACE_WIDTH * 2, GALAXY_SPACE_HEIGHT * 2))
 
     system_displays = generate_system_displays(g)
+    galaxy_displays = generate_galaxy_displays(game)
 
     text_explore = font.get_text_surface("explore")
     text_colonise = font.get_text_surface("colonise")
@@ -258,7 +210,9 @@ def main():
         # Game Mechanics
         for p in game.players:
             for s in p.ships:
-                s.move(elapsed_time)
+                moved, entered = s.move(elapsed_time)
+                if p == active_player and entered:
+                    galaxy_displays[active_player.id].refresh_primary_surface()
 
         # Display
 
@@ -267,14 +221,8 @@ def main():
         # GALAXY DISPLAY
         if display_mode == 1:
             
-            display.fill(COLOR_BACKGROUND)
-            draw_galaxy(display, g, active_player)
-            for p in game.players:
-                for s in p.ships:
-                    if s.star == None:
-                        draw_ship(display, s, (int(s.location[0]), int(s.location[1])))
-                    elif s.selected:
-                        pygame.draw.circle(display, COLOR_SHIP_SELECTION, s.star.location, GALAXY_STAR_RADIUS + 2, 2)
+            galaxy_displays[active_player.id].refresh_ship_surface()
+            galaxy_displays[active_player.id].draw(display, (0, 0))
 
         # SYSTEM DISPLAY
         elif display_mode == 2:

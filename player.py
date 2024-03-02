@@ -15,9 +15,10 @@ class Player():
         self.money = 99999999
         self.color = (random.randint(20, 255), random.randint(20, 255), random.randint(20, 255))
         self.ships = []
-
+        self.selected_ship = None
         self.explored_stars = []
         self.reset_explored_stars()
+        self.status_updated = False
 
     def reset_explored_stars(self):
         self.explored_stars = [False for _ in range(len(self.game.galaxy.stars))]

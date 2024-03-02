@@ -55,7 +55,6 @@ class Ship():
         self.health = 0
         self.energy = 0
         self.ruler = ruler
-        self.selected = False
         self.star = None # Star object, or None if travelling interstellar
         self.planet = None # Planet object, or None if not at a planet
         self.location = location # tuple
