@@ -59,29 +59,9 @@ def draw_ship(display, ship_obj, position):
     pygame.draw.circle(display, ship_obj.ruler.color, position, 8)
     display.blit(img_ufo, (position[0] - 10, position[1] - 10))
 
-def find_star(position, galaxy):
-    for s in galaxy.stars:
-        if math.hypot(s.location[0] - position[0], s.location[1] - position[1]) <= GALAXY_STAR_RADIUS:
-            return s
-    return None
-
-# def find_planet(position, star):
-#     for p in range(len(star.planets)):
-#         angle = p * 2 * math.pi / len(star.planets) - math.pi / 2
-#         planetCenter = (int(GALAXY_SPACE_WIDTH + SYSTEM_HORIZONTAL_AXIS * math.cos(angle)), int(GALAXY_SPACE_HEIGHT + SYSTEM_VERTICAL_AXIS * math.sin(angle)))
-#         if math.hypot(planetCenter[0] - position[0], planetCenter[1] - position[1]) <= SYSTEM_PLANET_RADIUS:
-#             return star.planets[p]
-#     return None
-
-def find_ship_galaxy(position, game):
-    for p in game.players:
-        for s in p.ships:
-            if math.hypot(s.location[0] - position[0], s.location[1] - position[1]) <= 10:
-                return s
-    return None
-
-def find_ship_system(position, star):
-    pass #TODO
+def get_pane_mouse_pos(pane_location):
+    mouse = pygame.mouse.get_pos()
+    return (mouse[0] - pane_location[0], mouse[1] - pane_location[1])
 
 """
 Display Modes:
@@ -113,7 +93,7 @@ def main():
     active_player = game.players[0]
     #ship_selection = ship.Ship((200, 100), active_player)
     ship_selection = active_player.ships[0]
-    ship_selection.selected = True
+    active_player.selected_ship = ship_selection
 
     star = None
 
@@ -158,7 +138,7 @@ def main():
                 if event.button == pygame.BUTTON_RIGHT:
                     if display_mode == 1:
                         ship_selection.exit_star()
-                        ship_selection.destination_star = find_star(pygame.mouse.get_pos(), g)
+                        ship_selection.destination_star = galaxy_displays[active_player.id].find_star(get_pane_mouse_pos(GALAXY_PANE_POSITION))
                         if ship_selection.destination_star != None:
                             ship_selection.destination = ship_selection.destination_star.location
                     elif display_mode == 2 and ship_selection.star == star:
@@ -173,12 +153,11 @@ def main():
                 elif event.button == pygame.BUTTON_LEFT:
                     if active_query == 0:
                         doubleclick += 1
-                        new_ship = find_ship_galaxy(pygame.mouse.get_pos(), game)
+                        new_ship = galaxy_displays[active_player.id].find_player_ship(get_pane_mouse_pos(GALAXY_PANE_POSITION))
                         if new_ship != None:
-                            ship_selection.selected = False
-                            new_ship.selected = True
                             ship_selection = new_ship
                             active_player = ship_selection.ruler
+                            active_player.selected_ship = ship_selection
 
             elif event.type == pygame.MOUSEMOTION:
                 doubleclick = 0
@@ -189,18 +168,14 @@ def main():
                     display_mode = 1
                 elif event.key == pygame.K_EQUALS:
                     if display_mode == 1:
-                        mouse_pos = pygame.mouse.get_pos()
-                        mouse_in_pane = (mouse_pos[0] - GALAXY_PANE_POSITION[0], mouse_pos[1] - GALAXY_PANE_POSITION[1])
-                        galaxy_displays[active_player.id].set_scale(galaxy_displays[active_player.id].view_scale * 1.5, mouse_in_pane)
+                        galaxy_displays[active_player.id].set_scale(galaxy_displays[active_player.id].view_scale * 1.5, get_pane_mouse_pos(GALAXY_PANE_POSITION))
                 elif event.key == pygame.K_MINUS:
                     if display_mode == 1:
-                        mouse_pos = pygame.mouse.get_pos()
-                        mouse_in_pane = (mouse_pos[0] - GALAXY_PANE_POSITION[0], mouse_pos[1] - GALAXY_PANE_POSITION[1])
-                        galaxy_displays[active_player.id].set_scale(galaxy_displays[active_player.id].view_scale / 1.5, mouse_in_pane)
+                        galaxy_displays[active_player.id].set_scale(galaxy_displays[active_player.id].view_scale / 1.5, get_pane_mouse_pos(GALAXY_PANE_POSITION))
 
 
         if doubleclick >= 2:
-            star = find_star(pygame.mouse.get_pos(), g)
+            star = galaxy_displays[active_player.id].find_star(get_pane_mouse_pos(GALAXY_PANE_POSITION))
             if star != None and active_player.explored_stars[star.id]:
                 display_mode = 2
             doubleclick = 0

@@ -6,6 +6,7 @@ import ship_display
 
 GALAXY_STAR_RADIUS = 12
 GALAXY_PLANET_RADIUS = 3
+GALAXY_SHIP_RADIUS = 10 # At view scale 1.0
 
 COLOR_BACKGROUND = (20, 20, 20)
 COLOR_UNEXPLORED_STAR = (135, 135, 135)
@@ -22,9 +23,6 @@ def create_blank_surface(dimensions):
     surface.set_colorkey(COLOR_BACKGROUND)
     surface.fill(COLOR_BACKGROUND)
     return surface
-
-def project_to_pane(location, view_corner, view_scale):
-    return (int(view_scale * (location[0] - view_corner[0])), int(view_scale * (location[1] - view_corner[1])))
 
 class GalaxyDisplay():
 
@@ -50,6 +48,31 @@ class GalaxyDisplay():
         self.refresh_primary_surface()
         self.refresh_ship_surface()
 
+    def find_star(self, click_location):
+        location = self.deproject_coordinate(click_location)
+        for s in self.game.galaxy.stars:
+            if math.hypot(s.location[0] - location[0], s.location[1] - location[1]) <= GALAXY_STAR_RADIUS:
+                return s
+        return None
+    
+    def find_player_ship(self, click_location):
+        location = self.deproject_coordinate(click_location)
+        for s in self.player.ships:
+            if math.hypot(s.location[0] - location[0], s.location[1] - location[1]) <= GALAXY_SHIP_RADIUS / self.view_scale:
+                return s
+
+    def project_coordinate(self, coordinate):
+        """
+        Turns a galaxy coordinate into a pane display coordinate
+        """
+        return (int(self.view_scale * (coordinate[0] - self.view_corner[0])), int(self.view_scale * (coordinate[1] - self.view_corner[1])))
+
+    def deproject_coordinate(self, coordinate):
+        """
+        Turns a pane display coordinate into a galaxy coordinate
+        """
+        return (int(coordinate[0] / self.view_scale + self.view_corner[0]), int(coordinate[1] / self.view_scale + self.view_corner[1]))
+
     def refresh_primary_surface(self):
         self.primary_surface.fill(COLOR_BACKGROUND)
         for i in range(len(self.game.galaxy.stars)):
@@ -57,15 +80,15 @@ class GalaxyDisplay():
             star_color = COLOR_UNEXPLORED_STAR
             if self.player.explored_stars[i]:
                 if s.ruler != None:
-                    pygame.draw.circle(self.primary_surface, s.ruler.color, project_to_pane(s.location, self.view_corner, self.view_scale), int(1.5 * self.view_scale * GALAXY_STAR_RADIUS))
+                    pygame.draw.circle(self.primary_surface, s.ruler.color, self.project_coordinate(s.location), int(1.5 * self.view_scale * GALAXY_STAR_RADIUS))
                 star_color = COLOR_STAR
-            pygame.draw.circle(self.primary_surface, star_color, project_to_pane(s.location, self.view_corner, self.view_scale), int(self.view_scale * GALAXY_STAR_RADIUS))
+            pygame.draw.circle(self.primary_surface, star_color, self.project_coordinate(s.location), int(self.view_scale * GALAXY_STAR_RADIUS))
             # pygame.draw.circle(surface, (255, 255, 255), s.location, radii, 1)
             numPlanets = len(s.planets)
             for p in range(numPlanets):
                 angle = p * 2 * math.pi / numPlanets
                 planetCenter = (int(s.location[0] + GALAXY_STAR_RADIUS * math.cos(angle)), int(s.location[1] + GALAXY_STAR_RADIUS * math.sin(angle)))
-                pygame.draw.circle(self.primary_surface, galaxy.MINERAL_COLORS[s.planets[p].mineral], project_to_pane(planetCenter, self.view_corner, self.view_scale), int(self.view_scale * GALAXY_PLANET_RADIUS))
+                pygame.draw.circle(self.primary_surface, galaxy.MINERAL_COLORS[s.planets[p].mineral], self.project_coordinate(planetCenter), int(self.view_scale * GALAXY_PLANET_RADIUS))
 
     def refresh_player_surface(self):
         # TODO: Add connectivity lines between players' colonies
@@ -74,14 +97,16 @@ class GalaxyDisplay():
             s = self.game.galaxy.stars[i]
             if self.player.explored_stars[i]:
                 if s.ruler != None:
-                    pygame.draw.circle(self.player_surface, s.ruler.color, project_to_pane(s.location, self.view_corner, self.view_scale), int(1.5 * self.view_scale * GALAXY_STAR_RADIUS))
+                    pygame.draw.circle(self.player_surface, s.ruler.color, self.project_coordinate(s.location), int(1.5 * self.view_scale * GALAXY_STAR_RADIUS))
 
     def refresh_ship_surface(self):
         self.ship_surface.fill(COLOR_BACKGROUND)
         for p in self.game.players:
             for s in p.ships:
                 if s.star == None:
-                    ship_display.draw_ship(self.ship_surface, s, project_to_pane(s.location, self.view_corner, self.view_scale))
+                    if s == p.selected_ship:
+                        ship_display.draw_ship_selection(self.ship_surface, self.project_coordinate(s.location))
+                    ship_display.draw_ship(self.ship_surface, s, self.project_coordinate(s.location))
 
     def draw(self, display, pane_location):
         display.blit(self.player_surface, pane_location)
