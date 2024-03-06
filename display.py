@@ -13,20 +13,23 @@ import uiframe
 import galaxy_display
 import system_display
 
+DISPLAY_DIMENSIONS = (1300, 900)
+
 GALAXY_WIDTH = 14
 GALAXY_HEIGHT = 10
 GALAXY_ZONE_RADIUS = 40
 GALAXY_STAR_RADIUS = 12
 GALAXY_PLANET_RADIUS = 3
-GALAXY_MARGIN = 50
+GALAXY_MARGIN = 20
 
 GALAXY_SPACE_WIDTH = GALAXY_ZONE_RADIUS * GALAXY_WIDTH + GALAXY_MARGIN
 GALAXY_SPACE_HEIGHT = int(GALAXY_ZONE_RADIUS * GALAXY_HEIGHT * 0.86 + GALAXY_MARGIN)
 
 SYSTEM_PANE_POSITION = ((2 * GALAXY_SPACE_WIDTH - system_display.SYSTEM_SURFACE_WIDTH) // 2, (2 * GALAXY_SPACE_HEIGHT - system_display.SYSTEM_SURFACE_HEIGHT) // 2)
-print(SYSTEM_PANE_POSITION)
+GALAXY_PANE_DIMENSIONS = (2 * GALAXY_SPACE_WIDTH, 2 * GALAXY_SPACE_HEIGHT)
+GALAXY_PANE_POSITION = ((DISPLAY_DIMENSIONS[0] - GALAXY_PANE_DIMENSIONS[0]) // 2, (DISPLAY_DIMENSIONS[1] - GALAXY_PANE_DIMENSIONS[1] - 58) // 2)
 
-COLOR_BACKGROUND = (10, 10, 10)
+COLOR_BACKGROUND = (0, 0, 0)
 COLOR_UNEXPLORED_STAR = (135, 135, 135)
 COLOR_STAR = (200, 170, 25)
 COLOR_ARTIFACT_RING = (150, 125, 35)
@@ -37,7 +40,7 @@ img_ufo = pygame.image.load("assets/ufo.png")
 def generate_galaxy_displays(game):
     galaxy_displays = []
     for p in game.players:
-        galaxy_displays.append(galaxy_display.GalaxyDisplay(game, p, (2 * GALAXY_SPACE_WIDTH, 2 * GALAXY_SPACE_HEIGHT)))
+        galaxy_displays.append(galaxy_display.GalaxyDisplay(game, p, GALAXY_PANE_DIMENSIONS, GALAXY_PANE_DIMENSIONS))
     return galaxy_displays
             
 def generate_system_displays(galaxy):
@@ -118,7 +121,7 @@ def main():
 
     pygame.init()
 
-    display = pygame.display.set_mode((GALAXY_SPACE_WIDTH * 2, GALAXY_SPACE_HEIGHT * 2))
+    display = pygame.display.set_mode(DISPLAY_DIMENSIONS)
 
     system_displays = generate_system_displays(g)
     galaxy_displays = generate_galaxy_displays(game)
@@ -127,7 +130,7 @@ def main():
     text_colonise = font.get_text_surface("colonise")
 
     panel_small = uiframe.get_panel_surface(20, 20)
-    panel_large = uiframe.get_panel_surface(GALAXY_SPACE_WIDTH * 2 - 6, 52)
+    panel_large = uiframe.get_panel_surface(DISPLAY_DIMENSIONS[0] - 6, 52)
     panel_money = uiframe.get_panel_surface(108, 16)
 
     button_diplomacy = uiframe.create_button("assets/icon-diplomacy.png")
@@ -176,18 +179,6 @@ def main():
                             new_ship.selected = True
                             ship_selection = new_ship
                             active_player = ship_selection.ruler
-                
-                elif event.button == pygame.BUTTON_WHEELUP:
-                    if display_mode == 1:
-                        galaxy_displays[active_player.id].set_scale_factor(galaxy_displays[active_player.id].scale_factor + 0.1, pygame.mouse.get_pos())
-                        galaxy_displays[active_player.id].refresh_primary_surface()
-                        galaxy_displays[active_player.id].refresh_player_surface()
-
-                elif event.button == pygame.BUTTON_WHEELDOWN:
-                    if display_mode == 1:
-                        galaxy_displays[active_player.id].set_scale_factor(galaxy_displays[active_player.id].scale_factor - 0.1, pygame.mouse.get_pos())
-                        galaxy_displays[active_player.id].refresh_primary_surface()
-                        galaxy_displays[active_player.id].refresh_player_surface()
 
             elif event.type == pygame.MOUSEMOTION:
                 doubleclick = 0
@@ -198,14 +189,14 @@ def main():
                     display_mode = 1
                 elif event.key == pygame.K_EQUALS:
                     if display_mode == 1:
-                        galaxy_displays[active_player.id].set_scale_factor(galaxy_displays[active_player.id].scale_factor + 0.1, pygame.mouse.get_pos())
-                        galaxy_displays[active_player.id].refresh_primary_surface()
-                        galaxy_displays[active_player.id].refresh_player_surface()
+                        mouse_pos = pygame.mouse.get_pos()
+                        mouse_in_pane = (mouse_pos[0] - GALAXY_PANE_POSITION[0], mouse_pos[1] - GALAXY_PANE_POSITION[1])
+                        galaxy_displays[active_player.id].set_scale(galaxy_displays[active_player.id].view_scale * 1.5, mouse_in_pane)
                 elif event.key == pygame.K_MINUS:
                     if display_mode == 1:
-                        galaxy_displays[active_player.id].set_scale_factor(galaxy_displays[active_player.id].scale_factor - 0.1, pygame.mouse.get_pos())
-                        galaxy_displays[active_player.id].refresh_primary_surface()
-                        galaxy_displays[active_player.id].refresh_player_surface()
+                        mouse_pos = pygame.mouse.get_pos()
+                        mouse_in_pane = (mouse_pos[0] - GALAXY_PANE_POSITION[0], mouse_pos[1] - GALAXY_PANE_POSITION[1])
+                        galaxy_displays[active_player.id].set_scale(galaxy_displays[active_player.id].view_scale / 1.5, mouse_in_pane)
 
 
         if doubleclick >= 2:
@@ -229,7 +220,7 @@ def main():
         if display_mode == 1:
             
             galaxy_displays[active_player.id].refresh_ship_surface()
-            galaxy_displays[active_player.id].draw(display, galaxy_displays[active_player.id].pan)
+            galaxy_displays[active_player.id].draw(display, GALAXY_PANE_POSITION)
 
         # SYSTEM DISPLAY
         elif display_mode == 2:
@@ -239,11 +230,8 @@ def main():
             else:
                 display_mode = 1
 
-        if active_query == 1 or active_query == 2:
-            display.blit(text_colonise, (GALAXY_SPACE_WIDTH * 2 - GALAXY_MARGIN - 150, GALAXY_SPACE_HEIGHT * 1.72 - GALAXY_MARGIN - 20))
 
-
-        display.blit(panel_large, (0, GALAXY_SPACE_HEIGHT * 2 - 58))
+        display.blit(panel_large, (0, DISPLAY_DIMENSIONS[1] - 58))
         # display.blit(button_diplomacy, (GALAXY_SPACE_WIDTH * 2 - 29, GALAXY_SPACE_HEIGHT * 2 - 55))
         # display.blit(button_ecology, (GALAXY_SPACE_WIDTH * 2 - 29, GALAXY_SPACE_HEIGHT * 2 - 29))
         # display.blit(button_explore, (GALAXY_SPACE_WIDTH * 2 - 55, GALAXY_SPACE_HEIGHT * 2 - 55))
