@@ -95,6 +95,10 @@ def main():
     ship_selection = active_player.ships[0]
     active_player.selected_ship = ship_selection
 
+    #TEMP
+    for _ in range(3):
+        active_player.add_ship(active_player.colonies[0].planet)
+
     star = None
 
     doubleclick = 0
@@ -142,18 +146,23 @@ def main():
                         if ship_selection.destination_star != None:
                             ship_selection.destination = ship_selection.destination_star.location
                     elif display_mode == 2 and ship_selection.star == star:
-                        mouse_pos = pygame.mouse.get_pos()
-                        relative_mouse_pos = (mouse_pos[0] - SYSTEM_PANE_POSITION[0], mouse_pos[1] - SYSTEM_PANE_POSITION[1])
-                        ship_selection.destination_planet = system_displays[star.id].find_planet(relative_mouse_pos)
-                        if system_displays[star.id].is_star_clicked(relative_mouse_pos):
+                        ship_selection.destination_planet = system_displays[star.id].find_planet(get_pane_mouse_pos(SYSTEM_PANE_POSITION))
+                        if system_displays[star.id].is_star_clicked(get_pane_mouse_pos(SYSTEM_PANE_POSITION)):
                             if ship_selection.planet == None:
                                 ship_selection.exit_star()
                             ship_selection.exit_planet()
 
                 elif event.button == pygame.BUTTON_LEFT:
-                    if active_query == 0:
+                    if display_mode == 1:
                         doubleclick += 1
                         new_ship = galaxy_displays[active_player.id].find_player_ship(get_pane_mouse_pos(GALAXY_PANE_POSITION))
+                        if new_ship != None:
+                            ship_selection = new_ship
+                            active_player = ship_selection.ruler
+                            active_player.selected_ship = ship_selection
+                    
+                    elif display_mode == 2:
+                        new_ship = system_displays[star.id].find_ship(get_pane_mouse_pos(SYSTEM_PANE_POSITION))
                         if new_ship != None:
                             ship_selection = new_ship
                             active_player = ship_selection.ruler
@@ -200,7 +209,7 @@ def main():
         # SYSTEM DISPLAY
         elif display_mode == 2:
             if star != None:
-                system_displays[star.id].refresh_ship_surface()
+                system_displays[star.id].refresh_ship_surface(active_player)
                 system_displays[star.id].draw(display, SYSTEM_PANE_POSITION)
             else:
                 display_mode = 1

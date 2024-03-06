@@ -104,9 +104,7 @@ class GalaxyDisplay():
         for p in self.game.players:
             for s in p.ships:
                 if s.star == None:
-                    if s == p.selected_ship:
-                        ship_display.draw_ship_selection(self.ship_surface, self.project_coordinate(s.location))
-                    ship_display.draw_ship(self.ship_surface, s, self.project_coordinate(s.location))
+                    ship_display.draw_ship(self.ship_surface, s, self.project_coordinate(s.location), self.player)
 
     def draw(self, display, pane_location):
         display.blit(self.player_surface, pane_location)

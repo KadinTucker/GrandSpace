@@ -16,6 +16,8 @@ SYSTEM_ARTIFACT_RING_WIDTH = 2
 SYSTEM_SURFACE_WIDTH = 2 * SYSTEM_HORIZONTAL_AXIS + 4 * SYSTEM_PLANET_RADIUS + 2
 SYSTEM_SURFACE_HEIGHT = 2 * SYSTEM_VERTICAL_AXIS + 4 * SYSTEM_PLANET_RADIUS + 2
 
+SYSTEM_SHIP_RADIUS = 10
+
 COLOR_BACKGROUND = (10, 10, 10)
 COLOR_STAR = (200, 170, 25)
 COLOR_ARTIFACT_RING = (150, 125, 35)
@@ -67,15 +69,15 @@ class SystemDisplay():
                 pygame.draw.circle(self.player_surface, COLOR_ARTIFACT_RING, self.planet_locations[p], SYSTEM_PLANET_RADIUS + SYSTEM_ARTIFACT_RING_WIDTH * 2, SYSTEM_ARTIFACT_RING_WIDTH)
                 pygame.draw.circle(self.player_surface, COLOR_ARTIFACT_RING, self.planet_locations[p], SYSTEM_PLANET_RADIUS + SYSTEM_ARTIFACT_RING_WIDTH * 4, SYSTEM_ARTIFACT_RING_WIDTH)
 
-    def refresh_ship_surface(self):
+    def refresh_ship_surface(self, player=None):
         self.ship_surface.fill(COLOR_BACKGROUND)
         star_ships = []
         for s in self.star.ships:
             if s.planet == None:
                 star_ships.append(s)
-        ship_display.draw_overlapping_ships(self.ship_surface, star_ships, (SYSTEM_SURFACE_WIDTH // 2, SYSTEM_SURFACE_HEIGHT // 2))
+        ship_display.draw_overlapping_ships(self.ship_surface, star_ships, (SYSTEM_SURFACE_WIDTH // 2, SYSTEM_SURFACE_HEIGHT // 2), player)
         for p in range(len(self.star.planets)):
-            ship_display.draw_overlapping_ships(self.ship_surface, self.star.planets[p].ships, self.planet_locations[p])
+            ship_display.draw_overlapping_ships(self.ship_surface, self.star.planets[p].ships, self.planet_locations[p], player)
 
     def draw(self, display, pane_location):
         display.blit(self.primary_surface, pane_location)
@@ -93,3 +95,19 @@ class SystemDisplay():
     
     def is_star_clicked(self, position):
         return math.hypot(SYSTEM_SURFACE_WIDTH / 2 - position[0], SYSTEM_SURFACE_HEIGHT / 2 - position[1]) <= SYSTEM_STAR_RADIUS
+    
+    def find_ship(self, position):
+        # First, star ships:
+        star_ships = []
+        for s in self.star.ships:
+            if s.planet == None:
+                star_ships.append(s)
+        star_ship = ship_display.find_overlapped_ship((SYSTEM_SURFACE_WIDTH // 2, SYSTEM_SURFACE_HEIGHT // 2), star_ships, position, SYSTEM_SHIP_RADIUS)
+        if star_ship != None:
+            return star_ship
+        # Next, planet ships:
+        for p in range(len(self.star.planets)):
+            planet_ship = ship_display.find_overlapped_ship(self.planet_locations[p], self.star.planets[p].ships, position, SYSTEM_SHIP_RADIUS)
+            if planet_ship != None:
+                return planet_ship
+        return None

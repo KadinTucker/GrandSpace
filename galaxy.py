@@ -38,14 +38,12 @@ def populate_homeworlds(galaxy, game):
         star = galaxy.stars[int((len(galaxy.stars) - 1) * float(p) / len(game.players))]
         while len(star.planets) < 5:
             star.planets.append(Planet(star))
-        star.planets[0].colony = colony.HomeworldColony(game.players[p], star.planets[0])
+        planet = random.choice(star.planets)
+        game.players[p].colonies.append(colony.HomeworldColony(game.players[p], planet))
+        star.planets[0].colony = game.players[p].colonies[0]
         star.ruler = game.players[p]
         game.players[p].explored_stars[int((len(galaxy.stars) - 1) * float(p) / len(game.players))] = True
-        game.players[p].ships.append(ship.Ship(star.location, game.players[p]))
-        game.players[p].ships[-1].destination_star = star
-        game.players[p].ships[-1].enter_star()
-        game.players[p].ships[-1].destination_planet = star.planets[0]
-        game.players[p].ships[-1].enter_planet()
+        game.players[p].add_ship(planet)
 
 def populate_artifacts(galaxy):
     for s in galaxy.stars:
