@@ -51,6 +51,17 @@ def populate_artifacts(galaxy):
             if random.random() < float(ARTIFACT_TOTAL) / AVERAGE_PLANETS / len(galaxy.stars):
                 p.artifacts = 1
 
+def get_closest_star(target, star_domain):
+    min_distance = -1
+    min_star = None
+    for s in star_domain:
+        if s != target:
+            distance = math.hypot(s.location[0] - target.location[0], s.location[1] - target.location[1])
+            if min_star == None or distance < min_distance:
+                min_star = s
+                min_distance = distance
+    return min_star
+
 class Planet():
     def __init__(self, star):
         self.star = star # Star object

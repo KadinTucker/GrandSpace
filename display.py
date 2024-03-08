@@ -77,8 +77,6 @@ Queries:
 2 - Destination Planet
 """
 
-
-
 def main():
 
     display_mode = 1
@@ -96,7 +94,7 @@ def main():
     active_player.selected_ship = ship_selection
 
     #TEMP
-    for _ in range(3):
+    for _ in range(9):
         active_player.add_ship(active_player.colonies[0].planet)
 
     star = None
@@ -181,6 +179,11 @@ def main():
                 elif event.key == pygame.K_MINUS:
                     if display_mode == 1:
                         galaxy_displays[active_player.id].set_scale(galaxy_displays[active_player.id].view_scale / 1.5, get_pane_mouse_pos(GALAXY_PANE_POSITION))
+                #TEMP
+                elif event.key == pygame.K_c:
+                    if star != None:
+                        star.ruler = active_player
+                        galaxy_displays[active_player.id].refresh_player_surface()
 
 
         if doubleclick >= 2:
@@ -216,15 +219,15 @@ def main():
 
 
         display.blit(panel_large, (0, DISPLAY_DIMENSIONS[1] - 58))
-        # display.blit(button_diplomacy, (GALAXY_SPACE_WIDTH * 2 - 29, GALAXY_SPACE_HEIGHT * 2 - 55))
-        # display.blit(button_ecology, (GALAXY_SPACE_WIDTH * 2 - 29, GALAXY_SPACE_HEIGHT * 2 - 29))
-        # display.blit(button_explore, (GALAXY_SPACE_WIDTH * 2 - 55, GALAXY_SPACE_HEIGHT * 2 - 55))
-        # display.blit(button_research, (GALAXY_SPACE_WIDTH * 2 - 55, GALAXY_SPACE_HEIGHT * 2 - 29))
-        # display.blit(button_battle, (GALAXY_SPACE_WIDTH * 2 - 81, GALAXY_SPACE_HEIGHT * 2 - 55))
-        # display.blit(button_colonial, (GALAXY_SPACE_WIDTH * 2 - 81, GALAXY_SPACE_HEIGHT * 2 - 29))
-        # money = font.get_text_surface("$" + str(active_player.money))
-        # display.blit(panel_money, (3, GALAXY_SPACE_HEIGHT * 2 - 40))
-        # display.blit(money, (6, GALAXY_SPACE_HEIGHT * 2 - 37))
+        display.blit(button_diplomacy, (DISPLAY_DIMENSIONS[0] - 29, DISPLAY_DIMENSIONS[1]  - 55))
+        display.blit(button_ecology, (DISPLAY_DIMENSIONS[0]  - 29, DISPLAY_DIMENSIONS[1] - 29))
+        display.blit(button_explore, (DISPLAY_DIMENSIONS[0]  - 55, DISPLAY_DIMENSIONS[1] - 55))
+        display.blit(button_research, (DISPLAY_DIMENSIONS[0]  - 55, DISPLAY_DIMENSIONS[1] - 29))
+        display.blit(button_battle, (DISPLAY_DIMENSIONS[0]  - 81, DISPLAY_DIMENSIONS[1] - 55))
+        display.blit(button_colonial, (DISPLAY_DIMENSIONS[0]  - 81, DISPLAY_DIMENSIONS[1] - 29))
+        money = font.get_text_surface("$" + str(active_player.money))
+        display.blit(panel_money, (3, DISPLAY_DIMENSIONS[1] - 40))
+        display.blit(money, (6, DISPLAY_DIMENSIONS[1] - 37))
         # Update; end tick
         pygame.display.update()
 

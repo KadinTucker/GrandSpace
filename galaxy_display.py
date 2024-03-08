@@ -8,11 +8,15 @@ GALAXY_STAR_RADIUS = 12
 GALAXY_PLANET_RADIUS = 3
 GALAXY_SHIP_RADIUS = 10 # At view scale 1.0
 
+EMPIRE_CONTROL_LINE_WIDTH = 5
+
 COLOR_BACKGROUND = (20, 20, 20)
 COLOR_UNEXPLORED_STAR = (135, 135, 135)
 COLOR_STAR = (200, 170, 25)
 
 MINERAL_COLORS = [(200, 20, 20), (20, 200, 20), (20, 20, 200), (200, 200, 20), (200, 20, 200), (20, 200, 200)]
+
+
 
 def create_blank_surface(dimensions):
     """
@@ -83,7 +87,6 @@ class GalaxyDisplay():
                     pygame.draw.circle(self.primary_surface, s.ruler.color, self.project_coordinate(s.location), int(1.5 * self.view_scale * GALAXY_STAR_RADIUS))
                 star_color = COLOR_STAR
             pygame.draw.circle(self.primary_surface, star_color, self.project_coordinate(s.location), int(self.view_scale * GALAXY_STAR_RADIUS))
-            # pygame.draw.circle(surface, (255, 255, 255), s.location, radii, 1)
             numPlanets = len(s.planets)
             for p in range(numPlanets):
                 angle = p * 2 * math.pi / numPlanets
@@ -91,13 +94,19 @@ class GalaxyDisplay():
                 pygame.draw.circle(self.primary_surface, galaxy.MINERAL_COLORS[s.planets[p].mineral], self.project_coordinate(planetCenter), int(self.view_scale * GALAXY_PLANET_RADIUS))
 
     def refresh_player_surface(self):
-        # TODO: Add connectivity lines between players' colonies
         self.player_surface.fill(COLOR_BACKGROUND)
+        player_stars = [[] for _ in range(len(self.game.players))]
         for i in range(len(self.game.galaxy.stars)):
             s = self.game.galaxy.stars[i]
             if self.player.explored_stars[i]:
                 if s.ruler != None:
+                    player_stars[s.ruler.id].append(s)
                     pygame.draw.circle(self.player_surface, s.ruler.color, self.project_coordinate(s.location), int(1.5 * self.view_scale * GALAXY_STAR_RADIUS))
+        for p in range(len(player_stars)):
+            for s in range(len(player_stars[p])):
+                closest_star = galaxy.get_closest_star(player_stars[p][s], player_stars[p])
+                if closest_star != None:
+                    pygame.draw.line(self.player_surface, player_stars[p][s].ruler.color, self.project_coordinate(player_stars[p][s].location), self.project_coordinate(closest_star.location), EMPIRE_CONTROL_LINE_WIDTH)
 
     def refresh_ship_surface(self):
         self.ship_surface.fill(COLOR_BACKGROUND)
