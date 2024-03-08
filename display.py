@@ -182,7 +182,7 @@ def main():
                 #TEMP
                 elif event.key == pygame.K_c:
                     if star != None:
-                        star.ruler = active_player
+                        active_player.add_ruled_star(star)
                         galaxy_displays[active_player.id].refresh_player_surface()
 
 

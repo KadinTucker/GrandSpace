@@ -11,6 +11,8 @@ Galaxy Generation Procedures:
 
 SQRT3 = math.sqrt(3)
 
+DISTANCE_RATIO_TOLERANCE = 1.5
+
 #SPICE_COLORS = [(200, 75, 20), (160, 200, 25), (50, 75, 200), (50, 200, 75), (200, 100, 160), (120, 20, 160)]
 MINERAL_COLORS = [(200, 20, 20), (20, 200, 20), (20, 20, 200), (200, 200, 20), (200, 20, 200), (20, 200, 200)]
 # Expected number of artifacts in the galaxy
@@ -41,6 +43,7 @@ def populate_homeworlds(galaxy, game):
         planet = random.choice(star.planets)
         game.players[p].colonies.append(colony.HomeworldColony(game.players[p], planet))
         star.planets[0].colony = game.players[p].colonies[0]
+        game.players[p].add_ruled_star(star)
         star.ruler = game.players[p]
         game.players[p].explored_stars[int((len(galaxy.stars) - 1) * float(p) / len(game.players))] = True
         game.players[p].add_ship(planet)
@@ -51,16 +54,16 @@ def populate_artifacts(galaxy):
             if random.random() < float(ARTIFACT_TOTAL) / AVERAGE_PLANETS / len(galaxy.stars):
                 p.artifacts = 1
 
-def get_closest_star(target, star_domain):
+def get_closest_star_index(target, star_domain):
     min_distance = -1
-    min_star = None
-    for s in star_domain:
+    min_star_index = -1
+    for s in range(len(star_domain)):
         if s != target:
-            distance = math.hypot(s.location[0] - target.location[0], s.location[1] - target.location[1])
-            if min_star == None or distance < min_distance:
-                min_star = s
+            distance = math.hypot(star_domain[s].location[0] - target.location[0], star_domain[s].location[1] - target.location[1])
+            if min_star_index == -1 or distance < min_distance:
+                min_star_index = s
                 min_distance = distance
-    return min_star
+    return min_star_index
 
 class Planet():
     def __init__(self, star):

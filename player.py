@@ -1,5 +1,6 @@
 import random
 
+import galaxy
 import ship
 
 class Game():
@@ -19,6 +20,8 @@ class Player():
         self.ships = []
         self.selected_ship = None
         self.colonies = []
+        self.ruled_stars = []
+        self.star_network = []
         self.explored_stars = []
         self.reset_explored_stars()
         self.status_updated = False
@@ -29,6 +32,11 @@ class Player():
         self.ships[-1].enter_star()
         self.ships[-1].destination_planet = planet
         self.ships[-1].enter_planet()
+
+    def add_ruled_star(self, star):
+        # TODO: if there is a previous ruler, remove the star from their previous rule
+        self.star_network.append(galaxy.get_closest_star_index(star, self.ruled_stars))
+        self.ruled_stars.append(star)
 
     def reset_explored_stars(self):
         self.explored_stars = [False for _ in range(len(self.game.galaxy.stars))]

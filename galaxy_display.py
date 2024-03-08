@@ -16,8 +16,6 @@ COLOR_STAR = (200, 170, 25)
 
 MINERAL_COLORS = [(200, 20, 20), (20, 200, 20), (20, 20, 200), (200, 200, 20), (200, 20, 200), (20, 200, 200)]
 
-
-
 def create_blank_surface(dimensions):
     """
     Creates a new surface that sets the background color as transparent 
@@ -95,18 +93,16 @@ class GalaxyDisplay():
 
     def refresh_player_surface(self):
         self.player_surface.fill(COLOR_BACKGROUND)
-        player_stars = [[] for _ in range(len(self.game.players))]
         for i in range(len(self.game.galaxy.stars)):
             s = self.game.galaxy.stars[i]
             if self.player.explored_stars[i]:
                 if s.ruler != None:
-                    player_stars[s.ruler.id].append(s)
                     pygame.draw.circle(self.player_surface, s.ruler.color, self.project_coordinate(s.location), int(1.5 * self.view_scale * GALAXY_STAR_RADIUS))
-        for p in range(len(player_stars)):
-            for s in range(len(player_stars[p])):
-                closest_star = galaxy.get_closest_star(player_stars[p][s], player_stars[p])
-                if closest_star != None:
-                    pygame.draw.line(self.player_surface, player_stars[p][s].ruler.color, self.project_coordinate(player_stars[p][s].location), self.project_coordinate(closest_star.location), EMPIRE_CONTROL_LINE_WIDTH)
+        for p in self.game.players:
+            for s in range(1, len(p.ruled_stars)):
+                if self.player.explored_stars[p.ruled_stars[s].id]:
+                    pygame.draw.line(self.player_surface, p.color, self.project_coordinate(p.ruled_stars[s].location), self.project_coordinate(p.ruled_stars[p.star_network[s]].location), EMPIRE_CONTROL_LINE_WIDTH)
+
 
     def refresh_ship_surface(self):
         self.ship_surface.fill(COLOR_BACKGROUND)
