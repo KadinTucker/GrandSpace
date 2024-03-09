@@ -14,6 +14,11 @@ COLOR_BACKGROUND = (20, 20, 20)
 COLOR_UNEXPLORED_STAR = (135, 135, 135)
 COLOR_STAR = (200, 170, 25)
 
+COLONY_HALO_MODIFIER = 1.3
+CAPITAL_STAR_MINOR_MODIFIER = 1.0
+CAPITAL_STAR_MAJOR_MODIFIER = 1.0
+CAPITAL_STAR_ANGLES = [(i + 0.5) * math.pi / 5 for i in range(10)]
+
 MINERAL_COLORS = [(200, 20, 20), (20, 200, 20), (20, 20, 200), (200, 200, 20), (200, 20, 200), (20, 200, 200)]
 
 def create_blank_surface(dimensions):
@@ -25,6 +30,9 @@ def create_blank_surface(dimensions):
     surface.set_colorkey(COLOR_BACKGROUND)
     surface.fill(COLOR_BACKGROUND)
     return surface
+
+def draw_five_point_star(surface, color, center, minor_radius, major_radius):
+    pygame.draw.polygon(surface, color, [(int(center[0] + (minor_radius + major_radius * (a % 2)) * math.cos(CAPITAL_STAR_ANGLES[a])), int(center[1] + (minor_radius + major_radius * (a % 2)) * math.sin(CAPITAL_STAR_ANGLES[a]))) for a in range(10)])
 
 class GalaxyDisplay():
 
@@ -81,8 +89,6 @@ class GalaxyDisplay():
             s = self.game.galaxy.stars[i]
             star_color = COLOR_UNEXPLORED_STAR
             if self.player.explored_stars[i]:
-                if s.ruler != None:
-                    pygame.draw.circle(self.primary_surface, s.ruler.color, self.project_coordinate(s.location), int(1.5 * self.view_scale * GALAXY_STAR_RADIUS))
                 star_color = COLOR_STAR
             pygame.draw.circle(self.primary_surface, star_color, self.project_coordinate(s.location), int(self.view_scale * GALAXY_STAR_RADIUS))
             numPlanets = len(s.planets)
@@ -97,11 +103,13 @@ class GalaxyDisplay():
             s = self.game.galaxy.stars[i]
             if self.player.explored_stars[i]:
                 if s.ruler != None:
-                    pygame.draw.circle(self.player_surface, s.ruler.color, self.project_coordinate(s.location), int(1.5 * self.view_scale * GALAXY_STAR_RADIUS))
+                    pygame.draw.circle(self.player_surface, s.ruler.color, self.project_coordinate(s.location), int(COLONY_HALO_MODIFIER * self.view_scale * GALAXY_STAR_RADIUS))
+                    if s == s.ruler.homeworld.star:
+                        draw_five_point_star(self.player_surface, s.ruler.color, self.project_coordinate(s.location), int(CAPITAL_STAR_MINOR_MODIFIER * self.view_scale * GALAXY_STAR_RADIUS), int(CAPITAL_STAR_MAJOR_MODIFIER * self.view_scale * GALAXY_STAR_RADIUS))
         for p in self.game.players:
-            for s in range(1, len(p.ruled_stars)):
-                if self.player.explored_stars[p.ruled_stars[s].id]:
-                    pygame.draw.line(self.player_surface, p.color, self.project_coordinate(p.ruled_stars[s].location), self.project_coordinate(p.ruled_stars[p.star_network[s]].location), EMPIRE_CONTROL_LINE_WIDTH)
+            for s in p.ruled_stars:
+                if self.player.explored_stars[s.id] and s.connected_star != None:
+                    pygame.draw.line(self.player_surface, p.color, self.project_coordinate(s.location), self.project_coordinate(s.connected_star.location), int(self.view_scale * EMPIRE_CONTROL_LINE_WIDTH))
 
 
     def refresh_ship_surface(self):

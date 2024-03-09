@@ -42,6 +42,7 @@ def populate_homeworlds(galaxy, game):
             star.planets.append(Planet(star))
         planet = random.choice(star.planets)
         game.players[p].colonies.append(colony.HomeworldColony(game.players[p], planet))
+        game.players[p].homeworld = planet
         star.planets[0].colony = game.players[p].colonies[0]
         game.players[p].add_ruled_star(star)
         star.ruler = game.players[p]
@@ -65,6 +66,12 @@ def get_closest_star_index(target, star_domain):
                 min_distance = distance
     return min_star_index
 
+def get_closest_star(target, star_domain):
+    index = get_closest_star_index(target, star_domain)
+    if index == -1:
+        return None
+    return star_domain[index]
+
 class Planet():
     def __init__(self, star):
         self.star = star # Star object
@@ -85,6 +92,7 @@ class Star():
             self.planets.append(Planet(self))
         self.ruler = None # Player object
         self.ships = []
+        self.connected_star = None # Connected star, for drawing purposes
 
 class Galaxy():
     def __init__(self):

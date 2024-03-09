@@ -19,9 +19,9 @@ class Player():
         self.color = (random.randint(20, 255), random.randint(20, 255), random.randint(20, 255))
         self.ships = []
         self.selected_ship = None
+        self.homeworld = None
         self.colonies = []
         self.ruled_stars = []
-        self.star_network = []
         self.explored_stars = []
         self.reset_explored_stars()
         self.status_updated = False
@@ -34,9 +34,19 @@ class Player():
         self.ships[-1].enter_planet()
 
     def add_ruled_star(self, star):
-        # TODO: if there is a previous ruler, remove the star from their previous rule
-        self.star_network.append(galaxy.get_closest_star_index(star, self.ruled_stars))
+        if star.ruler != None:
+            star.ruler.remove_ruled_star(star)
+        star.connected_star = galaxy.get_closest_star(star, self.ruled_stars)
         self.ruled_stars.append(star)
+        star.ruler = self
+
+    def remove_ruled_star(self, star):
+        if star in self.ruled_stars:
+            self.ruled_stars.remove(star)
+            for s in self.ruled_stars:
+                if s.connected_star == star:
+                    s.connected_star = star.connected_star
+            star.ruler = None
 
     def reset_explored_stars(self):
         self.explored_stars = [False for _ in range(len(self.game.galaxy.stars))]
