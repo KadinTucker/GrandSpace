@@ -25,17 +25,16 @@ GALAXY_MARGIN = 20
 GALAXY_SPACE_WIDTH = GALAXY_ZONE_RADIUS * GALAXY_WIDTH + GALAXY_MARGIN
 GALAXY_SPACE_HEIGHT = int(GALAXY_ZONE_RADIUS * GALAXY_HEIGHT * 0.86 + GALAXY_MARGIN)
 
-SYSTEM_PANE_POSITION = ((2 * GALAXY_SPACE_WIDTH - system_display.SYSTEM_SURFACE_WIDTH) // 2, (2 * GALAXY_SPACE_HEIGHT - system_display.SYSTEM_SURFACE_HEIGHT) // 2)
+SYSTEM_PANE_DIMENSIONS = (2 * GALAXY_SPACE_WIDTH, 2 * GALAXY_SPACE_HEIGHT)
+SYSTEM_PANE_POSITION = ((DISPLAY_DIMENSIONS[0] - SYSTEM_PANE_DIMENSIONS[0]) // 2, (DISPLAY_DIMENSIONS[1] - SYSTEM_PANE_DIMENSIONS[1] - 58) // 2)
 GALAXY_PANE_DIMENSIONS = (2 * GALAXY_SPACE_WIDTH, 2 * GALAXY_SPACE_HEIGHT)
 GALAXY_PANE_POSITION = ((DISPLAY_DIMENSIONS[0] - GALAXY_PANE_DIMENSIONS[0]) // 2, (DISPLAY_DIMENSIONS[1] - GALAXY_PANE_DIMENSIONS[1] - 58) // 2)
 
-COLOR_BACKGROUND = (0, 0, 0)
+COLOR_BACKGROUND = (50, 50, 50)
 COLOR_UNEXPLORED_STAR = (135, 135, 135)
 COLOR_STAR = (200, 170, 25)
 COLOR_ARTIFACT_RING = (150, 125, 35)
 COLOR_SHIP_SELECTION = (225, 225, 225)
-
-img_ufo = pygame.image.load("assets/ufo.png")
 
 def generate_galaxy_displays(game):
     galaxy_displays = []
@@ -46,18 +45,8 @@ def generate_galaxy_displays(game):
 def generate_system_displays(galaxy):
     system_displays = []
     for s in galaxy.stars:
-        system_displays.append(system_display.SystemDisplay(s))
+        system_displays.append(system_display.SystemDisplay(s, SYSTEM_PANE_DIMENSIONS))
     return system_displays
-
-def draw_location_ships(surface, position, ship_list):
-    for s in range(len(ship_list)):
-        angle = s * 2 * math.pi / len(ship_list) - math.pi / 2
-        radius = 10 * (len(ship_list) - 1)
-        draw_ship(surface, ship_list[s], (int(position[0] + radius * math.cos(angle)), int(position[1] + radius * math.sin(angle))))
-
-def draw_ship(display, ship_obj, position):
-    pygame.draw.circle(display, ship_obj.ruler.color, position, 8)
-    display.blit(img_ufo, (position[0] - 10, position[1] - 10))
 
 def get_pane_mouse_pos(pane_location):
     mouse = pygame.mouse.get_pos()
@@ -80,7 +69,6 @@ Queries:
 def main():
 
     display_mode = 1
-    active_query = 0
 
     g = galaxy.Galaxy()
     game = player.Game(5, g)
@@ -89,7 +77,6 @@ def main():
     galaxy.populate_artifacts(g)
 
     active_player = game.players[0]
-    #ship_selection = ship.Ship((200, 100), active_player)
     ship_selection = active_player.ships[0]
     active_player.selected_ship = ship_selection
 

@@ -35,15 +35,16 @@ def create_blank_surface(dimensions):
 
 class SystemDisplay():
 
-    def __init__(self, star):
+    def __init__(self, star, pane_dimensions):
         self.star = star
         self.planet_locations = []
+        self.dimensions = pane_dimensions
         self.set_planet_locations()
-        self.primary_surface = pygame.Surface((SYSTEM_SURFACE_WIDTH, SYSTEM_SURFACE_HEIGHT))
+        self.primary_surface = pygame.Surface(pane_dimensions)
         self.refresh_primary_surface()
-        self.player_surface = create_blank_surface((SYSTEM_SURFACE_WIDTH, SYSTEM_SURFACE_HEIGHT))
+        self.player_surface = create_blank_surface(pane_dimensions)
         self.refresh_player_surface()
-        self.ship_surface = create_blank_surface((SYSTEM_SURFACE_WIDTH, SYSTEM_SURFACE_HEIGHT))
+        self.ship_surface = create_blank_surface(pane_dimensions)
         self.refresh_ship_surface()
 
     def set_planet_locations(self):
@@ -52,11 +53,11 @@ class SystemDisplay():
         num_planets = len(self.star.planets)
         for p in range(num_planets):
             angle = p * 2 * math.pi / num_planets - math.pi / 2
-            self.planet_locations.append((int(SYSTEM_SURFACE_WIDTH / 2 + SYSTEM_HORIZONTAL_AXIS * math.cos(angle)), int(SYSTEM_SURFACE_HEIGHT / 2 + SYSTEM_VERTICAL_AXIS * math.sin(angle))))
+            self.planet_locations.append((int(self.dimensions[0] / 2 + SYSTEM_HORIZONTAL_AXIS * math.cos(angle)), int(self.dimensions[1] / 2 + SYSTEM_VERTICAL_AXIS * math.sin(angle))))
         
     def refresh_primary_surface(self):
         self.primary_surface.fill(COLOR_BACKGROUND)
-        pygame.draw.circle(self.primary_surface, COLOR_STAR, (SYSTEM_SURFACE_WIDTH // 2, SYSTEM_SURFACE_HEIGHT // 2), SYSTEM_STAR_RADIUS)
+        pygame.draw.circle(self.primary_surface, COLOR_STAR, (self.dimensions[0] // 2, self.dimensions[1] // 2), SYSTEM_STAR_RADIUS)
         for p in range(len(self.star.planets)):
             pygame.draw.circle(self.primary_surface, galaxy.MINERAL_COLORS[self.star.planets[p].mineral], self.planet_locations[p], SYSTEM_PLANET_RADIUS)
             
@@ -75,7 +76,7 @@ class SystemDisplay():
         for s in self.star.ships:
             if s.planet == None:
                 star_ships.append(s)
-        ship_display.draw_overlapping_ships(self.ship_surface, star_ships, (SYSTEM_SURFACE_WIDTH // 2, SYSTEM_SURFACE_HEIGHT // 2), player)
+        ship_display.draw_overlapping_ships(self.ship_surface, star_ships, (self.dimensions[0] // 2, self.dimensions[1] // 2), player)
         for p in range(len(self.star.planets)):
             ship_display.draw_overlapping_ships(self.ship_surface, self.star.planets[p].ships, self.planet_locations[p], player)
 
@@ -94,7 +95,7 @@ class SystemDisplay():
         return None
     
     def is_star_clicked(self, position):
-        return math.hypot(SYSTEM_SURFACE_WIDTH / 2 - position[0], SYSTEM_SURFACE_HEIGHT / 2 - position[1]) <= SYSTEM_STAR_RADIUS
+        return math.hypot(self.dimensions[0] / 2 - position[0], self.dimensions[1] / 2 - position[1]) <= SYSTEM_STAR_RADIUS
     
     def find_ship(self, position):
         # First, star ships:
@@ -102,7 +103,7 @@ class SystemDisplay():
         for s in self.star.ships:
             if s.planet == None:
                 star_ships.append(s)
-        star_ship = ship_display.find_overlapped_ship((SYSTEM_SURFACE_WIDTH // 2, SYSTEM_SURFACE_HEIGHT // 2), star_ships, position, SYSTEM_SHIP_RADIUS)
+        star_ship = ship_display.find_overlapped_ship((self.dimensions[0] // 2, self.dimensions[1] // 2), star_ships, position, SYSTEM_SHIP_RADIUS)
         if star_ship != None:
             return star_ship
         # Next, planet ships:
