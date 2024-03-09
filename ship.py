@@ -81,6 +81,17 @@ class Ship():
         if self.destination_planet != None:
             entered_p = self.try_enter_planet()
         return moved, entered_s or entered_p
+    
+    def set_destination_star(self, star):
+        self.destination_star = star
+        self.destination = star.location
+        self.exit_star()
+
+    def set_destination_planet(self, planet):
+        self.destination_planet = planet
+        self.destination_star = planet.star
+        self.destination = planet.star.location
+        self.exit_planet()
 
     def do_task(self):
         TASKS[self.task](self, self.ruler.game)

@@ -25,8 +25,10 @@ def task_null(ship, game):
     pass
 
 def task_explore_superficial(ship, game):
-    if ship.destination_star == None:
+    if ship.destination_star == None or ship.ruler.explored_stars[ship.destination_star.id]:
         explored = get_explored_stars(ship.ruler, game.galaxy)
-        ship.destination_star = find_nearest_star(ship.location, game, explored)
-        if ship.destination_star == None:
+        destination = find_nearest_star(ship.location, game, explored)
+        if destination != None:
+            ship.set_destination_star(destination)
+        else:
             ship.task = 0

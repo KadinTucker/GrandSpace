@@ -37,7 +37,7 @@ def generateGalaxyBoxes(galaxy, width, height, radius):
 def populate_homeworlds(galaxy, game):
     for p in range(len(game.players)):
         game.players[p].reset_explored_stars()
-        star = galaxy.stars[int((len(galaxy.stars) - 1) * float(p) / len(game.players))]
+        star = random.choice(galaxy.stars)
         while len(star.planets) < 5:
             star.planets.append(Planet(star))
         planet = random.choice(star.planets)
@@ -46,7 +46,6 @@ def populate_homeworlds(galaxy, game):
         star.planets[0].colony = game.players[p].colonies[0]
         game.players[p].add_ruled_star(star)
         star.ruler = game.players[p]
-        game.players[p].explored_stars[int((len(galaxy.stars) - 1) * float(p) / len(game.players))] = True
         game.players[p].add_ship(planet)
 
 def populate_artifacts(galaxy):

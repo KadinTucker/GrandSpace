@@ -145,6 +145,8 @@ def main():
                             ship_selection = new_ship
                             active_player = ship_selection.ruler
                             active_player.selected_ship = ship_selection
+                            galaxy_displays[active_player.id].refresh_primary_surface()
+                            galaxy_displays[active_player.id].refresh_player_surface()
                     
                     elif display_mode == 2:
                         new_ship = system_displays[star.id].find_ship(get_pane_mouse_pos(SYSTEM_PANE_POSITION))
@@ -152,6 +154,8 @@ def main():
                             ship_selection = new_ship
                             active_player = ship_selection.ruler
                             active_player.selected_ship = ship_selection
+                            galaxy_displays[active_player.id].refresh_primary_surface()
+                            galaxy_displays[active_player.id].refresh_player_surface()
 
             elif event.type == pygame.MOUSEMOTION:
                 doubleclick = 0
@@ -171,6 +175,9 @@ def main():
                     if star != None:
                         active_player.add_ruled_star(star)
                         galaxy_displays[active_player.id].refresh_player_surface()
+                #TEMP
+                elif event.key == pygame.K_e:
+                    ship_selection.task = 1
 
 
         if doubleclick >= 2:
@@ -182,9 +189,11 @@ def main():
         # Game Mechanics
         for p in game.players:
             for s in p.ships:
+                s.do_task()
                 moved, entered = s.move(elapsed_time)
                 if p == active_player and entered:
                     galaxy_displays[active_player.id].refresh_primary_surface()
+                    galaxy_displays[active_player.id].refresh_player_surface()
 
         # Display
 
