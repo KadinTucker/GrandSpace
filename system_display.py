@@ -33,6 +33,9 @@ def create_blank_surface(dimensions):
     surface.fill(COLOR_BACKGROUND)
     return surface
 
+def get_pane_id(star_id):
+    return star_id + 1
+
 class SystemDisplay():
 
     def __init__(self, star, pane_dimensions):

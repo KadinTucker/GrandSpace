@@ -13,32 +13,27 @@ def create_blank_surface(dimensions, background_color):
 
 class Pane(object):
 
-    def __init__(self, game, player, pane_dimensions, pane_position):
-        self.game = game
-        self.player = player
-        self.pane_dimensions = pane_dimensions
-        self.pane_position = pane_position
-        self.next_pane_id = -1
-
-    def get_relative_pane_pos(self, position):
-        return (position[0] - self.pane_position[0], position[1] - self.pane_position[1])
-
-    def draw(self, display):
-        pass
-
-
-class LayeredPane(Pane):
-
     def __init__(self, game, player, pane_dimensions, pane_position, num_layers, background_color):
         """
         A layered panel, with multiple cached layers
         The first layer, at index 0, is the background layer
         Subsequent layers lie on top
+        Can also (optionally) zoom and handle events
         """
-        super().__init__(game, player, pane_dimensions, pane_position)
+        self.game = game
+        self.player = player
+        self.pane_dimensions = pane_dimensions
+        self.pane_position = pane_position
+        self.next_pane_id = -1
+        self.view_corner = (0, 0)
+        self.view_scale = 1.0
+        self.num_clicks = 0
         self.layers = []
         self.background_color = background_color
         self.init_layers(num_layers)
+
+    def get_relative_pane_pos(self, position):
+        return (position[0] - self.pane_position[0], position[1] - self.pane_position[1])
 
     def init_layers(self, num_layers):
         self.layers.append(pygame.Surface(self.pane_dimensions))
@@ -60,13 +55,6 @@ class LayeredPane(Pane):
         for l in self.layers:
             display.blit(l, self.pane_position)
 
-
-class Zoomable(object):
-
-    def __init__(self):
-        self.view_corner = (0, 0)
-        self.view_scale = 1.0
-
     def set_scale(self, new_scale, center):
         scale_change_coefficient = 1 / self.view_scale - 1 / new_scale
         self.view_corner = (self.view_corner[0] + center[0] * scale_change_coefficient, self.view_corner[1] + center[1] * scale_change_coefficient)
@@ -83,12 +71,6 @@ class Zoomable(object):
         Turns a pane display coordinate into a zoomed coordinate
         """
         return (int(coordinate[0] / self.view_scale + self.view_corner[0]), int(coordinate[1] / self.view_scale + self.view_corner[1]))
-
-
-class EventHandler(object):
-
-    def __init__(self):
-        self.num_clicks = 0
 
     def handle_event(self, event, mouse_pos, active_player):
         """
