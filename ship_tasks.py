@@ -1,8 +1,6 @@
 import math
 
-import ship
-
-def find_nearest_star(position, game, blacklist=[]):
+def find_nearest_star(position, game, blacklist=()):
     nearest = None
     min_distance = -1
     for s in game.galaxy.stars:
@@ -25,10 +23,10 @@ def task_null(ship, game):
     pass
 
 def task_explore_superficial(ship, game):
-    if ship.destination_star == None or ship.ruler.explored_stars[ship.destination_star.id]:
+    if ship.destination_star is None or ship.ruler.explored_stars[ship.destination_star.id]:
         explored = get_explored_stars(ship.ruler, game.galaxy)
         destination = find_nearest_star(ship.location, game, explored)
-        if destination != None:
+        if destination is not None:
             ship.set_destination_star(destination)
         else:
             ship.task = 0

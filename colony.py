@@ -1,7 +1,7 @@
 
 
 MINERAL_PER_DEVELOPMENT_PER_MINUTE = 1
-HOMEWORLD_PRODUCTION_FACTOR = 3 # amount by which production is divided for homeworld
+HOMEWORLD_PRODUCTION_FACTOR = 3  # amount by which production is divided for homeworld
 MAX_DEVELOPMENT_PER_CITY_PER_HABITABILITY = 1
 MINERAL_CAPACITY_PER_CITY = 5
 

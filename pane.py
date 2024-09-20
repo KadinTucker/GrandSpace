@@ -33,7 +33,7 @@ class Pane(object):
         self.init_layers(num_layers)
 
     def get_relative_pane_pos(self, position):
-        return (position[0] - self.pane_position[0], position[1] - self.pane_position[1])
+        return position[0] - self.pane_position[0], position[1] - self.pane_position[1]
 
     def init_layers(self, num_layers):
         self.layers.append(pygame.Surface(self.pane_dimensions))
@@ -52,25 +52,29 @@ class Pane(object):
             self.refresh_layer(i)
 
     def draw(self, display):
-        for l in self.layers:
-            display.blit(l, self.pane_position)
+        for layer in self.layers:
+            display.blit(layer, self.pane_position)
 
     def set_scale(self, new_scale, center):
         scale_change_coefficient = 1 / self.view_scale - 1 / new_scale
-        self.view_corner = (self.view_corner[0] + center[0] * scale_change_coefficient, self.view_corner[1] + center[1] * scale_change_coefficient)
+        self.view_corner = (self.view_corner[0] + center[0] * scale_change_coefficient,
+                            self.view_corner[1] + center[1] * scale_change_coefficient)
         self.view_scale = new_scale
+        self.refresh_all_layers()
 
     def project_coordinate(self, coordinate):
         """
         Turns a zoomed coordinate into a pane display coordinate
         """
-        return (self.view_scale * (coordinate[0] - self.view_corner[0]), self.view_scale * (coordinate[1] - self.view_corner[1]))
+        return (self.view_scale * (coordinate[0] - self.view_corner[0]),
+                self.view_scale * (coordinate[1] - self.view_corner[1]))
 
     def deproject_coordinate(self, coordinate):
         """
         Turns a pane display coordinate into a zoomed coordinate
         """
-        return (int(coordinate[0] / self.view_scale + self.view_corner[0]), int(coordinate[1] / self.view_scale + self.view_corner[1]))
+        return (int(coordinate[0] / self.view_scale + self.view_corner[0]),
+                int(coordinate[1] / self.view_scale + self.view_corner[1]))
 
     def handle_event(self, event, mouse_pos, active_player):
         """
@@ -82,4 +86,3 @@ class Pane(object):
                 self.num_clicks += 1
         elif event.type == pygame.MOUSEMOTION:
             self.num_clicks = 0
-

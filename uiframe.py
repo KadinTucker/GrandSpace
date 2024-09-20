@@ -7,21 +7,22 @@ COLOR_FILL = (198, 198, 198)
 
 PATH = "assets/uiframe/"
 
-corners = [pygame.image.load(PATH + "highleft.png"), pygame.image.load(PATH + "highright.png"), pygame.image.load(PATH + "lowleft.png"), pygame.image.load(PATH + "lowright.png")]
+corners = [pygame.image.load(PATH + "highleft.png"), pygame.image.load(PATH + "highright.png"),
+           pygame.image.load(PATH + "lowleft.png"), pygame.image.load(PATH + "lowright.png")]
 
 def get_panel_surface(width, height):
     surface = pygame.Surface((6 + width, 6 + height))
     surface.fill(COLOR_FILL)
-    #Top Left
+    # Top Left
     surface.blit(corners[0], (0, 0))
     pygame.draw.rect(surface, COLOR_TOP, pygame.Rect(3, 0, width, 3))
-    #Top Right
+    # Top Right
     surface.blit(corners[1], (3 + width, 0))
     pygame.draw.rect(surface, COLOR_MIDDLE, pygame.Rect(0, 3, 3, height))
-    #Bottom Left
+    # Bottom Left
     surface.blit(corners[2], (0, 3 + height))
     pygame.draw.rect(surface, COLOR_BOTTOM, pygame.Rect(3, 3 + height, width, 3))
-    #Bottom Right
+    # Bottom Right
     surface.blit(corners[3], (3 + width, 3 + height))
     pygame.draw.rect(surface, COLOR_MIDDLE, pygame.Rect(3 + width, 3, 3, height))
     return surface
