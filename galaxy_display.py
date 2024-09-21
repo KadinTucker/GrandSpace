@@ -103,10 +103,7 @@ class GalaxyDisplay(pane.Pane):
         super().handle_event(event, mouse_pos, active_player)
         if event.type == pygame.MOUSEBUTTONDOWN:
             if event.button == pygame.BUTTON_RIGHT:
-                active_player.selected_ship.exit_star()
-                active_player.selected_ship.destination_star = self.find_star(self.get_relative_pane_pos(mouse_pos))
-                if active_player.selected_ship.destination_star is not None:
-                    active_player.selected_ship.destination = active_player.selected_ship.destination_star.location
+                active_player.selected_ship.set_destination_star(self.find_star(self.get_relative_pane_pos(mouse_pos)))
             elif event.button == pygame.BUTTON_LEFT:
                 new_ship = self.find_player_ship(self.get_relative_pane_pos(mouse_pos))
                 if new_ship is not None:

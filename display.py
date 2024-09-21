@@ -98,6 +98,7 @@ def main():
     galaxy_displays = generate_galaxy_displays(game)
 
     active_display = galaxy_displays[active_player.id]
+    active_display.refresh_all_layers()
 
     text_explore = font.get_text_surface("explore")
     text_colonise = font.get_text_surface("colonise")
@@ -133,15 +134,15 @@ def main():
 
                 if event.button == pygame.BUTTON_RIGHT:
                     if display_mode == 2:
-                        ship_selection.set_destination_planet((system_displays[star.id]
-                                                              .find_planet(get_pane_mouse_pos(SYSTEM_PANE_POSITION))))
                         if system_displays[star.id].is_star_clicked(get_pane_mouse_pos(SYSTEM_PANE_POSITION)):
                             if ship_selection.planet is None:
-                                ship_selection.exit_star()
-                            ship_selection.exit_planet()
-                        print(ship_selection.star)
-                        print(ship_selection.planet)
-
+                                ship_selection.set_destination_star(None)
+                            else:
+                                ship_selection.set_destination_planet(None)
+                        else:
+                            planet = system_displays[star.id].find_planet(get_pane_mouse_pos(SYSTEM_PANE_POSITION))
+                            if planet is not None:
+                                ship_selection.set_destination_planet(planet)
                 elif event.button == pygame.BUTTON_LEFT:
                     doubleclick += 1
                     if display_mode == 2:
@@ -160,6 +161,8 @@ def main():
                 if event.key == pygame.K_ESCAPE:
                     active_query = 0 
                     display_mode = 1
+                    active_display = galaxy_displays[active_player.id]
+                    star = None
                 elif event.key == pygame.K_PLUS:
                     if display_mode == 1:
                         galaxy_displays[active_player.id].set_scale(galaxy_displays[active_player.id].view_scale * 1.5,
@@ -182,14 +185,15 @@ def main():
             if star is not None and active_player.explored_stars[star.id]:
                 system_displays[star.id].refresh_all_layers()
                 display_mode = 2
+                active_display = system_displays[star.id]
             doubleclick = 0
 
         # Game Mechanics
         for p in game.players:
             for s in p.ships:
                 s.do_task()
-                moved, entered = s.move(elapsed_time)
-                if p == active_player and entered:
+                s.move(elapsed_time)
+                if p == active_player:
                     galaxy_displays[active_player.id].refresh_layer(0)
                     galaxy_displays[active_player.id].refresh_layer(1)
 
@@ -199,13 +203,13 @@ def main():
 
         # GALAXY DISPLAY
         if display_mode == 1:
-            active_display.refresh_layer(2)
+            active_display.refresh_all_layers()
             active_display.draw(display)
 
         # SYSTEM DISPLAY
         elif display_mode == 2:
             if star is not None:
-                system_displays[star.id].sketch_ship_surface()
+                system_displays[star.id].refresh_all_layers()
                 system_displays[star.id].draw(display)
             else:
                 display_mode = 1

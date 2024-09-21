@@ -47,6 +47,7 @@ def populate_homeworlds(galaxy, game):
         game.players[p].add_ruled_star(star)
         star.ruler = game.players[p]
         game.players[p].add_ship(planet)
+        game.players[p].explored_stars[star.id] = True
 
 def populate_artifacts(galaxy):
     for s in galaxy.stars:

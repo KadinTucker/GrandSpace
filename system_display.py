@@ -42,6 +42,7 @@ class SystemDisplay(pane.Pane):
         self.star = star
         self.planet_locations = []
         self.set_planet_locations()
+        self.refresh_all_layers()
 
     def set_planet_locations(self):
         # Relative to the system pane's pasted location
