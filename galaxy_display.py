@@ -99,17 +99,22 @@ class GalaxyDisplay(pane.Pane):
         elif index == 2:
             self.sketch_ship_surface()
 
-    def handle_event(self, event, mouse_pos, active_player):
-        super().handle_event(event, mouse_pos, active_player)
+    def handle_event(self, event, mouse_pos):
+        super().handle_event(event, mouse_pos)
         if event.type == pygame.MOUSEBUTTONDOWN:
             if event.button == pygame.BUTTON_RIGHT:
-                active_player.selected_ship.set_destination_star(self.find_star(self.get_relative_pane_pos(mouse_pos)))
+                self.player.selected_ship.set_destination_star(self.find_star(self.get_relative_pane_pos(mouse_pos)))
             elif event.button == pygame.BUTTON_LEFT:
                 new_ship = self.find_player_ship(self.get_relative_pane_pos(mouse_pos))
                 if new_ship is not None:
-                    active_player.selected_ship = new_ship
+                    self.player.selected_ship = new_ship
                 if self.num_clicks >= 2:
                     star = self.find_star(self.get_relative_pane_pos(mouse_pos))
-                    if star is not None and active_player.explored_stars[star.id]:
+                    if star is not None and self.player.explored_stars[star.id]:
                         self.next_pane_id = system_display.get_pane_id(star.id)
                     self.num_clicks = 0
+        elif event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_PLUS:
+                self.set_scale(self.view_scale * 1.5, self.get_relative_pane_pos(mouse_pos))
+            elif event.key == pygame.K_MINUS:
+                self.set_scale(self.view_scale / 1.5, self.get_relative_pane_pos(mouse_pos))

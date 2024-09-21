@@ -128,7 +128,7 @@ def main():
                 pygame.quit()
                 sys.exit()
             
-            active_display.handle_event(event, pygame.mouse.get_pos(), active_player)
+            active_display.handle_event(event, pygame.mouse.get_pos())
 
             if event.type == pygame.MOUSEBUTTONDOWN:
 
@@ -154,25 +154,10 @@ def main():
                             galaxy_displays[active_player.id].refresh_layer(1)
                             galaxy_displays[active_player.id].refresh_layer(0)
 
-            elif event.type == pygame.MOUSEMOTION:
-                doubleclick = 0
-
             elif event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_ESCAPE:
-                    active_query = 0 
-                    display_mode = 1
-                    active_display = galaxy_displays[active_player.id]
-                    star = None
-                elif event.key == pygame.K_PLUS:
-                    if display_mode == 1:
-                        galaxy_displays[active_player.id].set_scale(galaxy_displays[active_player.id].view_scale * 1.5,
-                                                                    get_pane_mouse_pos(GALAXY_PANE_POSITION))
-                elif event.key == pygame.K_MINUS:
-                    if display_mode == 1:
-                        galaxy_displays[active_player.id].set_scale(galaxy_displays[active_player.id].view_scale / 1.5,
-                                                                    get_pane_mouse_pos(GALAXY_PANE_POSITION))
+
                 # TEMP
-                elif event.key == pygame.K_c:
+                if event.key == pygame.K_c:
                     if star is not None:
                         active_player.add_ruled_star(star)
                         galaxy_displays[active_player.id].refresh_layer(0)
@@ -180,13 +165,13 @@ def main():
                 elif event.key == pygame.K_e:
                     ship_selection.task = 1
 
-        if doubleclick >= 2:
-            star = galaxy_displays[active_player.id].find_star(get_pane_mouse_pos(GALAXY_PANE_POSITION))
-            if star is not None and active_player.explored_stars[star.id]:
-                system_displays[star.id].refresh_all_layers()
-                display_mode = 2
-                active_display = system_displays[star.id]
-            doubleclick = 0
+        if active_display.next_pane_id != -1:
+            next_id = active_display.next_pane_id
+            active_display.next_pane_id = -1
+            if next_id == 0:
+                active_display = galaxy_displays[active_player.id]
+            else:
+                active_display = system_displays[next_id - 1]
 
         # Game Mechanics
         for p in game.players:

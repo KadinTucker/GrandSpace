@@ -108,6 +108,27 @@ class SystemDisplay(pane.Pane):
     def is_star_clicked(self, position):
         return math.hypot(self.pane_dimensions[0] / 2 - position[0],
                           self.pane_dimensions[1] / 2 - position[1]) <= SYSTEM_STAR_RADIUS
+
+    def handle_event(self, event, mouse_pos):
+        super().handle_event(event, mouse_pos)
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            if event.button == pygame.BUTTON_RIGHT:
+                if self.is_star_clicked(self.get_relative_pane_pos(mouse_pos)):
+                    if self.player.selected_ship.planet is None:
+                        self.player.selected_ship.set_destination_star(None)
+                    else:
+                        self.player.selected_ship.set_destination_planet(None)
+                else:
+                    planet = self.find_planet(self.get_relative_pane_pos(mouse_pos))
+                    if planet is not None:
+                        self.player.selected_ship.set_destination_planet(planet)
+            elif event.button == pygame.BUTTON_LEFT:
+                new_ship = self.find_ship(self.get_relative_pane_pos(mouse_pos))
+                if new_ship is not None and new_ship.ruler is self.player:
+                    self.player.selected_ship = new_ship
+        elif event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_ESCAPE:
+                self.next_pane_id = 0
     
     def find_ship(self, position):
         # First, star ships:

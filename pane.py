@@ -76,7 +76,7 @@ class Pane(object):
         return (int(coordinate[0] / self.view_scale + self.view_corner[0]),
                 int(coordinate[1] / self.view_scale + self.view_corner[1]))
 
-    def handle_event(self, event, mouse_pos, active_player):
+    def handle_event(self, event, mouse_pos):
         """
         Takes a pygame Event object as input, the mouse position, and the active player
         Modifies data internal to the object
