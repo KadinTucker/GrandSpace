@@ -124,46 +124,22 @@ def main():
 
         # Events
         for event in pygame.event.get():
+            active_display.handle_event(event, pygame.mouse.get_pos())
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
-            
-            active_display.handle_event(event, pygame.mouse.get_pos())
 
-            if event.type == pygame.MOUSEBUTTONDOWN:
-
-                if event.button == pygame.BUTTON_RIGHT:
-                    if display_mode == 2:
-                        if system_displays[star.id].is_star_clicked(get_pane_mouse_pos(SYSTEM_PANE_POSITION)):
-                            if ship_selection.planet is None:
-                                ship_selection.set_destination_star(None)
-                            else:
-                                ship_selection.set_destination_planet(None)
-                        else:
-                            planet = system_displays[star.id].find_planet(get_pane_mouse_pos(SYSTEM_PANE_POSITION))
-                            if planet is not None:
-                                ship_selection.set_destination_planet(planet)
-                elif event.button == pygame.BUTTON_LEFT:
-                    doubleclick += 1
-                    if display_mode == 2:
-                        new_ship = system_displays[star.id].find_ship(get_pane_mouse_pos(SYSTEM_PANE_POSITION))
-                        if new_ship is not None:
-                            ship_selection = new_ship
-                            active_player = ship_selection.ruler
-                            active_player.selected_ship = ship_selection
-                            galaxy_displays[active_player.id].refresh_layer(1)
-                            galaxy_displays[active_player.id].refresh_layer(0)
-
+            # Handle ship selection events
+            # TODO:
             elif event.type == pygame.KEYDOWN:
-
-                # TEMP
+                # TEMP: conquer active ship's star
                 if event.key == pygame.K_c:
-                    if star is not None:
-                        active_player.add_ruled_star(star)
+                    if active_player.selected_ship.star is not None:
+                        active_player.add_ruled_star(active_player.selected_ship.star)
                         galaxy_displays[active_player.id].refresh_layer(0)
                 # TEMP
                 elif event.key == pygame.K_e:
-                    ship_selection.task = 1
+                    active_player.selected_ship.task = 1
 
         if active_display.next_pane_id != -1:
             next_id = active_display.next_pane_id

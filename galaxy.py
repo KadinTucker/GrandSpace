@@ -2,6 +2,7 @@ import random
 import math
 
 import colony
+import ecology
 
 """
 Galaxy Generation Procedures:
@@ -79,6 +80,7 @@ class Planet:
         self.mineral = random.randint(0, 5)
         self.artifacts = 0  # Integer number of artifacts
         self.colony = None
+        self.ecology = ecology.Ecology(self)
         self.ships = []
     
     def get_habitability(self):

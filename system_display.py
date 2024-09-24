@@ -113,6 +113,7 @@ class SystemDisplay(pane.Pane):
         super().handle_event(event, mouse_pos)
         if event.type == pygame.MOUSEBUTTONDOWN:
             if event.button == pygame.BUTTON_RIGHT:
+                self.player.selected_ship.reset_task()
                 if self.is_star_clicked(self.get_relative_pane_pos(mouse_pos)):
                     if self.player.selected_ship.planet is None:
                         self.player.selected_ship.set_destination_star(None)

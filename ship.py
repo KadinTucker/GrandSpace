@@ -1,5 +1,6 @@
 import math
 
+import ecology
 import ship_tasks
 
 """
@@ -58,7 +59,7 @@ class Ship:
         self.star = None  # Star object, or None if travelling interstellar
         self.planet = None  # Planet object, or None if not at a planet
         self.location = location  # tuple
-        self.cargo = Cargo()  # Cargo object
+        self.cargo = Cargo(self)  # Cargo object
         self.task = 0
         self.destination = location
         self.destination_star = None
@@ -169,6 +170,9 @@ class Ship:
     def do_task(self):
         TASKS[self.task](self, self.ruler.game)
 
+    def reset_task(self):
+        self.task = 0
+
     def explore_location(self):
         if self.star is not None:
             self.ruler.explored_stars[self.star.id] = True
@@ -231,10 +235,11 @@ class Ship:
 
 class Cargo:
 
-    def __init__(self):
+    def __init__(self, ship):
+        self.ship = ship
         self.minerals = [0, 0, 0, 0, 0, 0]
         self.artifacts = 0
-        self.biomass = {}  # keys: origins; values: biomass total
+        self.biomass = ecology.Biomass(ship)
         self.buildings = 0
     
     def get_fullness(self):
@@ -243,8 +248,6 @@ class Cargo:
             if c > 0:
                 total += 20 + c
         total += self.artifacts * 20
-        for b in self.biomass:
-            if self.biomass[b] > 0:
-                total += 20 + self.biomass[b]
+        total += self.biomass.get_fullness()
         total += self.buildings
         return total

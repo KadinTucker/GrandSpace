@@ -6,9 +6,12 @@ import pane
 import ship_display
 import system_display
 
-GALAXY_STAR_RADIUS = 12
-GALAXY_PLANET_RADIUS = 3
+GALAXY_STAR_RADIUS = 8
+GALAXY_PLANET_RADIUS = 2
 GALAXY_SHIP_RADIUS = 10  # At view scale 1.0
+
+SCROLL_SPEED = 0.125  # As a fraction of pane size
+ZOOM_FACTOR = 1.5
 
 EMPIRE_CONTROL_LINE_WIDTH = 5
 
@@ -58,13 +61,15 @@ class GalaxyDisplay(pane.Pane):
                 star_color = COLOR_STAR
             pygame.draw.circle(self.layers[1], star_color, self.project_coordinate(s.location),
                                int(self.view_scale * GALAXY_STAR_RADIUS))
-            num_planets = len(s.planets)
-            for p in range(num_planets):
-                angle = p * 2 * math.pi / num_planets
-                planet_center = (int(s.location[0] + GALAXY_STAR_RADIUS * math.cos(angle)),
-                                 int(s.location[1] + GALAXY_STAR_RADIUS * math.sin(angle)))
-                pygame.draw.circle(self.layers[1], galaxy.MINERAL_COLORS[s.planets[p].mineral],
-                                   self.project_coordinate(planet_center), int(self.view_scale * GALAXY_PLANET_RADIUS))
+            if self.player.explored_stars[i]:
+                num_planets = len(s.planets)
+                for p in range(num_planets):
+                    angle = p * 2 * math.pi / num_planets
+                    planet_center = (int(s.location[0] + GALAXY_STAR_RADIUS * math.cos(angle)),
+                                     int(s.location[1] + GALAXY_STAR_RADIUS * math.sin(angle)))
+                    pygame.draw.circle(self.layers[1], galaxy.MINERAL_COLORS[s.planets[p].mineral],
+                                       self.project_coordinate(planet_center),
+                                       int(self.view_scale * GALAXY_PLANET_RADIUS))
 
     def sketch_player_surface(self):
         for i in range(len(self.game.galaxy.stars)):
@@ -103,6 +108,7 @@ class GalaxyDisplay(pane.Pane):
         super().handle_event(event, mouse_pos)
         if event.type == pygame.MOUSEBUTTONDOWN:
             if event.button == pygame.BUTTON_RIGHT:
+                self.player.selected_ship.reset_task()
                 self.player.selected_ship.set_destination_star(self.find_star(self.get_relative_pane_pos(mouse_pos)))
             elif event.button == pygame.BUTTON_LEFT:
                 new_ship = self.find_player_ship(self.get_relative_pane_pos(mouse_pos))
@@ -115,6 +121,19 @@ class GalaxyDisplay(pane.Pane):
                     self.num_clicks = 0
         elif event.type == pygame.KEYDOWN:
             if event.key == pygame.K_PLUS:
-                self.set_scale(self.view_scale * 1.5, self.get_relative_pane_pos(mouse_pos))
+                self.set_scale(self.view_scale * ZOOM_FACTOR, self.get_relative_pane_pos(mouse_pos))
             elif event.key == pygame.K_MINUS:
-                self.set_scale(self.view_scale / 1.5, self.get_relative_pane_pos(mouse_pos))
+                self.set_scale(self.view_scale / ZOOM_FACTOR, self.get_relative_pane_pos(mouse_pos))
+            elif event.key == pygame.K_LEFT:
+                self.view_corner = (self.view_corner[0] - SCROLL_SPEED * self.pane_dimensions[0] / self.view_scale,
+                                    self.view_corner[1])
+            elif event.key == pygame.K_RIGHT:
+                self.view_corner = (self.view_corner[0] + SCROLL_SPEED * self.pane_dimensions[0] / self.view_scale,
+                                    self.view_corner[1])
+            elif event.key == pygame.K_UP:
+                self.view_corner = (self.view_corner[0],
+                                    self.view_corner[1] - SCROLL_SPEED * self.pane_dimensions[1] / self.view_scale)
+            elif event.key == pygame.K_DOWN:
+                self.view_corner = (self.view_corner[0],
+                                    self.view_corner[1] + SCROLL_SPEED * self.pane_dimensions[1] / self.view_scale)
+
