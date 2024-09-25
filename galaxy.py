@@ -54,13 +54,22 @@ def populate_homeworlds(galaxy, game):
         game.players[p].add_ruled_star(star)
         star.ruler = game.players[p]
         game.players[p].add_ship(planet)
+        game.players[p].selected_ship = game.players[p].ships[0]
         game.players[p].explored_stars[star.id] = True
+    populate_life(galaxy, len(game.players) * 3, species)
 
 def populate_artifacts(galaxy):
     for s in galaxy.stars:
         for p in s.planets:
             if random.random() < float(ARTIFACT_TOTAL) / AVERAGE_PLANETS / len(galaxy.stars):
                 p.artifacts = 1
+
+def populate_life(galaxy, num_species, species_list):
+    for i in range(num_species):
+        star = random.choice(galaxy.stars)
+        planet = random.choice(star.planets)
+        planet.ecology.habitability = 1
+        planet.ecology.species[species_list[i]] = True
 
 def get_closest_star_index(target, star_domain):
     min_distance = -1

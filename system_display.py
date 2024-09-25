@@ -8,7 +8,7 @@ import pane
 import ship_display
 
 SYSTEM_STAR_RADIUS = 60
-SYSTEM_PLANET_RADIUS = 15
+SYSTEM_PLANET_RADIUS = 20
 SYSTEM_HORIZONTAL_AXIS = 300
 SYSTEM_VERTICAL_AXIS = 150
 SYSTEM_ARTIFACT_RING_WIDTH = 2
@@ -30,9 +30,9 @@ ECOLOGY_BIOMASS_HALO_WIDTH = 2
 
 ECOLOGY_SPECIES_FILENAMES = ["assets/typeface/eco-serif/" + letter + ".png" for letter in ecology.BIOMASS_TYPES]
 
-INDICATOR_HABITAT_IMG = pygame.image.load("assets/indicator-habitat.png")
-INDICATOR_CITY_IMG = pygame.image.load("assets/indicator-city.png")
-INDICATOR_DEVELOPMENT_IMG = pygame.image.load("assets/indicator-development.png")
+INDICATOR_HABITAT_IMG = pygame.image.load("assets/indicator-habitat-new.png")
+INDICATOR_CITY_IMG = pygame.image.load("assets/indicator-city-new.png")
+INDICATOR_DEVELOPMENT_IMG = pygame.image.load("assets/indicator-development-new.png")
 
 COLOR_BACKGROUND = (10, 10, 10)
 COLOR_STAR = (200, 130, 25)
@@ -42,13 +42,34 @@ COLOR_BIOMASS_EMPTY = (95, 35, 15)
 COLOR_BIOMASS_FULL = (25, 110, 15)
 COLOR_BIOMASS_HALO = (110, 220, 110)
 
+def get_ring_distribution_coordinates(center, radius, num_items):
+    coordinates = [[0, 0] for _ in range(num_items)]
+    num_rings = int(math.sqrt(num_items) + 1)
+    current_item = 0
+    for i in range(num_rings - 1):
+        ring_plots = 2 * i + 1
+        for j in range(ring_plots):
+            coordinates[current_item][0] = int(center[0] + radius * math.cos(2 * math.pi * j / ring_plots)
+                                               * i / num_rings)
+            coordinates[current_item][1] = int(center[1] + radius * math.sin(2 * math.pi * j / ring_plots)
+                                               * i / num_rings)
+            current_item += 1
+    remaining_items = num_items - current_item
+    for i in range(remaining_items):
+        coordinates[current_item][0] = int(center[0] + radius * math.cos(2 * math.pi * i / remaining_items)
+                                           * (num_rings - 1) / num_rings)
+        coordinates[current_item][1] = int(center[1] + radius * math.sin(2 * math.pi * i / remaining_items)
+                                           * (num_rings - 1) / num_rings)
+        current_item += 1
+    return coordinates
+
 def get_pane_id(star_id):
     return star_id + 1
 
 class SystemDisplay(pane.Pane):
 
     def __init__(self, game, player, pane_dimensions, pane_position, star):
-        super().__init__(game, player, pane_dimensions, pane_position, 4, COLOR_BACKGROUND)
+        super().__init__(game, player, pane_dimensions, pane_position, 5, COLOR_BACKGROUND)
         self.star = star
         self.planet_locations = []
         self.set_planet_locations()
@@ -77,7 +98,7 @@ class SystemDisplay(pane.Pane):
         for p in range(len(self.star.planets)):
             if self.star.planets[p].colony is not None:
                 pygame.draw.circle(self.layers[1], self.star.planets[p].colony.ruler.color, self.planet_locations[p],
-                                   int(1.5 * SYSTEM_PLANET_RADIUS), SYSTEM_PLANET_RADIUS // 2)
+                                   int(1.5 * SYSTEM_PLANET_RADIUS), SYSTEM_PLANET_RADIUS // 2 + 1)
             if self.star.planets[p].artifacts > 0:
                 pygame.draw.circle(self.layers[1], COLOR_ARTIFACT_RING, self.planet_locations[p],
                                    SYSTEM_PLANET_RADIUS + SYSTEM_ARTIFACT_RING_WIDTH * 2, SYSTEM_ARTIFACT_RING_WIDTH)
@@ -134,6 +155,27 @@ class SystemDisplay(pane.Pane):
                                      + s * (ECOLOGY_SPECIES_WIDTH + ECOLOGY_SPECIES_SPACING),
                                      self.planet_locations[p][1] - ECOLOGY_SPECIES_ALTITUDE - ECOLOGY_SPECIES_HEIGHT))
 
+    def sketch_planet_detail_surface(self):
+        self.layers[4].fill(COLOR_BACKGROUND)
+        for p in range(len(self.star.planets)):
+            # Draw cities, development pips, then trees, in a spiral fashion
+            num_cities = 0
+            num_development = 0
+            if self.star.planets[p].colony is not None:
+                num_cities = self.star.planets[p].colony.cities
+                num_development = self.star.planets[p].colony.development
+            num_habit = self.star.planets[p].ecology.habitability * 3
+            pip_locations = get_ring_distribution_coordinates((self.planet_locations[p][0] - 4,
+                                                               self.planet_locations[p][1] - 4), SYSTEM_PLANET_RADIUS,
+                                                              num_cities + num_development + num_habit)
+            for i in range(len(pip_locations)):
+                if i < num_cities:
+                    self.layers[4].blit(INDICATOR_CITY_IMG, pip_locations[i])
+                elif i < num_cities + num_development:
+                    self.layers[4].blit(INDICATOR_DEVELOPMENT_IMG, pip_locations[i])
+                else:
+                    self.layers[4].blit(INDICATOR_HABITAT_IMG, pip_locations[i])
+
     def refresh_layer(self, index):
         super().refresh_layer(index)
         if index == 0:
@@ -144,6 +186,8 @@ class SystemDisplay(pane.Pane):
             self.sketch_ship_surface()
         elif index == 3:
             self.sketch_ecology_surface()
+        elif index == 4:
+            self.sketch_planet_detail_surface()
 
     def find_planet(self, position):
         """

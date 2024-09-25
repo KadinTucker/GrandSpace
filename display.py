@@ -1,6 +1,7 @@
 import pygame
 import sys
 
+import colony
 import galaxy
 import player
 
@@ -70,8 +71,6 @@ Queries:
 
 def main():
 
-    display_mode = 1
-
     g = galaxy.Galaxy()
     game = player.Game(5, g)
     galaxy.generate_galaxy_boxes(g, GALAXY_WIDTH, GALAXY_HEIGHT, GALAXY_ZONE_RADIUS)
@@ -81,14 +80,6 @@ def main():
     active_player = game.players[0]
     ship_selection = active_player.ships[0]
     active_player.selected_ship = ship_selection
-
-    # TEMP
-    for _ in range(9):
-        active_player.add_ship(active_player.colonies[0].planet)
-
-    star = None
-
-    doubleclick = 0
 
     pygame.init()
 
@@ -134,9 +125,14 @@ def main():
             elif event.type == pygame.KEYDOWN:
                 # TEMP: conquer active ship's star
                 if event.key == pygame.K_c:
-                    if active_player.selected_ship.star is not None:
+                    if active_player.selected_ship.planet is not None:
+                        new_colony = colony.Colony(active_player, active_player.selected_ship.planet)
+                        active_player.selected_ship.planet.colony = new_colony
+                        active_player.colonies.append(new_colony)
                         active_player.add_ruled_star(active_player.selected_ship.star)
                         galaxy_displays[active_player.id].refresh_layer(0)
+                        system_displays[active_player.selected_ship.planet.star.id].refresh_layer(1)
+                        system_displays[active_player.selected_ship.planet.star.id].refresh_layer(4)
                 # TEMP
                 elif event.key == pygame.K_e:
                     active_player.selected_ship.task = 1
@@ -167,18 +163,8 @@ def main():
 
         display.fill(COLOR_BACKGROUND)
 
-        # GALAXY DISPLAY
-        if display_mode == 1:
-            active_display.refresh_all_layers()
-            active_display.draw(display)
-
-        # SYSTEM DISPLAY
-        elif display_mode == 2:
-            if star is not None:
-                system_displays[star.id].refresh_all_layers()
-                system_displays[star.id].draw(display)
-            else:
-                display_mode = 1
+        active_display.refresh_layer(2)
+        active_display.draw(display)
 
         display.blit(panel_large, (0, DISPLAY_DIMENSIONS[1] - 58))
         display.blit(button_diplomacy, (DISPLAY_DIMENSIONS[0] - 29, DISPLAY_DIMENSIONS[1] - 55))
