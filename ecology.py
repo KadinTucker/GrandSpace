@@ -4,7 +4,7 @@ BIOMASS_TYPES = "A B C D E F G H I J K L M N O P Q R S T U V W X Y Z".split()
 
 MAX_HABITABILITY = 3
 BASE_TERRAFORM_COST = 10
-BIOMASS_REGENERATION_PER_MINUTE = 1.0  # In fraction of full capacity per minute
+BIOMASS_REGENERATION_PER_MINUTE = 1.5  # In fraction of full capacity per minute
 
 class Biomass:
 
@@ -56,4 +56,5 @@ class Ecology:
         Given an elapsed time, in minutes, find how much total biomass regenerates in this ecology
         Does not let biomass regenerate above 1.0
         """
-        self.biomass_level = min(1.0, self.biomass_level + BIOMASS_REGENERATION_PER_MINUTE * time)
+        if self.habitability > 0:
+            self.biomass_level = min(1.0, self.biomass_level + BIOMASS_REGENERATION_PER_MINUTE * time)

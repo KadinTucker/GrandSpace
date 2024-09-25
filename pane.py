@@ -10,7 +10,6 @@ def create_blank_surface(dimensions, background_color):
     surface.fill(background_color)
     return surface
 
-
 class Pane(object):
 
     def __init__(self, game, player, pane_dimensions, pane_position, num_layers, background_color):

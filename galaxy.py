@@ -36,15 +36,21 @@ def generate_galaxy_boxes(galaxy, width, height, radius):
             i += 1
 
 def populate_homeworlds(galaxy, game):
+    species = [i for i in range(len(ecology.BIOMASS_TYPES))]
+    random.shuffle(species)
     for p in range(len(game.players)):
         game.players[p].reset_explored_stars()
         star = random.choice(galaxy.stars)
         while len(star.planets) < 5:
             star.planets.append(Planet(star))
         planet = random.choice(star.planets)
-        game.players[p].colonies.append(colony.HomeworldColony(game.players[p], planet))
+        planet.ecology.habitability = 3
+        for i in range(3):
+            planet.ecology.species[species[3 * p + i]] = True
+        new_colony = colony.HomeworldColony(game.players[p], planet)
+        game.players[p].colonies.append(new_colony)
         game.players[p].homeworld = planet
-        star.planets[0].colony = game.players[p].colonies[0]
+        planet.colony = new_colony
         game.players[p].add_ruled_star(star)
         star.ruler = game.players[p]
         game.players[p].add_ship(planet)
@@ -84,7 +90,7 @@ class Planet:
         self.ships = []
     
     def get_habitability(self):
-        return 0  # Remains to be implemented
+        return self.ecology.habitability
     
 class Star:
     def __init__(self, s_id, location, num_planets):

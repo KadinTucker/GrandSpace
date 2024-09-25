@@ -130,7 +130,7 @@ def main():
                 sys.exit()
 
             # Handle ship selection events
-            # TODO:
+            # TODO: include in ship-specific event handling
             elif event.type == pygame.KEYDOWN:
                 # TEMP: conquer active ship's star
                 if event.key == pygame.K_c:
@@ -150,6 +150,7 @@ def main():
                 active_display = system_displays[next_id - 1]
 
         # Game Mechanics
+        # Player loop
         for p in game.players:
             for s in p.ships:
                 s.do_task()
@@ -157,6 +158,10 @@ def main():
                 if p == active_player:
                     galaxy_displays[active_player.id].refresh_layer(0)
                     galaxy_displays[active_player.id].refresh_layer(1)
+        # Galaxy loop
+        for s in g.stars:
+            for p in s.planets:
+                p.ecology.regenerate_biomass(elapsed_time)
 
         # Display
 

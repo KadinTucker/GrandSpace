@@ -1,6 +1,7 @@
 import pygame
 import math
 
+import ecology
 import galaxy
 
 import pane
@@ -17,20 +18,29 @@ SYSTEM_SURFACE_HEIGHT = 2 * SYSTEM_VERTICAL_AXIS + 4 * SYSTEM_PLANET_RADIUS + 2
 
 SYSTEM_SHIP_RADIUS = 10
 
+ECOLOGY_SPECIES_ALTITUDE = SYSTEM_PLANET_RADIUS * 3
+ECOLOGY_SPECIES_WIDTH = 12
+ECOLOGY_SPECIES_HEIGHT = 16
+ECOLOGY_SPECIES_SPACING = 6
+
+ECOLOGY_BIOMASS_ALTITUDE = SYSTEM_PLANET_RADIUS * 2
+ECOLOGY_BIOMASS_HEIGHT = 10
+ECOLOGY_BIOMASS_WIDTH = 30
+ECOLOGY_BIOMASS_HALO_WIDTH = 2
+
+ECOLOGY_SPECIES_FILENAMES = ["assets/typeface/eco-serif/" + letter + ".png" for letter in ecology.BIOMASS_TYPES]
+
+INDICATOR_HABITAT_IMG = pygame.image.load("assets/indicator-habitat.png")
+INDICATOR_CITY_IMG = pygame.image.load("assets/indicator-city.png")
+INDICATOR_DEVELOPMENT_IMG = pygame.image.load("assets/indicator-development.png")
+
 COLOR_BACKGROUND = (10, 10, 10)
-COLOR_STAR = (200, 170, 25)
+COLOR_STAR = (200, 130, 25)
 COLOR_ARTIFACT_RING = (150, 125, 35)
 COLOR_SHIP_SELECTION = (225, 225, 225)
-
-def create_blank_surface(dimensions):
-    """
-    Creates a new surface that sets the background color as transparent 
-    Meaning that filling in the surface with the background color will fill with transparency
-    """
-    surface = pygame.Surface(dimensions)
-    surface.set_colorkey(COLOR_BACKGROUND)
-    surface.fill(COLOR_BACKGROUND)
-    return surface
+COLOR_BIOMASS_EMPTY = (95, 35, 15)
+COLOR_BIOMASS_FULL = (25, 110, 15)
+COLOR_BIOMASS_HALO = (110, 220, 110)
 
 def get_pane_id(star_id):
     return star_id + 1
@@ -38,10 +48,11 @@ def get_pane_id(star_id):
 class SystemDisplay(pane.Pane):
 
     def __init__(self, game, player, pane_dimensions, pane_position, star):
-        super().__init__(game, player, pane_dimensions, pane_position, 3, COLOR_BACKGROUND)
+        super().__init__(game, player, pane_dimensions, pane_position, 4, COLOR_BACKGROUND)
         self.star = star
         self.planet_locations = []
         self.set_planet_locations()
+        self.species_images = [pygame.image.load(fn) for fn in ECOLOGY_SPECIES_FILENAMES]
         self.refresh_all_layers()
 
     def set_planet_locations(self):
@@ -86,6 +97,43 @@ class SystemDisplay(pane.Pane):
             ship_display.draw_overlapping_ships(self.layers[2], self.star.planets[p].ships,
                                                 self.planet_locations[p], self.player)
 
+    def sketch_ecology_surface(self):
+        self.layers[3].fill(COLOR_BACKGROUND)
+        for p in range(len(self.star.planets)):
+            # Biomass Bar
+            if self.star.planets[p].ecology.habitability > 0:
+                if self.star.planets[p].ecology.biomass_level == 1:
+                    pygame.draw.rect(self.layers[3], COLOR_BIOMASS_HALO,
+                                     pygame.Rect(self.planet_locations[p][0] - ECOLOGY_BIOMASS_WIDTH // 2
+                                                 - ECOLOGY_BIOMASS_HALO_WIDTH,
+                                                 self.planet_locations[p][1] - ECOLOGY_BIOMASS_HEIGHT
+                                                 - ECOLOGY_BIOMASS_ALTITUDE - ECOLOGY_BIOMASS_HALO_WIDTH,
+                                                 ECOLOGY_BIOMASS_WIDTH + ECOLOGY_BIOMASS_HALO_WIDTH * 2,
+                                                 ECOLOGY_BIOMASS_HEIGHT + ECOLOGY_BIOMASS_HALO_WIDTH * 2))
+                else:
+                    pygame.draw.rect(self.layers[3], COLOR_BIOMASS_EMPTY,
+                                     pygame.Rect(self.planet_locations[p][0] - ECOLOGY_BIOMASS_WIDTH // 2,
+                                                 self.planet_locations[p][1] - ECOLOGY_BIOMASS_HEIGHT
+                                                 - ECOLOGY_BIOMASS_ALTITUDE, ECOLOGY_BIOMASS_WIDTH,
+                                                 ECOLOGY_BIOMASS_HEIGHT))
+                pygame.draw.rect(self.layers[3], COLOR_BIOMASS_FULL,
+                                 pygame.Rect(self.planet_locations[p][0] - ECOLOGY_BIOMASS_WIDTH // 2,
+                                             self.planet_locations[p][1] - ECOLOGY_BIOMASS_HEIGHT
+                                             - ECOLOGY_BIOMASS_ALTITUDE,
+                                             int(ECOLOGY_BIOMASS_WIDTH * self.star.planets[p].ecology.biomass_level),
+                                             ECOLOGY_BIOMASS_HEIGHT))
+            # Species Icons
+            species = []
+            for j in range(len(self.star.planets[p].ecology.species)):
+                if self.star.planets[p].ecology.species[j]:
+                    species.append(j)
+            for s in range(len(species)):
+                self.layers[3].blit(self.species_images[species[s]],
+                                    (self.planet_locations[p][0] - (ECOLOGY_SPECIES_SPACING * (len(species) - 1)
+                                     + ECOLOGY_SPECIES_WIDTH * len(species)) // 2
+                                     + s * (ECOLOGY_SPECIES_WIDTH + ECOLOGY_SPECIES_SPACING),
+                                     self.planet_locations[p][1] - ECOLOGY_SPECIES_ALTITUDE - ECOLOGY_SPECIES_HEIGHT))
+
     def refresh_layer(self, index):
         super().refresh_layer(index)
         if index == 0:
@@ -94,6 +142,8 @@ class SystemDisplay(pane.Pane):
             self.sketch_player_surface()
         elif index == 2:
             self.sketch_ship_surface()
+        elif index == 3:
+            self.sketch_ecology_surface()
 
     def find_planet(self, position):
         """
