@@ -96,7 +96,15 @@ def main():
 
     panel_small = uiframe.get_panel_surface(20, 20)
     panel_large = uiframe.get_panel_surface(DISPLAY_DIMENSIONS[0] - 6, 52)
+    panel_wide = uiframe.get_panel_surface(156, 26)
     panel_money = uiframe.get_panel_surface(108, 16)
+
+    icon_mineral_r = uiframe.create_button("assets/minerals-red.png")
+    icon_mineral_g = uiframe.create_button("assets/minerals-green.png")
+    icon_mineral_b = uiframe.create_button("assets/minerals-blue.png")
+    icon_mineral_c = uiframe.create_button("assets/minerals-cyan.png")
+    icon_mineral_m = uiframe.create_button("assets/minerals-magenta.png")
+    icon_mineral_y = uiframe.create_button("assets/minerals-yellow.png")
 
     button_diplomacy = uiframe.create_button("assets/icon-diplomacy.png")
     button_colonial = uiframe.create_button("assets/icon-colonial.png")
@@ -133,9 +141,14 @@ def main():
                         galaxy_displays[active_player.id].refresh_layer(0)
                         system_displays[active_player.selected_ship.planet.star.id].refresh_layer(1)
                         system_displays[active_player.selected_ship.planet.star.id].refresh_layer(4)
-                # TEMP
+                # TEMP: auto explore
                 elif event.key == pygame.K_e:
                     active_player.selected_ship.task = 1
+                # TEMP: collect biomass
+                elif event.key == pygame.K_b:
+                    if active_player.selected_ship.planet is not None:
+                        active_player.selected_ship.collect_biomass(active_player.selected_ship.planet.ecology)
+
 
         if active_display.next_pane_id != -1:
             next_id = active_display.next_pane_id
@@ -162,9 +175,12 @@ def main():
         # Display
 
         display.fill(COLOR_BACKGROUND)
-
         active_display.refresh_layer(2)
+        if isinstance(active_display, system_display.SystemDisplay):
+            active_display.refresh_layer(3)
         active_display.draw(display)
+
+        # TEMP: manually draw all UI elements
 
         display.blit(panel_large, (0, DISPLAY_DIMENSIONS[1] - 58))
         display.blit(button_diplomacy, (DISPLAY_DIMENSIONS[0] - 29, DISPLAY_DIMENSIONS[1] - 55))
@@ -173,9 +189,52 @@ def main():
         display.blit(button_research, (DISPLAY_DIMENSIONS[0] - 55, DISPLAY_DIMENSIONS[1] - 29))
         display.blit(button_battle, (DISPLAY_DIMENSIONS[0] - 81, DISPLAY_DIMENSIONS[1] - 55))
         display.blit(button_colonial, (DISPLAY_DIMENSIONS[0] - 81, DISPLAY_DIMENSIONS[1] - 29))
+
         money = font.get_text_surface("$" + str(active_player.money))
         display.blit(panel_money, (3, DISPLAY_DIMENSIONS[1] - 40))
         display.blit(money, (6, DISPLAY_DIMENSIONS[1] - 37))
+
+        display.blit(button_explore, (175, DISPLAY_DIMENSIONS[1] - 52))
+        amt_artifact = font.get_text_surface(str(active_player.selected_ship.cargo.artifacts))
+        display.blit(amt_artifact, (182, DISPLAY_DIMENSIONS[1] - 22))
+
+        display.blit(panel_wide, (226, DISPLAY_DIMENSIONS[1] - 55))
+        display.blit(icon_mineral_r, (229, DISPLAY_DIMENSIONS[1] - 52))
+        amt_r = font.get_text_surface(str(active_player.selected_ship.cargo.minerals[0]))
+        display.blit(amt_r, (236, DISPLAY_DIMENSIONS[1] - 22))
+        display.blit(icon_mineral_g, (255, DISPLAY_DIMENSIONS[1] - 52))
+        amt_g = font.get_text_surface(str(active_player.selected_ship.cargo.minerals[1]))
+        display.blit(amt_g, (262, DISPLAY_DIMENSIONS[1] - 22))
+        display.blit(icon_mineral_b, (281, DISPLAY_DIMENSIONS[1] - 52))
+        amt_b = font.get_text_surface(str(active_player.selected_ship.cargo.minerals[2]))
+        display.blit(amt_b, (288, DISPLAY_DIMENSIONS[1] - 22))
+        display.blit(icon_mineral_c, (307, DISPLAY_DIMENSIONS[1] - 52))
+        amt_c = font.get_text_surface(str(active_player.selected_ship.cargo.minerals[3]))
+        display.blit(amt_c, (314, DISPLAY_DIMENSIONS[1] - 22))
+        display.blit(icon_mineral_m, (333, DISPLAY_DIMENSIONS[1] - 52))
+        amt_m = font.get_text_surface(str(active_player.selected_ship.cargo.minerals[4]))
+        display.blit(amt_m, (340, DISPLAY_DIMENSIONS[1] - 22))
+        display.blit(icon_mineral_y, (359, DISPLAY_DIMENSIONS[1] - 52))
+        amt_y = font.get_text_surface(str(active_player.selected_ship.cargo.minerals[5]))
+        display.blit(amt_y, (366, DISPLAY_DIMENSIONS[1] - 22))
+
+        display.blit(button_colonial, (425, DISPLAY_DIMENSIONS[1] - 52))
+        amt_building = font.get_text_surface(str(active_player.selected_ship.cargo.buildings))
+        display.blit(amt_building, (432, DISPLAY_DIMENSIONS[1] - 22))
+
+        display.blit(button_ecology, (475, DISPLAY_DIMENSIONS[1] - 52))
+        biomasses = 0
+        for i in range(len(active_player.selected_ship.cargo.biomass.quantities)):
+            if active_player.selected_ship.cargo.biomass.quantities[i] > 0:
+                pygame.draw.rect(display, (50, 15, 15),
+                                 pygame.Rect(504 + biomasses * 14, DISPLAY_DIMENSIONS[1] - 49, 16, 18))
+                display.blit(system_display.ECOLOGY_SPECIES_IMAGES[i],
+                             (506 + biomasses * 14, DISPLAY_DIMENSIONS[1] - 48))
+                biomass_amount = font.get_text_surface(str(active_player.selected_ship.cargo.biomass.quantities[i]))
+                display.blit(biomass_amount,(506 + biomasses * 14, DISPLAY_DIMENSIONS[1] - 22))
+                biomasses += 1
+
+
         # Update; end tick
         pygame.display.update()
 

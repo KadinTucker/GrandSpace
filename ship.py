@@ -232,6 +232,13 @@ class Ship:
         self.planet.ships.remove(self)
         self.planet = None
 
+    def collect_biomass(self, ecology_obj):
+        if ecology_obj is not None and ecology_obj.biomass_level == 1:
+            for i in range(len(ecology_obj.species)):
+                if ecology_obj.species[i]:
+                    self.cargo.biomass.quantities[i] += 1
+            ecology_obj.biomass_level = 0
+
 
 class Cargo:
 

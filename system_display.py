@@ -29,6 +29,7 @@ ECOLOGY_BIOMASS_WIDTH = 30
 ECOLOGY_BIOMASS_HALO_WIDTH = 2
 
 ECOLOGY_SPECIES_FILENAMES = ["assets/typeface/eco-serif/" + letter + ".png" for letter in ecology.BIOMASS_TYPES]
+ECOLOGY_SPECIES_IMAGES = [pygame.image.load(fn) for fn in ECOLOGY_SPECIES_FILENAMES]
 
 INDICATOR_HABITAT_IMG = pygame.image.load("assets/indicator-habitat-new.png")
 INDICATOR_CITY_IMG = pygame.image.load("assets/indicator-city-new.png")
@@ -73,7 +74,7 @@ class SystemDisplay(pane.Pane):
         self.star = star
         self.planet_locations = []
         self.set_planet_locations()
-        self.species_images = [pygame.image.load(fn) for fn in ECOLOGY_SPECIES_FILENAMES]
+
         self.refresh_all_layers()
 
     def set_planet_locations(self):
@@ -149,7 +150,7 @@ class SystemDisplay(pane.Pane):
                 if self.star.planets[p].ecology.species[j]:
                     species.append(j)
             for s in range(len(species)):
-                self.layers[3].blit(self.species_images[species[s]],
+                self.layers[3].blit(ECOLOGY_SPECIES_IMAGES[species[s]],
                                     (self.planet_locations[p][0] - (ECOLOGY_SPECIES_SPACING * (len(species) - 1)
                                      + ECOLOGY_SPECIES_WIDTH * len(species)) // 2
                                      + s * (ECOLOGY_SPECIES_WIDTH + ECOLOGY_SPECIES_SPACING),
