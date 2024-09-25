@@ -14,8 +14,7 @@ SQRT3 = math.sqrt(3)
 
 DISTANCE_RATIO_TOLERANCE = 1.5
 
-# SPICE_COLORS = [(200, 75, 20), (160, 200, 25), (50, 75, 200), (50, 200, 75), (200, 100, 160), (120, 20, 160)]
-MINERAL_COLORS = [(200, 20, 20), (20, 200, 20), (20, 20, 200), (200, 200, 20), (200, 20, 200), (20, 200, 200)]
+MINERAL_COLORS = [(200, 20, 20), (20, 200, 20), (20, 20, 200), (20, 200, 200), (200, 20, 200), (200, 200, 20)]
 # Expected number of artifacts in the galaxy
 ARTIFACT_TOTAL = 25
 AVERAGE_PLANETS = 3

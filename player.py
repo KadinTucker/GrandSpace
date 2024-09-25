@@ -15,7 +15,7 @@ class Player:
     def __init__(self, game, p_id):
         self.game = game
         self.id = p_id
-        self.money = 99999999
+        self.money = 0
         self.color = (random.randint(20, 255), random.randint(20, 255), random.randint(20, 255))
         self.ships = []
         self.selected_ship = None

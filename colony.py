@@ -1,7 +1,7 @@
-
+import trade
 
 MINERAL_PER_DEVELOPMENT_PER_MINUTE = 1
-HOMEWORLD_PRODUCTION_FACTOR = 3  # amount by which production is divided for homeworld
+HOMEWORLD_PRODUCTION_FACTOR = 1  # amount by which production is divided for homeworld
 MAX_DEVELOPMENT_PER_CITY_PER_HABITABILITY = 1
 MINERAL_CAPACITY_PER_CITY = 5
 
@@ -13,6 +13,7 @@ class Colony(object):
         self.cities = 1
         self.development = 0
         self.minerals = 0
+        self.demand = trade.Demand(self)
 
     def get_maximum_cities(self):
         return max(1, self.planet.get_habitability())

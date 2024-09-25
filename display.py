@@ -39,8 +39,10 @@ COLOR_SHIP_SELECTION = (225, 225, 225)
 def generate_galaxy_displays(game):
     galaxy_displays = []
     for p in game.players:
-        galaxy_displays.append(galaxy_display.GalaxyDisplay(game, p, GALAXY_PANE_DIMENSIONS, GALAXY_PANE_DIMENSIONS,
-                                                            GALAXY_PANE_POSITION))
+        new_display = galaxy_display.GalaxyDisplay(game, p, GALAXY_PANE_DIMENSIONS, GALAXY_PANE_DIMENSIONS,
+                                                            GALAXY_PANE_POSITION)
+        new_display.set_scale(3.0, p.homeworld.star.location)
+        galaxy_displays.append(new_display)
     return galaxy_displays
             
 def generate_system_displays(game, active_player):
@@ -171,16 +173,18 @@ def main():
         for s in g.stars:
             for p in s.planets:
                 p.ecology.regenerate_biomass(elapsed_time)
+                if p.colony is not None:
+                    p.colony.demand.progress_demand(elapsed_time)
 
         # Display
 
         display.fill(COLOR_BACKGROUND)
-        active_display.refresh_layer(2)
+        active_display.refresh_layer(len(active_display.layers) - 1)  # refresh top layer every tick
         if isinstance(active_display, system_display.SystemDisplay):
-            active_display.refresh_layer(3)
+            active_display.refresh_layer(3)  # refresh ecology layer every tick, because it has moving bars
         active_display.draw(display)
 
-        # TEMP: manually draw all UI elements
+        # TEMP: manually drawing all UI elements
 
         display.blit(panel_large, (0, DISPLAY_DIMENSIONS[1] - 58))
         display.blit(button_diplomacy, (DISPLAY_DIMENSIONS[0] - 29, DISPLAY_DIMENSIONS[1] - 55))
@@ -233,7 +237,6 @@ def main():
                 biomass_amount = font.get_text_surface(str(active_player.selected_ship.cargo.biomass.quantities[i]))
                 display.blit(biomass_amount,(506 + biomasses * 14, DISPLAY_DIMENSIONS[1] - 22))
                 biomasses += 1
-
 
         # Update; end tick
         pygame.display.update()

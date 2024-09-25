@@ -2,6 +2,7 @@ import pygame
 import math
 
 import ecology
+import font
 import galaxy
 
 import pane
@@ -31,6 +32,25 @@ ECOLOGY_BIOMASS_HALO_WIDTH = 2
 ECOLOGY_SPECIES_FILENAMES = ["assets/typeface/eco-serif/" + letter + ".png" for letter in ecology.BIOMASS_TYPES]
 ECOLOGY_SPECIES_IMAGES = [pygame.image.load(fn) for fn in ECOLOGY_SPECIES_FILENAMES]
 
+TRADE_DEMAND_DEPTH = SYSTEM_PLANET_RADIUS * 2
+TRADE_MINERAL_DEMAND_OFFSET = 34
+TRADE_DEMAND_TEXT_OFFSET = 14
+TRADE_DEMAND_PROGRESS_OFFSET = 36
+TRADE_DEMAND_PROGRESS_WIDTH = 3
+TRADE_DEMAND_PROGRESS_HEIGHT = 16
+TRADE_LEAD_STRING = " : "
+
+PRODUCTION_DEPTH = TRADE_DEMAND_DEPTH + 27
+PRODUCTION_OFFSET = 52
+PRODUCTION_ICON_OFFSET = 16
+PRODUCTION_TIME_OFFSET = -4
+
+MINERAL_FILENAMES = ["assets/minerals-red.png", "assets/minerals-green.png", "assets/minerals-blue.png",
+                     "assets/minerals-cyan.png", "assets/minerals-magenta.png", "assets/minerals-yellow.png",
+                     "assets/minerals-blank.png"]
+MINERAL_IMAGES = [pygame.image.load(fn) for fn in MINERAL_FILENAMES]
+SLASH_MIN_IMAGE = font.get_text_surface("/min")
+
 INDICATOR_HABITAT_IMG = pygame.image.load("assets/indicator-habitat-new.png")
 INDICATOR_CITY_IMG = pygame.image.load("assets/indicator-city-new.png")
 INDICATOR_DEVELOPMENT_IMG = pygame.image.load("assets/indicator-development-new.png")
@@ -42,10 +62,11 @@ COLOR_SHIP_SELECTION = (225, 225, 225)
 COLOR_BIOMASS_EMPTY = (95, 35, 15)
 COLOR_BIOMASS_FULL = (25, 110, 15)
 COLOR_BIOMASS_HALO = (110, 220, 110)
+COLOR_DEMAND_PROGRESS = (180, 180, 180)
 
 def get_ring_distribution_coordinates(center, radius, num_items):
     coordinates = [[0, 0] for _ in range(num_items)]
-    num_rings = int(math.sqrt(num_items) + 1)
+    num_rings = math.ceil(math.sqrt(num_items))
     current_item = 0
     for i in range(num_rings - 1):
         ring_plots = 2 * i + 1
@@ -107,16 +128,16 @@ class SystemDisplay(pane.Pane):
                                    SYSTEM_PLANET_RADIUS + SYSTEM_ARTIFACT_RING_WIDTH * 4, SYSTEM_ARTIFACT_RING_WIDTH)
 
     def sketch_ship_surface(self):
-        self.layers[2].fill(COLOR_BACKGROUND)
+        self.layers[4].fill(COLOR_BACKGROUND)
         star_ships = []
         for s in self.star.ships:
             if s.planet is None:
                 star_ships.append(s)
-        ship_display.draw_overlapping_ships(self.layers[2], star_ships,
+        ship_display.draw_overlapping_ships(self.layers[4], star_ships,
                                             (self.pane_dimensions[0] // 2, self.pane_dimensions[1] // 2),
                                             self.player)
         for p in range(len(self.star.planets)):
-            ship_display.draw_overlapping_ships(self.layers[2], self.star.planets[p].ships,
+            ship_display.draw_overlapping_ships(self.layers[4], self.star.planets[p].ships,
                                                 self.planet_locations[p], self.player)
 
     def sketch_ecology_surface(self):
@@ -155,9 +176,33 @@ class SystemDisplay(pane.Pane):
                                      + ECOLOGY_SPECIES_WIDTH * len(species)) // 2
                                      + s * (ECOLOGY_SPECIES_WIDTH + ECOLOGY_SPECIES_SPACING),
                                      self.planet_locations[p][1] - ECOLOGY_SPECIES_ALTITUDE - ECOLOGY_SPECIES_HEIGHT))
+            # TEMP demand and production indicators
+            if self.star.planets[p].colony is not None:
+                self.layers[3].blit(MINERAL_IMAGES[self.star.planets[p].colony.demand.mineral_demanded],
+                                    (self.planet_locations[p][0] - TRADE_MINERAL_DEMAND_OFFSET,
+                                     self.planet_locations[p][1] + TRADE_DEMAND_DEPTH))
+                demand_img = font.get_text_surface(TRADE_LEAD_STRING
+                                                   + str(self.star.planets[p].colony.demand.demand_quantity))
+                self.layers[3].blit(demand_img, (self.planet_locations[p][0] - TRADE_DEMAND_TEXT_OFFSET,
+                                                 self.planet_locations[p][1] + TRADE_DEMAND_DEPTH))
+                progress_height = int(self.star.planets[p].colony.demand.change_progress * TRADE_DEMAND_PROGRESS_HEIGHT)
+                pygame.draw.rect(self.layers[3], COLOR_DEMAND_PROGRESS,
+                                 pygame.Rect(self.planet_locations[p][0] + TRADE_DEMAND_PROGRESS_OFFSET,
+                                             self.planet_locations[p][1] + TRADE_DEMAND_DEPTH
+                                             + TRADE_DEMAND_PROGRESS_HEIGHT - progress_height,
+                                             TRADE_DEMAND_PROGRESS_WIDTH, progress_height))
+                production_img = font.get_text_surface("+" + str(int(self.star.planets[p].colony.get_production(1))))
+                self.layers[3].blit(production_img, (self.planet_locations[p][0] - PRODUCTION_OFFSET,
+                                                     self.planet_locations[p][1] + PRODUCTION_DEPTH))
+                self.layers[3].blit(MINERAL_IMAGES[self.star.planets[p].mineral],
+                                    (self.planet_locations[p][0] - PRODUCTION_ICON_OFFSET,
+                                     self.planet_locations[p][1] + PRODUCTION_DEPTH - 2))
+                self.layers[3].blit(SLASH_MIN_IMAGE, (self.planet_locations[p][0] - PRODUCTION_TIME_OFFSET,
+                                                      self.planet_locations[p][1] + PRODUCTION_DEPTH))
+
 
     def sketch_planet_detail_surface(self):
-        self.layers[4].fill(COLOR_BACKGROUND)
+        self.layers[2].fill(COLOR_BACKGROUND)
         for p in range(len(self.star.planets)):
             # Draw cities, development pips, then trees, in a spiral fashion
             num_cities = 0
@@ -171,11 +216,11 @@ class SystemDisplay(pane.Pane):
                                                               num_cities + num_development + num_habit)
             for i in range(len(pip_locations)):
                 if i < num_cities:
-                    self.layers[4].blit(INDICATOR_CITY_IMG, pip_locations[i])
+                    self.layers[2].blit(INDICATOR_CITY_IMG, pip_locations[i])
                 elif i < num_cities + num_development:
-                    self.layers[4].blit(INDICATOR_DEVELOPMENT_IMG, pip_locations[i])
+                    self.layers[2].blit(INDICATOR_DEVELOPMENT_IMG, pip_locations[i])
                 else:
-                    self.layers[4].blit(INDICATOR_HABITAT_IMG, pip_locations[i])
+                    self.layers[2].blit(INDICATOR_HABITAT_IMG, pip_locations[i])
 
     def refresh_layer(self, index):
         super().refresh_layer(index)
@@ -184,11 +229,11 @@ class SystemDisplay(pane.Pane):
         elif index == 1:
             self.sketch_player_surface()
         elif index == 2:
-            self.sketch_ship_surface()
+            self.sketch_planet_detail_surface()
         elif index == 3:
             self.sketch_ecology_surface()
         elif index == 4:
-            self.sketch_planet_detail_surface()
+            self.sketch_ship_surface()
 
     def find_planet(self, position):
         """

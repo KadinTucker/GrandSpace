@@ -43,9 +43,9 @@ Task Enumeration:
 9 - Research
 """
 
-# Assuming average distance of 80 units between stars and taking 2 seconds to traverse 80 units
-SHIP_SPEED_PER_MINUTE = 2400 
-STAR_ENTRY_DISTANCE = 10
+# Average distance of 80 units between stars and taking 2 seconds to traverse 80 units requires a speed of 2400
+SHIP_SPEED_PER_MINUTE = 800
+STAR_ENTRY_DISTANCE = 1
 
 # TODO: make these tasks (or above constants) vary with technology
 TASKS = [ship_tasks.task_null, ship_tasks.task_explore_superficial]

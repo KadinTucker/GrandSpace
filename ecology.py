@@ -4,7 +4,7 @@ BIOMASS_TYPES = "A B C D E F G H I J K L M N O P Q R S T U V W X Y Z".split()
 
 MAX_HABITABILITY = 3
 BASE_TERRAFORM_COST = 10
-BIOMASS_REGENERATION_PER_MINUTE = 12.0  # In fraction of full capacity per minute - recommended 1.0
+BIOMASS_REGENERATION_PER_MINUTE = 1.0  # In fraction of full capacity per minute - recommended 1.0
 
 class Biomass:
 
