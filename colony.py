@@ -35,11 +35,11 @@ class HomeworldColony(Colony):
 
     def __init__(self, player, planet):
         super(HomeworldColony, self).__init__(player, planet)
-        self.cities = 10
+        self.cities = self.get_maximum_cities()
         self.development = self.get_maximum_development() // 2
 
     def get_maximum_cities(self):
-        return 1 + 3 * self.planet.get_habitability()
+        return 1 + 2 * self.planet.get_habitability()
 
     def get_maximum_development(self):
         return self.cities

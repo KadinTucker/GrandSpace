@@ -18,6 +18,7 @@ MINERAL_COLORS = [(200, 20, 20), (20, 200, 20), (20, 20, 200), (20, 200, 200), (
 # Expected number of artifacts in the galaxy
 ARTIFACT_TOTAL = 25
 AVERAGE_PLANETS = 3
+LIFE_DENSITY = 0.5 # approximate fraction of stars one expects to have life (in reality, less if higher)
 
 def generate_galaxy_boxes(galaxy, width, height, radius):
     i = 0
@@ -55,7 +56,7 @@ def populate_homeworlds(galaxy, game):
         game.players[p].add_ship(planet)
         game.players[p].selected_ship = game.players[p].ships[0]
         game.players[p].explored_stars[star.id] = True
-    populate_life(galaxy, len(game.players) * 3, species)
+    populate_life(galaxy, len(game.players) * 3, species, int(LIFE_DENSITY * len(galaxy.stars) / len(game.players) / 3))
 
 def populate_artifacts(galaxy):
     for s in galaxy.stars:
@@ -63,12 +64,13 @@ def populate_artifacts(galaxy):
             if random.random() < float(ARTIFACT_TOTAL) / AVERAGE_PLANETS / len(galaxy.stars):
                 p.artifacts = 1
 
-def populate_life(galaxy, num_species, species_list):
-    for i in range(num_species):
-        star = random.choice(galaxy.stars)
-        planet = random.choice(star.planets)
-        planet.ecology.habitability = 1
-        planet.ecology.species[species_list[i]] = True
+def populate_life(galaxy, num_species, species_list, num_repeats):
+    for _ in range(num_repeats):
+        for i in range(num_species):
+            star = random.choice(galaxy.stars)
+            planet = random.choice(star.planets)
+            planet.ecology.habitability += 1
+            planet.ecology.species[species_list[i]] = True
 
 def get_closest_star_index(target, star_domain):
     min_distance = -1

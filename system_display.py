@@ -7,6 +7,7 @@ import galaxy
 
 import pane
 import ship_display
+import uiframe
 
 SYSTEM_STAR_RADIUS = 60
 SYSTEM_PLANET_RADIUS = 20
@@ -47,6 +48,22 @@ PRODUCTION_TIME_OFFSET = PRODUCTION_ICON_OFFSET + 20
 STORAGE_DEPTH = -4
 STORAGE_OFFSET = PRODUCTION_DEPTH + 16
 
+SUMMARY_CITY_ICON_OFFSET = SYSTEM_PLANET_RADIUS * 2 + 60
+SUMMARY_CITY_ICON_ALTITUDE = 44
+SUMMARY_CITY_TEXT_OFFSET = SUMMARY_CITY_ICON_OFFSET - 7
+SUMMARY_CITY_TEXT_ALTITUDE = SUMMARY_CITY_ICON_ALTITUDE - 28
+SUMMARY_DEVELOPMENT_ICON_OFFSET = SYSTEM_PLANET_RADIUS * 2 + 26
+SUMMARY_DEVELOPMENT_ICON_ALTITUDE = 44
+SUMMARY_DEVELOPMENT_TEXT_OFFSET = SUMMARY_DEVELOPMENT_ICON_OFFSET + 3
+SUMMARY_DEVELOPMENT_TEXT_ALTITUDE = SUMMARY_DEVELOPMENT_ICON_ALTITUDE - 28
+
+SHIELD_STACK_LEFT = SYSTEM_PLANET_RADIUS * 2 + 72
+SHIELD_STACK_RIGHT = SYSTEM_PLANET_RADIUS * 2 + 10
+SHIELD_STACK_DEPTH = 10
+SHIELD_WIDTH = 26
+SHIELD_FILL_HEIGHT = 18
+SHIELD_FILL_OFFSET = 3
+
 ACCESS_PANE_HEIGHT = 46
 ACCESS_PANE_WIDTH = 96
 ACCESS_ELEMENT_POSITIONS = [(0, 0), (24, 0), (48, 0), (72, 13), (48, 26), (24, 26), (0, 26)]
@@ -56,6 +73,11 @@ MINERAL_FILENAMES = ["assets/minerals-red.png", "assets/minerals-green.png", "as
                      "assets/minerals-blank.png"]
 MINERAL_IMAGES = [pygame.image.load(fn) for fn in MINERAL_FILENAMES]
 SLASH_MIN_IMAGE = font.get_text_surface("/min")
+
+SUMMARY_CITY_ICON_IMG = uiframe.create_button("assets/icon-city.png")
+SUMMARY_DEVELOPMENT_ICON_IMG = uiframe.create_button("assets/icon-development.png")
+
+SHIELD_ICON = pygame.image.load("assets/defense_slot.png")
 
 INDICATOR_HABITAT_IMG = pygame.image.load("assets/indicator-habitat-new.png")
 INDICATOR_CITY_IMG = pygame.image.load("assets/indicator-city-new.png")
@@ -98,6 +120,9 @@ def get_ring_distribution_coordinates(center, radius, num_items):
                                            * (num_rings - 1) / num_rings)
         current_item += 1
     return coordinates
+
+def get_linear_stack_positions(start_boundary, end_boundary, num_items):
+    return [start_boundary + ((i + 1) / (num_items + 1) * (end_boundary - start_boundary)) for i in range(num_items)]
 
 def get_pane_id(star_id):
     return star_id + 1
@@ -143,7 +168,7 @@ class SystemDisplay(pane.Pane):
         # Access
         if self.star.ruler is not None:
             pane_left = (self.pane_dimensions[0] - ACCESS_PANE_WIDTH) // 2
-            pane_up = self.pane_dimensions[1] // 2 + int(SYSTEM_STAR_RADIUS * 0.6)
+            pane_up = (self.pane_dimensions[1] - ACCESS_PANE_HEIGHT) // 2
             pygame.draw.rect(self.layers[1], COLOR_ACCESS_PANE,
                              pygame.Rect(pane_left, pane_up, ACCESS_PANE_WIDTH, ACCESS_PANE_HEIGHT))
             for i in range(len(ACCESS_ELEMENT_POSITIONS)):
@@ -234,6 +259,30 @@ class SystemDisplay(pane.Pane):
                                                     + str(int(self.star.planets[p].colony.get_mineral_capacity())))
                 self.layers[3].blit(storage_img, (self.planet_locations[p][0] + STORAGE_OFFSET,
                                                   self.planet_locations[p][1] - STORAGE_DEPTH))
+                # Summary
+                self.layers[3].blit(SUMMARY_CITY_ICON_IMG, (self.planet_locations[p][0] - SUMMARY_CITY_ICON_OFFSET,
+                                                            self.planet_locations[p][1] - SUMMARY_CITY_ICON_ALTITUDE))
+                city_img = font.get_text_surface(str(int(self.star.planets[p].colony.cities)))
+                self.layers[3].blit(city_img, (self.planet_locations[p][0] - SUMMARY_CITY_TEXT_OFFSET,
+                                               self.planet_locations[p][1] - SUMMARY_CITY_TEXT_ALTITUDE))
+                self.layers[3].blit(SUMMARY_DEVELOPMENT_ICON_IMG,
+                                    (self.planet_locations[p][0] - SUMMARY_DEVELOPMENT_ICON_OFFSET,
+                                     self.planet_locations[p][1] - SUMMARY_DEVELOPMENT_ICON_ALTITUDE))
+                development_img = font.get_text_surface(str(int(self.star.planets[p].colony.development)) + "/"
+                                                        + str(int(self.star.planets[p].colony
+                                                                  .get_maximum_development())))
+                self.layers[3].blit(development_img, (self.planet_locations[p][0] - SUMMARY_DEVELOPMENT_TEXT_OFFSET,
+                                                      self.planet_locations[p][1] - SUMMARY_DEVELOPMENT_TEXT_ALTITUDE))
+                # Shields
+                positions = get_linear_stack_positions(self.planet_locations[p][0] - SHIELD_STACK_LEFT,
+                                                       self.planet_locations[p][0] - SHIELD_STACK_RIGHT,
+                                                       self.star.planets[p].colony.cities)
+                for pos in positions:
+                    # TODO: include conquest progress, if under siege
+                    pygame.draw.rect(self.layers[3], self.star.ruler.color,
+                                     pygame.Rect(pos, self.planet_locations[p][1] + SHIELD_STACK_DEPTH
+                                                 + SHIELD_FILL_OFFSET, SHIELD_WIDTH, SHIELD_FILL_HEIGHT))
+                    self.layers[3].blit(SHIELD_ICON, (pos, self.planet_locations[p][1] + SHIELD_STACK_DEPTH))
 
     def sketch_planet_detail_surface(self):
         self.layers[2].fill(COLOR_BACKGROUND)

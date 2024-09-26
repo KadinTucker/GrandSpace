@@ -160,6 +160,23 @@ def main():
                 elif event.key == pygame.K_b:
                     if active_player.selected_ship.planet is not None:
                         active_player.selected_ship.collect_biomass(active_player.selected_ship.planet.ecology)
+                # TEMP: build city
+                elif event.key == pygame.K_y:
+                    if active_player.selected_ship.planet is not None:
+                        if active_player.selected_ship.planet.colony is not None:
+                            if active_player.selected_ship.planet.colony.ruler is active_player:
+                                if (active_player.selected_ship.planet.colony.cities < active_player.selected_ship
+                                        .planet.colony.get_maximum_cities()):
+                                    active_player.selected_ship.planet.colony.cities += 1
+                                    system_displays[active_player.selected_ship.planet.star.id].refresh_layer(2)
+                elif event.key == pygame.K_d:
+                    if active_player.selected_ship.planet is not None:
+                        if active_player.selected_ship.planet.colony is not None:
+                            if active_player.selected_ship.planet.colony.ruler is active_player:
+                                if (active_player.selected_ship.planet.colony.development < active_player.selected_ship
+                                        .planet.colony.get_maximum_development()):
+                                    active_player.selected_ship.planet.colony.development += 1
+                                    system_displays[active_player.selected_ship.planet.star.id].refresh_layer(2)
 
         if active_display.next_pane_id != -1:
             next_id = active_display.next_pane_id
