@@ -49,20 +49,7 @@ STORAGE_OFFSET = PRODUCTION_DEPTH + 16
 
 ACCESS_PANE_HEIGHT = 46
 ACCESS_PANE_WIDTH = 96
-ACCESS_BIOMASS_RIGHT = 0
-ACCESS_BIOMASS_DOWN = 0
-ACCESS_DIPLOMACY_RIGHT = 24
-ACCESS_DIPLOMACY_DOWN = 0
-ACCESS_TRADE_RIGHT = 48
-ACCESS_TRADE_DOWN = 0
-ACCESS_PASSAGE_RIGHT = 72
-ACCESS_PASSAGE_DOWN = 13
-ACCESS_PIRACY_RIGHT = 48
-ACCESS_PIRACY_DOWN = 26
-ACCESS_BATTLE_RIGHT = 24
-ACCESS_BATTLE_DOWN = 26
-ACCESS_SIEGE_RIGHT = 0
-ACCESS_SIEGE_DOWN = 26
+ACCESS_ELEMENT_POSITIONS = [(0, 0), (24, 0), (48, 0), (72, 13), (48, 26), (24, 26), (0, 26)]
 
 MINERAL_FILENAMES = ["assets/minerals-red.png", "assets/minerals-green.png", "assets/minerals-blue.png",
                      "assets/minerals-cyan.png", "assets/minerals-magenta.png", "assets/minerals-yellow.png",
@@ -74,13 +61,11 @@ INDICATOR_HABITAT_IMG = pygame.image.load("assets/indicator-habitat-new.png")
 INDICATOR_CITY_IMG = pygame.image.load("assets/indicator-city-new.png")
 INDICATOR_DEVELOPMENT_IMG = pygame.image.load("assets/indicator-development-new.png")
 
-ACCESS_BIOMASS_IMG = pygame.image.load("assets/icon-ecology.png")
-ACCESS_DIPLOMACY_IMG = pygame.image.load("assets/icon-diplomacy.png")
-ACCESS_TRADE_IMG = pygame.image.load("assets/icon-access-trade.png")
-ACCESS_PASSAGE_IMG = pygame.image.load("assets/icon-access-passage.png")
-ACCESS_PIRACY_IMG = pygame.image.load("assets/icon-access-piracy.png")
-ACCESS_BATTLE_IMG = pygame.image.load("assets/icon-battle.png")
-ACCESS_SIEGE_IMG = pygame.image.load("assets/icon-access-siege.png")
+ACCESS_IMAGE_FILENAMES = ["assets/icon-ecology.png", "assets/icon-diplomacy.png", "assets/icon-access-trade.png",
+                          "assets/icon-access-passage.png", "assets/icon-access-piracy.png", "assets/icon-battle.png",
+                          "assets/icon-access-siege.png"]
+
+ACCESS_IMAGES = [pygame.image.load(fn) for fn in ACCESS_IMAGE_FILENAMES]
 ACCESS_NONE_IMG = pygame.image.load("assets/no-access.png")
 
 COLOR_BACKGROUND = (10, 10, 10)
@@ -156,26 +141,17 @@ class SystemDisplay(pane.Pane):
                 pygame.draw.circle(self.layers[1], COLOR_ARTIFACT_RING, self.planet_locations[p],
                                    SYSTEM_PLANET_RADIUS + SYSTEM_ARTIFACT_RING_WIDTH * 4, SYSTEM_ARTIFACT_RING_WIDTH)
         # Access
-        # TODO: modularise access, so that it is indexable
         if self.star.ruler is not None:
             pane_left = (self.pane_dimensions[0] - ACCESS_PANE_WIDTH) // 2
             pane_up = self.pane_dimensions[1] // 2 + int(SYSTEM_STAR_RADIUS * 0.6)
             pygame.draw.rect(self.layers[1], COLOR_ACCESS_PANE,
                              pygame.Rect(pane_left, pane_up, ACCESS_PANE_WIDTH, ACCESS_PANE_HEIGHT))
-            self.layers[1].blit(ACCESS_BIOMASS_IMG, (pane_left + ACCESS_BIOMASS_RIGHT,
-                                                     pane_up + ACCESS_BIOMASS_DOWN))
-            self.layers[1].blit(ACCESS_DIPLOMACY_IMG, (pane_left + ACCESS_DIPLOMACY_RIGHT,
-                                                     pane_up + ACCESS_DIPLOMACY_DOWN))
-            self.layers[1].blit(ACCESS_TRADE_IMG, (pane_left + ACCESS_TRADE_RIGHT,
-                                                     pane_up + ACCESS_TRADE_DOWN))
-            self.layers[1].blit(ACCESS_PASSAGE_IMG, (pane_left + ACCESS_PASSAGE_RIGHT,
-                                                     pane_up + ACCESS_PASSAGE_DOWN))
-            self.layers[1].blit(ACCESS_PIRACY_IMG, (pane_left + ACCESS_PIRACY_RIGHT,
-                                                     pane_up + ACCESS_PIRACY_DOWN))
-            self.layers[1].blit(ACCESS_BATTLE_IMG, (pane_left + ACCESS_BATTLE_RIGHT,
-                                                     pane_up + ACCESS_BATTLE_DOWN))
-            self.layers[1].blit(ACCESS_SIEGE_IMG, (pane_left + ACCESS_SIEGE_RIGHT,
-                                                     pane_up + ACCESS_SIEGE_DOWN))
+            for i in range(len(ACCESS_ELEMENT_POSITIONS)):
+                self.layers[1].blit(ACCESS_IMAGES[i], (pane_left + ACCESS_ELEMENT_POSITIONS[i][0],
+                                                       pane_up + ACCESS_ELEMENT_POSITIONS[i][1]))
+                if not self.game.diplomacy.access_matrix[self.star.ruler.id][self.player.id][i]:
+                    self.layers[1].blit(ACCESS_NONE_IMG, (pane_left + ACCESS_ELEMENT_POSITIONS[i][0],
+                                                          pane_up + ACCESS_ELEMENT_POSITIONS[i][1]))
 
     def sketch_ship_surface(self):
         self.layers[4].fill(COLOR_BACKGROUND)
@@ -313,7 +289,9 @@ class SystemDisplay(pane.Pane):
             if event.button == pygame.BUTTON_RIGHT:
                 self.player.selected_ship.reset_task()
                 if self.is_star_clicked(self.get_relative_pane_pos(mouse_pos)):
-                    if self.player.selected_ship.planet is None:
+                    if self.player.selected_ship.star is not self.star:
+                        self.player.selected_ship.set_destination_star(self.star)
+                    elif self.player.selected_ship.planet is None:
                         self.player.selected_ship.set_destination_star(None)
                     else:
                         self.player.selected_ship.set_destination_planet(None)

@@ -1,5 +1,6 @@
 import random
 
+import diplomacy
 import galaxy
 import ship
 
@@ -8,7 +9,7 @@ class Game:
     def __init__(self, n_players, galaxy_obj):
         self.galaxy = galaxy_obj
         self.players = [Player(self, i) for i in range(n_players)]
-        self.leverages = [[0 for _ in range(n_players)] for _ in range(n_players)]
+        self.diplomacy = diplomacy.Diplomacy(self)
 
 class Player:
 

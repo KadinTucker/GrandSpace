@@ -2,10 +2,12 @@ import pygame
 import sys
 
 import colony
+import ecology
 import galaxy
 import player
 
 import font
+import ship
 import uiframe
 
 import galaxy_display
@@ -75,6 +77,11 @@ Queries:
 """
 
 def main():
+
+    if len(sys.argv) > 1 and sys.argv[1] == 'cheat':
+        print("*** CHEAT MODE ACTIVATED ***")
+        ship.SHIP_SPEED_PER_MINUTE = 10000
+        ecology.BIOMASS_REGENERATION_PER_MINUTE = 15.0
 
     g = galaxy.Galaxy()
     game = player.Game(5, g)
