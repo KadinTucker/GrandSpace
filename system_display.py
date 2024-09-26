@@ -47,24 +47,22 @@ PRODUCTION_TIME_OFFSET = PRODUCTION_ICON_OFFSET + 20
 STORAGE_DEPTH = -4
 STORAGE_OFFSET = PRODUCTION_DEPTH + 16
 
-ACCESS_BIOMASS_LEFT = SYSTEM_PLANET_RADIUS * 2 + 96
-ACCESS_BIOMASS_DOWN = -23
-ACCESS_DIPLOMACY_LEFT = SYSTEM_PLANET_RADIUS * 2 + 72
-ACCESS_DIPLOMACY_DOWN = -23
-ACCESS_TRADE_LEFT = SYSTEM_PLANET_RADIUS * 2 + 48
-ACCESS_TRADE_DOWN = -23
-ACCESS_PASSAGE_LEFT = SYSTEM_PLANET_RADIUS * 2 + 24
-ACCESS_PASSAGE_DOWN = -10
-ACCESS_PIRACY_LEFT = SYSTEM_PLANET_RADIUS * 2 + 48
-ACCESS_PIRACY_DOWN = 3
-ACCESS_BATTLE_LEFT = SYSTEM_PLANET_RADIUS * 2 + 72
-ACCESS_BATTLE_DOWN = 3
-ACCESS_SIEGE_LEFT = SYSTEM_PLANET_RADIUS * 2 + 96
-ACCESS_SIEGE_DOWN = 3
-ACCESS_PANE_LEFT = SYSTEM_PLANET_RADIUS * 2 + 96
-ACCESS_PANE_DOWN = -23
-ACCESS_PANE_WIDTH = 96
 ACCESS_PANE_HEIGHT = 46
+ACCESS_PANE_WIDTH = 96
+ACCESS_BIOMASS_RIGHT = 0
+ACCESS_BIOMASS_DOWN = 0
+ACCESS_DIPLOMACY_RIGHT = 24
+ACCESS_DIPLOMACY_DOWN = 0
+ACCESS_TRADE_RIGHT = 48
+ACCESS_TRADE_DOWN = 0
+ACCESS_PASSAGE_RIGHT = 72
+ACCESS_PASSAGE_DOWN = 13
+ACCESS_PIRACY_RIGHT = 48
+ACCESS_PIRACY_DOWN = 26
+ACCESS_BATTLE_RIGHT = 24
+ACCESS_BATTLE_DOWN = 26
+ACCESS_SIEGE_RIGHT = 0
+ACCESS_SIEGE_DOWN = 26
 
 MINERAL_FILENAMES = ["assets/minerals-red.png", "assets/minerals-green.png", "assets/minerals-blue.png",
                      "assets/minerals-cyan.png", "assets/minerals-magenta.png", "assets/minerals-yellow.png",
@@ -157,6 +155,27 @@ class SystemDisplay(pane.Pane):
                                    SYSTEM_PLANET_RADIUS + SYSTEM_ARTIFACT_RING_WIDTH * 2, SYSTEM_ARTIFACT_RING_WIDTH)
                 pygame.draw.circle(self.layers[1], COLOR_ARTIFACT_RING, self.planet_locations[p],
                                    SYSTEM_PLANET_RADIUS + SYSTEM_ARTIFACT_RING_WIDTH * 4, SYSTEM_ARTIFACT_RING_WIDTH)
+        # Access
+        # TODO: modularise access, so that it is indexable
+        if self.star.ruler is not None:
+            pane_left = (self.pane_dimensions[0] - ACCESS_PANE_WIDTH) // 2
+            pane_up = self.pane_dimensions[1] // 2 + int(SYSTEM_STAR_RADIUS * 0.6)
+            pygame.draw.rect(self.layers[1], COLOR_ACCESS_PANE,
+                             pygame.Rect(pane_left, pane_up, ACCESS_PANE_WIDTH, ACCESS_PANE_HEIGHT))
+            self.layers[1].blit(ACCESS_BIOMASS_IMG, (pane_left + ACCESS_BIOMASS_RIGHT,
+                                                     pane_up + ACCESS_BIOMASS_DOWN))
+            self.layers[1].blit(ACCESS_DIPLOMACY_IMG, (pane_left + ACCESS_DIPLOMACY_RIGHT,
+                                                     pane_up + ACCESS_DIPLOMACY_DOWN))
+            self.layers[1].blit(ACCESS_TRADE_IMG, (pane_left + ACCESS_TRADE_RIGHT,
+                                                     pane_up + ACCESS_TRADE_DOWN))
+            self.layers[1].blit(ACCESS_PASSAGE_IMG, (pane_left + ACCESS_PASSAGE_RIGHT,
+                                                     pane_up + ACCESS_PASSAGE_DOWN))
+            self.layers[1].blit(ACCESS_PIRACY_IMG, (pane_left + ACCESS_PIRACY_RIGHT,
+                                                     pane_up + ACCESS_PIRACY_DOWN))
+            self.layers[1].blit(ACCESS_BATTLE_IMG, (pane_left + ACCESS_BATTLE_RIGHT,
+                                                     pane_up + ACCESS_BATTLE_DOWN))
+            self.layers[1].blit(ACCESS_SIEGE_IMG, (pane_left + ACCESS_SIEGE_RIGHT,
+                                                     pane_up + ACCESS_SIEGE_DOWN))
 
     def sketch_ship_surface(self):
         self.layers[4].fill(COLOR_BACKGROUND)
@@ -172,6 +191,7 @@ class SystemDisplay(pane.Pane):
                                                 self.planet_locations[p], self.player)
 
     def sketch_ecology_surface(self):
+        # TODO: include in separate file and/or class, as "planet display"
         self.layers[3].fill(COLOR_BACKGROUND)
         for p in range(len(self.star.planets)):
             # Biomass Bar
@@ -238,33 +258,6 @@ class SystemDisplay(pane.Pane):
                                                     + str(int(self.star.planets[p].colony.get_mineral_capacity())))
                 self.layers[3].blit(storage_img, (self.planet_locations[p][0] + STORAGE_OFFSET,
                                                   self.planet_locations[p][1] - STORAGE_DEPTH))
-                # Access
-                # TODO: Make access display system-specific, rather than planet specific
-                pygame.draw.rect(self.layers[3], COLOR_ACCESS_PANE,
-                                 pygame.Rect(self.planet_locations[p][0] - ACCESS_PANE_LEFT,
-                                             self.planet_locations[p][1] + ACCESS_PANE_DOWN,
-                                             ACCESS_PANE_WIDTH, ACCESS_PANE_HEIGHT))
-                self.layers[3].blit(ACCESS_BIOMASS_IMG, (self.planet_locations[p][0] - ACCESS_BIOMASS_LEFT,
-                                                         self.planet_locations[p][1] + ACCESS_BIOMASS_DOWN))
-                self.layers[3].blit(ACCESS_DIPLOMACY_IMG, (self.planet_locations[p][0] - ACCESS_DIPLOMACY_LEFT,
-                                                         self.planet_locations[p][1] + ACCESS_DIPLOMACY_DOWN))
-                self.layers[3].blit(ACCESS_TRADE_IMG, (self.planet_locations[p][0] - ACCESS_TRADE_LEFT,
-                                                         self.planet_locations[p][1] + ACCESS_TRADE_DOWN))
-                self.layers[3].blit(ACCESS_PASSAGE_IMG, (self.planet_locations[p][0] - ACCESS_PASSAGE_LEFT,
-                                                         self.planet_locations[p][1] + ACCESS_PASSAGE_DOWN))
-                self.layers[3].blit(ACCESS_PIRACY_IMG, (self.planet_locations[p][0] - ACCESS_PIRACY_LEFT,
-                                                         self.planet_locations[p][1] + ACCESS_PIRACY_DOWN))
-                self.layers[3].blit(ACCESS_NONE_IMG, (self.planet_locations[p][0] - ACCESS_PIRACY_LEFT,
-                                                        self.planet_locations[p][1] + ACCESS_PIRACY_DOWN))
-                self.layers[3].blit(ACCESS_BATTLE_IMG, (self.planet_locations[p][0] - ACCESS_BATTLE_LEFT,
-                                                         self.planet_locations[p][1] + ACCESS_BATTLE_DOWN))
-                self.layers[3].blit(ACCESS_NONE_IMG, (self.planet_locations[p][0] - ACCESS_BATTLE_LEFT,
-                                                        self.planet_locations[p][1] + ACCESS_BATTLE_DOWN))
-                self.layers[3].blit(ACCESS_SIEGE_IMG, (self.planet_locations[p][0] - ACCESS_SIEGE_LEFT,
-                                                         self.planet_locations[p][1] + ACCESS_SIEGE_DOWN))
-                self.layers[3].blit(ACCESS_NONE_IMG, (self.planet_locations[p][0] - ACCESS_SIEGE_LEFT,
-                                                       self.planet_locations[p][1] + ACCESS_SIEGE_DOWN))
-
 
     def sketch_planet_detail_surface(self):
         self.layers[2].fill(COLOR_BACKGROUND)
