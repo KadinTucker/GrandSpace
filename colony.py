@@ -42,7 +42,7 @@ class HomeworldColony(Colony):
         return 1 + 3 * self.planet.get_habitability()
 
     def get_maximum_development(self):
-        return self.get_maximum_cities()
+        return self.cities
     
     def get_production(self, time):
         return super(HomeworldColony, self).get_production(time) / HOMEWORLD_PRODUCTION_FACTOR

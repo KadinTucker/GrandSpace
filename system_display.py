@@ -40,10 +40,13 @@ TRADE_DEMAND_PROGRESS_WIDTH = 3
 TRADE_DEMAND_PROGRESS_HEIGHT = 16
 TRADE_LEAD_STRING = " : "
 
-PRODUCTION_DEPTH = TRADE_DEMAND_DEPTH + 27
-PRODUCTION_OFFSET = 52
-PRODUCTION_ICON_OFFSET = 16
-PRODUCTION_TIME_OFFSET = -4
+PRODUCTION_DEPTH = SYSTEM_PLANET_RADIUS * 2
+PRODUCTION_ALTITUDE = 18
+PRODUCTION_ICON_OFFSET = 32
+PRODUCTION_TIME_OFFSET = PRODUCTION_ICON_OFFSET + 20
+
+STORAGE_DEPTH = -4
+STORAGE_OFFSET = PRODUCTION_DEPTH + 16
 
 MINERAL_FILENAMES = ["assets/minerals-red.png", "assets/minerals-green.png", "assets/minerals-blue.png",
                      "assets/minerals-cyan.png", "assets/minerals-magenta.png", "assets/minerals-yellow.png",
@@ -192,14 +195,18 @@ class SystemDisplay(pane.Pane):
                                              + TRADE_DEMAND_PROGRESS_HEIGHT - progress_height,
                                              TRADE_DEMAND_PROGRESS_WIDTH, progress_height))
                 production_img = font.get_text_surface("+" + str(int(self.star.planets[p].colony.get_production(1))))
-                self.layers[3].blit(production_img, (self.planet_locations[p][0] - PRODUCTION_OFFSET,
-                                                     self.planet_locations[p][1] + PRODUCTION_DEPTH))
+                self.layers[3].blit(production_img, (self.planet_locations[p][0] + PRODUCTION_DEPTH,
+                                                     self.planet_locations[p][1] - PRODUCTION_ALTITUDE))
                 self.layers[3].blit(MINERAL_IMAGES[self.star.planets[p].mineral],
-                                    (self.planet_locations[p][0] - PRODUCTION_ICON_OFFSET,
-                                     self.planet_locations[p][1] + PRODUCTION_DEPTH - 2))
-                self.layers[3].blit(SLASH_MIN_IMAGE, (self.planet_locations[p][0] - PRODUCTION_TIME_OFFSET,
-                                                      self.planet_locations[p][1] + PRODUCTION_DEPTH))
-
+                                    (self.planet_locations[p][0] + PRODUCTION_DEPTH + PRODUCTION_ICON_OFFSET,
+                                     self.planet_locations[p][1] - PRODUCTION_ALTITUDE - 2))
+                self.layers[3].blit(SLASH_MIN_IMAGE, (self.planet_locations[p][0] + PRODUCTION_DEPTH
+                                                      + PRODUCTION_TIME_OFFSET, self.planet_locations[p][1]
+                                                      - PRODUCTION_ALTITUDE))
+                storage_img = font.get_text_surface(str(int(self.star.planets[p].colony.minerals)) + " / "
+                                                    + str(int(self.star.planets[p].colony.get_mineral_capacity())))
+                self.layers[3].blit(storage_img, (self.planet_locations[p][0] + STORAGE_OFFSET,
+                                                  self.planet_locations[p][1] - STORAGE_DEPTH))
 
     def sketch_planet_detail_surface(self):
         self.layers[2].fill(COLOR_BACKGROUND)

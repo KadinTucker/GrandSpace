@@ -142,7 +142,7 @@ def main():
                         active_player.add_ruled_star(active_player.selected_ship.star)
                         galaxy_displays[active_player.id].refresh_layer(0)
                         system_displays[active_player.selected_ship.planet.star.id].refresh_layer(1)
-                        system_displays[active_player.selected_ship.planet.star.id].refresh_layer(4)
+                        system_displays[active_player.selected_ship.planet.star.id].refresh_layer(2)
                 # TEMP: auto explore
                 elif event.key == pygame.K_e:
                     active_player.selected_ship.task = 1
@@ -150,7 +150,6 @@ def main():
                 elif event.key == pygame.K_b:
                     if active_player.selected_ship.planet is not None:
                         active_player.selected_ship.collect_biomass(active_player.selected_ship.planet.ecology)
-
 
         if active_display.next_pane_id != -1:
             next_id = active_display.next_pane_id
@@ -175,6 +174,7 @@ def main():
                 p.ecology.regenerate_biomass(elapsed_time)
                 if p.colony is not None:
                     p.colony.demand.progress_demand(elapsed_time)
+                    p.colony.produce(elapsed_time)
 
         # Display
 
