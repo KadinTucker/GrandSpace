@@ -1,3 +1,4 @@
+![image](thumbnail.png)
 # Grand Space
 
 A grand(-ish) space strategy game inspired by various space opera/sci-fi games programmed with Python and pygame.
