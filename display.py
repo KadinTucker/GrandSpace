@@ -50,31 +50,16 @@ def generate_galaxy_displays(game):
         galaxy_displays.append(new_display)
     return galaxy_displays
             
-def generate_system_displays(game, active_player):
-    system_displays = []
-    for s in game.galaxy.stars:
-        system_displays.append(system_display.SystemDisplay(game, active_player, SYSTEM_PANE_DIMENSIONS,
-                                                            SYSTEM_PANE_POSITION, s))
-    return system_displays
+def generate_player_system_displays(game, player_obj):
+    return [system_display.SystemDisplay(game, player_obj, SYSTEM_PANE_DIMENSIONS,
+                                         SYSTEM_PANE_POSITION, s) for s in game.galaxy.stars]
+
+def generate_all_system_displays(game):
+    return [generate_player_system_displays(game, p) for p in game.players]
 
 def get_pane_mouse_pos(pane_location):
     mouse = pygame.mouse.get_pos()
     return mouse[0] - pane_location[0], mouse[1] - pane_location[1]
-
-
-"""
-Display Modes:
-0 - null
-1 - Galaxy
-2 - System
-3 - Planet(?)
-"""
-"""
-Queries:
-0 - null
-1 - Destination Star
-2 - Destination Planet
-"""
 
 def main():
 
@@ -90,14 +75,13 @@ def main():
     galaxy.populate_artifacts(g)
 
     active_player = game.players[0]
-    ship_selection = active_player.ships[0]
-    active_player.selected_ship = ship_selection
+    active_player.selected_ship = active_player.ships[0]
 
     pygame.init()
 
     display = pygame.display.set_mode(DISPLAY_DIMENSIONS)
 
-    system_displays = generate_system_displays(game, active_player)
+    system_displays = generate_all_system_displays(game)
     galaxy_displays = generate_galaxy_displays(game)
 
     active_display = galaxy_displays[active_player.id]
@@ -143,16 +127,25 @@ def main():
             # Handle ship selection events
             # TODO: include in ship-specific event handling
             elif event.type == pygame.KEYDOWN:
+                # TEMP: change active player
+                if event.key == pygame.K_TAB:
+                    active_player = game.players[(active_player.id + 1) % len(game.players)]
+                    active_display = galaxy_displays[active_player.id]
                 # TEMP: conquer active ship's star
-                if event.key == pygame.K_c:
+                elif event.key == pygame.K_c:
                     if active_player.selected_ship.planet is not None:
-                        new_colony = colony.Colony(active_player, active_player.selected_ship.planet)
-                        active_player.selected_ship.planet.colony = new_colony
-                        active_player.colonies.append(new_colony)
-                        active_player.add_ruled_star(active_player.selected_ship.star)
-                        galaxy_displays[active_player.id].refresh_layer(0)
-                        system_displays[active_player.selected_ship.planet.star.id].refresh_layer(1)
-                        system_displays[active_player.selected_ship.planet.star.id].refresh_layer(2)
+                        if (active_player.selected_ship.planet.colony is None
+                                and (active_player.selected_ship.planet.star.ruler is None or
+                                     active_player.selected_ship.planet.star.ruler is active_player)):
+                            new_colony = colony.Colony(active_player, active_player.selected_ship.planet)
+                            active_player.selected_ship.planet.colony = new_colony
+                            active_player.colonies.append(new_colony)
+                            active_player.add_ruled_star(active_player.selected_ship.star)
+                            galaxy_displays[active_player.id].refresh_layer(0)
+                            (system_displays[active_player.id][active_player.selected_ship.planet.star.id]
+                             .refresh_layer(1))
+                            (system_displays[active_player.id][active_player.selected_ship.planet.star.id]
+                             .refresh_layer(2))
                 # TEMP: auto explore
                 elif event.key == pygame.K_e:
                     active_player.selected_ship.task = 1
@@ -168,7 +161,7 @@ def main():
                                 if (active_player.selected_ship.planet.colony.cities < active_player.selected_ship
                                         .planet.colony.get_maximum_cities()):
                                     active_player.selected_ship.planet.colony.cities += 1
-                                    system_displays[active_player.selected_ship.planet.star.id].refresh_layer(2)
+                                    system_displays[active_player.id][active_player.selected_ship.planet.star.id].refresh_layer(2)
                 elif event.key == pygame.K_d:
                     if active_player.selected_ship.planet is not None:
                         if active_player.selected_ship.planet.colony is not None:
@@ -176,7 +169,9 @@ def main():
                                 if (active_player.selected_ship.planet.colony.development < active_player.selected_ship
                                         .planet.colony.get_maximum_development()):
                                     active_player.selected_ship.planet.colony.development += 1
-                                    system_displays[active_player.selected_ship.planet.star.id].refresh_layer(2)
+                                    system_displays[active_player.id][active_player.selected_ship.planet.star.id].refresh_layer(2)
+                elif event.key == pygame.K_s:
+                    active_player.add_ship(active_player.homeworld)
 
         if active_display.next_pane_id != -1:
             next_id = active_display.next_pane_id
@@ -184,7 +179,7 @@ def main():
             if next_id == 0:
                 active_display = galaxy_displays[active_player.id]
             else:
-                active_display = system_displays[next_id - 1]
+                active_display = system_displays[active_player.id][next_id - 1]
 
         # Game Mechanics
         # Player loop
@@ -205,7 +200,7 @@ def main():
 
         # Display
 
-        display.fill(COLOR_BACKGROUND)
+        display.fill(active_player.color)
         active_display.refresh_layer(len(active_display.layers) - 1)  # refresh top layer every tick
         if isinstance(active_display, system_display.SystemDisplay):
             active_display.refresh_layer(3)  # refresh ecology layer every tick, because it has moving bars

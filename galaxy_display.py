@@ -26,6 +26,11 @@ CAPITAL_STAR_ANGLES = [(i + 0.5) * math.pi / 5 for i in range(10)]
 
 MINERAL_COLORS = [(200, 20, 20), (20, 200, 20), (20, 20, 200), (200, 200, 20), (200, 20, 200), (20, 200, 200)]
 
+def get_color_blend(color1, color2, color1_share):
+    return (int(color1[0] * color1_share + color2[0] * (1 - color1_share)),
+            int(color1[1] * color1_share + color2[1] * (1 - color1_share)),
+            int(color1[2] * color1_share + color2[2] * (1 - color1_share)))
+
 def draw_five_point_star(surface, color, center, minor_radius, major_radius):
     pygame.draw.polygon(surface, color, [(int(center[0] + (minor_radius + major_radius * (a % 2))
                                               * math.cos(CAPITAL_STAR_ANGLES[a])),
@@ -72,6 +77,22 @@ class GalaxyDisplay(pane.Pane):
                                        int(self.view_scale * GALAXY_PLANET_RADIUS))
 
     def sketch_player_surface(self):
+        # Draw player territory
+        for p in self.game.players:
+            for s in p.ruled_stars:
+                if self.player.explored_stars[s.id]:
+                    # TODO: make territory radius a function of player's technology
+                    pygame.draw.circle(self.layers[0], get_color_blend(s.ruler.color, COLOR_BACKGROUND, 0.2),
+                                       self.project_coordinate(s.location),
+                                       int(self.view_scale * 45))
+        # Draw empire connection lines
+        for p in self.game.players:
+            for s in p.ruled_stars:
+                if self.player.explored_stars[s.id] and s.connected_star is not None:
+                    pygame.draw.line(self.layers[0], p.color, self.project_coordinate(s.location),
+                                     self.project_coordinate(s.connected_star.location),
+                                     int(self.view_scale * EMPIRE_CONTROL_LINE_WIDTH))
+        # Draw player control markers
         for i in range(len(self.game.galaxy.stars)):
             s = self.game.galaxy.stars[i]
             if self.player.explored_stars[i]:
@@ -82,18 +103,18 @@ class GalaxyDisplay(pane.Pane):
                         draw_five_point_star(self.layers[0], s.ruler.color, self.project_coordinate(s.location),
                                              int(CAPITAL_STAR_MINOR_MODIFIER * self.view_scale * GALAXY_STAR_RADIUS),
                                              int(CAPITAL_STAR_MAJOR_MODIFIER * self.view_scale * GALAXY_STAR_RADIUS))
-        for p in self.game.players:
-            for s in p.ruled_stars:
-                if self.player.explored_stars[s.id] and s.connected_star is not None:
-                    pygame.draw.line(self.layers[0], p.color, self.project_coordinate(s.location),
-                                     self.project_coordinate(s.connected_star.location),
-                                     int(self.view_scale * EMPIRE_CONTROL_LINE_WIDTH))
+
 
     def sketch_ship_surface(self):
         for p in self.game.players:
             for s in p.ships:
-                if s.star is None:
-                    ship_display.draw_ship(self.layers[2], s, self.project_coordinate(s.location), self.player)
+                # TODO: make ships only drawn if they are "visible" to the active player
+                # TODO: make ship range a function of player's technology
+                # TODO: make ship pathing and movement affected by range
+                ship_display.draw_ship(self.layers[2], s, self.project_coordinate(s.location), self.player)
+                if s is self.player.selected_ship:
+                    ship_display.draw_ship_galaxy_range(self.layers[2], self.project_coordinate(s.location),
+                                                        90, self.view_scale)
 
     def refresh_layer(self, index):
         super().refresh_layer(index)

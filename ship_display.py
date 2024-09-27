@@ -7,6 +7,7 @@ SHIP_HEIGHT = IMG_SHIP.get_height()
 
 SHIP_COLOR_RADIUS = 8
 SHIP_SELECTION_RADIUS = 12
+SHIP_RANGE_WIDTH = 1
 
 SHIP_STACK_RADIUS = 10
 
@@ -14,6 +15,10 @@ COLOR_SHIP_SELECTION = (225, 225, 225)
 
 def draw_ship_selection(surface, position):
     pygame.draw.circle(surface, COLOR_SHIP_SELECTION, position, SHIP_SELECTION_RADIUS)
+
+def draw_ship_galaxy_range(surface, position, radius, scale):
+    pygame.draw.circle(surface, COLOR_SHIP_SELECTION, position, int(radius * scale),
+                       math.ceil(SHIP_RANGE_WIDTH * scale))
 
 def draw_ship(surface, ship_obj, position, player=None):
     if player is not None and ship_obj == player.selected_ship:
@@ -35,16 +40,6 @@ def get_overlapped_ship_positions(center, ships):
     angle = 2 * math.pi / len(ships)
     return [(int(center[0] + radius * math.cos(i * angle)),
              int(center[1] + radius * math.sin(i * angle))) for i in range(len(ships))]
-
-# def draw_overlapping_ships(surface, ships, position, player=None):
-#     if len(ships) == 0:
-#         return
-#     radius = SHIP_STACK_RADIUS * (len(ships) - 1)
-#     angle_mult = 2 * math.pi / len(ships)
-#     for s in range(len(ships)):
-#         angle = s * angle_mult - math.pi / 2
-#         draw_ship(surface, ships[s], (int(position[0] + radius * math.cos(angle)),
-#                                       int(position[1] + radius * math.sin(angle))), player)
 
 def draw_overlapping_ships(surface, ships, center, player=None):
     positions = get_overlapped_ship_positions(center, ships)
