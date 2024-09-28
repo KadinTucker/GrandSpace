@@ -11,9 +11,14 @@ class Biomass:
     def __init__(self, ship):
         self.ship = ship
         self.quantities = [0 for _ in range(len(BIOMASS_TYPES))]
+        self.value = self.get_biological_value()
 
     def get_fullness(self):
         return sum(self.quantities) * 20 + len(self.quantities) - self.quantities.count(0)
+
+    def change_quantity(self, species, amount):
+        self.quantities[species] += amount
+        self.value = self.get_biological_value()
 
     def get_biological_value(self):
         highest = max(self.quantities)

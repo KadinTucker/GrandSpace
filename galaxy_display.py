@@ -104,7 +104,6 @@ class GalaxyDisplay(pane.Pane):
                                              int(CAPITAL_STAR_MINOR_MODIFIER * self.view_scale * GALAXY_STAR_RADIUS),
                                              int(CAPITAL_STAR_MAJOR_MODIFIER * self.view_scale * GALAXY_STAR_RADIUS))
 
-
     def sketch_ship_surface(self):
         for p in self.game.players:
             for s in p.ships:

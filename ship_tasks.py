@@ -1,5 +1,8 @@
 import math
 
+# TODO: implement a fast pathing system, implementing Dijkstra's algorithm and storing, in stars, sorted lists
+#  of stars' distances to each other from shortest to longest, to quickly easily find the best path to follow
+#  and initialising that pathing information before game run
 def find_nearest_star(position, game, blacklist=()):
     nearest = None
     min_distance = -1

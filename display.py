@@ -80,6 +80,8 @@ def main():
     pygame.init()
 
     display = pygame.display.set_mode(DISPLAY_DIMENSIONS)
+    pygame.display.set_icon(pygame.image.load("assets/app.png"))
+    pygame.display.set_caption("Grand Space")
 
     system_displays = generate_all_system_displays(game)
     galaxy_displays = generate_galaxy_displays(game)
@@ -249,6 +251,8 @@ def main():
         display.blit(amt_building, (432, DISPLAY_DIMENSIONS[1] - 22))
 
         display.blit(button_ecology, (475, DISPLAY_DIMENSIONS[1] - 52))
+        value_biomass = font.get_text_surface(str(active_player.selected_ship.cargo.biomass.value))
+        display.blit(value_biomass, (476, DISPLAY_DIMENSIONS[1] - 26))
         biomasses = 0
         for i in range(len(active_player.selected_ship.cargo.biomass.quantities)):
             if active_player.selected_ship.cargo.biomass.quantities[i] > 0:
