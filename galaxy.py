@@ -142,7 +142,7 @@ class Galaxy:
         # Start by adding species to players' homeworlds
         for p in range(len(game.players)):
             for i in range(3):
-                game.players[p].homeworld.ecology.species[p * 3 + i] = True
+                game.players[p].homeworld.ecology.species[species[p * 3 + i]] = True
                 game.players[p].homeworld.ecology.habitability += 1
         num_species = len(game.players) * 3
         for _ in range(int(len(self.stars) * LIFE_DENSITY / num_species)):

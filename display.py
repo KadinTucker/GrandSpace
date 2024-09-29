@@ -80,6 +80,7 @@ def main():
 
     active_player = game.players[0]
     active_player.selected_ship = active_player.ships[0]
+    active_player.selected_biomass = -1
 
     pygame.init()
 
@@ -182,6 +183,39 @@ def main():
                                      .refresh_layer(2))
                 elif event.key == pygame.K_s:
                     active_player.add_ship(active_player.homeworld)
+                elif event.key == pygame.K_t:
+                    if active_player.selected_ship.planet is not None:
+                        if active_player.selected_biomass != -1 and active_player.selected_ship.cargo.biomass.quantities[active_player.selected_biomass] >= 1:
+                            if active_player.selected_ship.cargo.biomass.value >= active_player.selected_ship.planet.ecology.get_terraform_cost():
+                                if not active_player.selected_ship.planet.ecology.species[active_player.selected_biomass]:
+                                    active_player.selected_ship.planet.ecology.species[active_player.selected_biomass] = True
+                                    active_player.selected_ship.planet.ecology.habitability += 1
+                                    active_player.selected_ship.cargo.biomass.empty()
+                                    active_player.selected_biomass = -1
+
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                if event.button == pygame.BUTTON_LEFT:
+                    mouse_pos = pygame.mouse.get_pos()
+                    if DISPLAY_DIMENSIONS[1] - 49 < mouse_pos[1] < DISPLAY_DIMENSIONS[1] - 31:
+                        biomass_index = (mouse_pos[0] - 504) // 14 + 1
+                        print(biomass_index)
+                        if 0 <= biomass_index < 26:
+                            biomasses = 0
+                            for i in range(len(active_player.selected_ship.cargo.biomass.quantities)):
+                                if active_player.selected_ship.cargo.biomass.quantities[i] > 0 or active_player.selected_biomass == i:
+                                    biomasses += 1
+                                    if biomasses == biomass_index:
+                                        print("clicked " + str(ecology.BIOMASS_TYPES[i]))
+                                        if i == active_player.selected_biomass:
+                                            active_player.selected_biomass = -1
+                                            active_player.selected_ship.cargo.biomass.change_quantity(i, 1)
+                                        else:
+                                            if active_player.selected_biomass != -1:
+                                                (active_player.selected_ship.cargo.biomass
+                                                 .change_quantity(active_player.selected_biomass, 1))
+                                            active_player.selected_biomass = i
+                                            active_player.selected_ship.cargo.biomass.change_quantity(i, -1)
+                                        break
 
         if active_display.next_pane_id != -1:
             next_id = active_display.next_pane_id
@@ -265,13 +299,21 @@ def main():
         display.blit(value_biomass, (476, DISPLAY_DIMENSIONS[1] - 26))
         biomasses = 0
         for i in range(len(active_player.selected_ship.cargo.biomass.quantities)):
-            if active_player.selected_ship.cargo.biomass.quantities[i] > 0:
-                pygame.draw.rect(display, (50, 15, 15),
-                                 pygame.Rect(504 + biomasses * 14, DISPLAY_DIMENSIONS[1] - 49, 16, 18))
-                display.blit(system_display.ECOLOGY_SPECIES_IMAGES[i],
-                             (506 + biomasses * 14, DISPLAY_DIMENSIONS[1] - 48))
+            if active_player.selected_ship.cargo.biomass.quantities[i] > 0 or active_player.selected_biomass == i:
                 biomass_amount = font.get_text_surface(str(active_player.selected_ship.cargo.biomass.quantities[i]))
                 display.blit(biomass_amount, (506 + biomasses * 14, DISPLAY_DIMENSIONS[1] - 22))
+                if active_player.selected_biomass == i:
+                    pygame.draw.rect(display, (160, 200, 120),
+                                     pygame.Rect(504 + biomasses * 14 - 2, DISPLAY_DIMENSIONS[1] - 49 - 2, 20, 22))
+                    pygame.draw.rect(display, (30, 10, 10),
+                                     pygame.Rect(504 + biomasses * 14 - 2, DISPLAY_DIMENSIONS[1] - 49 - 2, 20, 22), 2)
+                    pygame.draw.rect(display, (200, 10, 10),
+                                     pygame.Rect(506 + biomasses * 14, DISPLAY_DIMENSIONS[1] - 22, 12, 16), 2)
+                else:
+                    pygame.draw.rect(display, (50, 15, 15),
+                                     pygame.Rect(504 + biomasses * 14, DISPLAY_DIMENSIONS[1] - 49, 16, 18))
+                display.blit(system_display.ECOLOGY_SPECIES_IMAGES[i],
+                             (506 + biomasses * 14, DISPLAY_DIMENSIONS[1] - 48))
                 biomasses += 1
 
         # Update; end tick

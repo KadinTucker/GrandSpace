@@ -31,6 +31,13 @@ class Biomass:
             total += (count * (count + 1)) // 2
         return total
 
+    def empty(self):
+        value = self.get_biological_value()
+        for i in range(len(self.quantities)):
+            self.quantities[i] = 0
+        self.value = 0
+        return value
+
 class Ecology:
     """
     An object representing the ecology, or lack thereof, on a planet
