@@ -45,7 +45,7 @@ def generate_galaxy_displays(game):
     galaxy_displays = []
     for p in game.players:
         new_display = galaxy_display.GalaxyDisplay(game, p, GALAXY_PANE_DIMENSIONS, GALAXY_PANE_DIMENSIONS,
-                                                            GALAXY_PANE_POSITION)
+                                                   GALAXY_PANE_POSITION)
         new_display.set_scale(3.0, p.homeworld.star.location)
         galaxy_displays.append(new_display)
     return galaxy_displays
@@ -68,11 +68,12 @@ def main():
         ship.SHIP_SPEED_PER_MINUTE = 10000
         ecology.BIOMASS_REGENERATION_PER_MINUTE = 15.0
 
-    g = galaxy.Galaxy()
+    g = galaxy.Galaxy(galaxy.generate_galaxy_boxes(GALAXY_WIDTH, GALAXY_HEIGHT, GALAXY_ZONE_RADIUS))
     game = player.Game(5, g)
-    galaxy.generate_galaxy_boxes(g, GALAXY_WIDTH, GALAXY_HEIGHT, GALAXY_ZONE_RADIUS)
     galaxy.populate_homeworlds(g, game)
     galaxy.populate_artifacts(g)
+    g.generate_star_distance_matrix()
+    g.generate_star_distance_hierarchy()
 
     active_player = game.players[0]
     active_player.selected_ship = active_player.ships[0]
@@ -263,7 +264,7 @@ def main():
                 display.blit(system_display.ECOLOGY_SPECIES_IMAGES[i],
                              (506 + biomasses * 14, DISPLAY_DIMENSIONS[1] - 48))
                 biomass_amount = font.get_text_surface(str(active_player.selected_ship.cargo.biomass.quantities[i]))
-                display.blit(biomass_amount,(506 + biomasses * 14, DISPLAY_DIMENSIONS[1] - 22))
+                display.blit(biomass_amount, (506 + biomasses * 14, DISPLAY_DIMENSIONS[1] - 22))
                 biomasses += 1
 
         # Update; end tick

@@ -1,7 +1,6 @@
 import random
 
 import diplomacy
-import galaxy
 import ship
 
 class Game:
@@ -35,9 +34,10 @@ class Player:
     def add_ruled_star(self, star):
         if star.ruler is not None:
             star.ruler.remove_ruled_star(star)
-        star.connected_star = galaxy.get_closest_star(star, self.ruled_stars)
-        self.ruled_stars.append(star)
+        if len(self.ruled_stars) > 0:
+            star.connected_star = self.game.galaxy.get_closest_star_from_player(star.id, self)
         star.ruler = self
+        self.ruled_stars.append(star)
 
     def remove_ruled_star(self, star):
         if star in self.ruled_stars:

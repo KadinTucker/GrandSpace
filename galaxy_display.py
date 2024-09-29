@@ -4,6 +4,7 @@ import math
 import galaxy
 import pane
 import ship_display
+import ship_tasks
 import system_display
 
 GALAXY_STAR_RADIUS = 8
@@ -18,6 +19,8 @@ EMPIRE_CONTROL_LINE_WIDTH = 5
 COLOR_BACKGROUND = (20, 20, 20)
 COLOR_UNEXPLORED_STAR = (135, 135, 135)
 COLOR_STAR = (200, 170, 25)
+COLOR_STAR_IN_RANGE = (230, 190, 50)
+IN_RANGE_INDICATOR_RADIUS = 9
 
 COLONY_HALO_MODIFIER = 1.3
 CAPITAL_STAR_MINOR_MODIFIER = 1.0
@@ -106,6 +109,13 @@ class GalaxyDisplay(pane.Pane):
                 if s is self.player.selected_ship:
                     ship_display.draw_ship_galaxy_range(self.layers[2], self.project_coordinate(s.location),
                                                         90, self.view_scale)
+                    if s.star is not None:
+                        stars_in_range = ship_tasks.find_stars_in_range(s.star, 90, self.game.galaxy)
+                        for r in stars_in_range:
+                            pygame.draw.circle(self.layers[2], COLOR_STAR_IN_RANGE,
+                                               self.project_coordinate(self.game.galaxy.stars[r].location),
+                                               IN_RANGE_INDICATOR_RADIUS * self.view_scale, 2 +
+                                               int((IN_RANGE_INDICATOR_RADIUS - GALAXY_STAR_RADIUS) * self.view_scale))
 
     def refresh_layer(self, index):
         super().refresh_layer(index)

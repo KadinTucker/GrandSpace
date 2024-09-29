@@ -136,8 +136,9 @@ class SystemDisplay(pane.Pane):
         self.layers[1].fill(COLOR_BACKGROUND)
         for p in range(len(self.star.planets)):
             if self.star.planets[p].colony is not None:
+                print("drawing player colony in system")
                 pygame.draw.circle(self.layers[1], self.star.planets[p].colony.ruler.color, self.planet_locations[p],
-                                   SYSTEM_COLONY_RADIUS, SYSTEM_PLANET_RADIUS - SYSTEM_COLONY_RADIUS + 1)
+                                   SYSTEM_COLONY_RADIUS, SYSTEM_COLONY_RADIUS - SYSTEM_PLANET_RADIUS + 1)
         # Access
         if self.star.ruler is not None:
             pane_left = (self.dimensions[0] - ACCESS_PANE_WIDTH) // 2

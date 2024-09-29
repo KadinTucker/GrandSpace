@@ -20,7 +20,8 @@ ARTIFACT_TOTAL = 25
 AVERAGE_PLANETS = 3
 LIFE_DENSITY = 0.5  # approximate fraction of stars one expects to have life (in reality, less if higher)
 
-def generate_galaxy_boxes(galaxy, width, height, radius):
+def generate_galaxy_boxes(width, height, radius):
+    stars = []
     i = 0
     for x in range(width):
         for y in range(height):
@@ -32,8 +33,9 @@ def generate_galaxy_boxes(galaxy, width, height, radius):
             random_angle = random.random() * 2 * math.pi
             basex += math.cos(random_angle) * random_radius
             basey += math.sin(random_angle) * random_radius
-            galaxy.stars.append(Star(i, (int(basex), int(basey)), random.randint(1, 5)))
+            stars.append(Star(i, (int(basex), int(basey)), random.randint(1, 5)))
             i += 1
+    return stars
 
 def populate_homeworlds(galaxy, game):
     species = [i for i in range(len(ecology.BIOMASS_TYPES))]
@@ -72,24 +74,6 @@ def populate_life(galaxy, num_species, species_list, num_repeats):
             planet.ecology.habitability += 1
             planet.ecology.species[species_list[i]] = True
 
-def get_closest_star_index(target, star_domain):
-    min_distance = -1
-    min_star_index = -1
-    for s in range(len(star_domain)):
-        if s != target:
-            distance = math.hypot(star_domain[s].location[0] - target.location[0],
-                                  star_domain[s].location[1] - target.location[1])
-            if min_star_index == -1 or distance < min_distance:
-                min_star_index = s
-                min_distance = distance
-    return min_star_index
-
-def get_closest_star(target, star_domain):
-    index = get_closest_star_index(target, star_domain)
-    if index == -1:
-        return None
-    return star_domain[index]
-
 class Planet:
     def __init__(self, star):
         self.star = star  # Star object
@@ -114,5 +98,37 @@ class Star:
         self.connected_star = None  # Connected star, for drawing purposes
 
 class Galaxy:
-    def __init__(self):
-        self.stars = []  # list of Star objects
+    def __init__(self, stars):
+        # list of Star objects, indexed by their id fields
+        self.stars = stars
+        # a matrix (symmetric square) giving the distance as the space-crow flies between all stars
+        self.star_distance_matrix = []
+        # once initialised, entry i consists of a sorted list of the star id numbers by distance to the star
+        # with id i, excluding the star i itself
+        self.star_distance_hierarchy = []
+        self.init()
+
+    def generate_star_distance_matrix(self):
+        self.star_distance_matrix = [[-1.0 for _ in range(len(self.stars))] for _ in range(len(self.stars))]
+        for i in range(len(self.stars)):
+            for j in range(len(self.stars)):
+                self.star_distance_matrix[i][j] = math.hypot(self.stars[i].location[0] - self.stars[j].location[0],
+                                                             self.stars[i].location[1] - self.stars[j].location[1])
+
+    def generate_star_distance_hierarchy(self):
+        for i in range(len(self.stars)):
+            self.star_distance_hierarchy.append(sorted([j for j in range(len(self.stars)) if j != i],
+                                                key=lambda k: self.star_distance_matrix[i][k]))
+
+    def init(self):
+        self.generate_star_distance_matrix()
+        self.generate_star_distance_hierarchy()
+
+    def get_closest_star(self, origin_id):
+        return self.stars[self.star_distance_hierarchy[origin_id][0]]
+
+    def get_closest_star_from_player(self, origin_id, player):
+        for star_id in self.star_distance_hierarchy[origin_id]:
+            if self.stars[star_id].ruler is player:
+                return self.stars[star_id]
+        return self.stars[origin_id]

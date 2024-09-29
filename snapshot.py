@@ -1,5 +1,3 @@
-import pygame
-
 import drawable
 
 class Snapshot(drawable.Drawable):
