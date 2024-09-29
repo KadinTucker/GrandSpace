@@ -134,8 +134,7 @@ class SystemDisplay(pane.Pane):
         self.star = star
         self.planet_locations = []
         self.set_planet_locations()
-
-        self.refresh_all_layers()
+        self.update()
 
     def set_planet_locations(self):
         # Relative to the system pane's pasted location
@@ -143,13 +142,13 @@ class SystemDisplay(pane.Pane):
         num_planets = len(self.star.planets)
         for p in range(num_planets):
             angle = p * 2 * math.pi / num_planets - math.pi / 2
-            self.planet_locations.append((int(self.pane_dimensions[0] / 2 + SYSTEM_HORIZONTAL_AXIS * math.cos(angle)),
-                                          int(self.pane_dimensions[1] / 2 + SYSTEM_VERTICAL_AXIS * math.sin(angle))))
+            self.planet_locations.append((int(self.dimensions[0] / 2 + SYSTEM_HORIZONTAL_AXIS * math.cos(angle)),
+                                          int(self.dimensions[1] / 2 + SYSTEM_VERTICAL_AXIS * math.sin(angle))))
         
     def sketch_primary_surface(self):
         self.layers[0].fill(COLOR_BACKGROUND)
         pygame.draw.circle(self.layers[0], COLOR_STAR,
-                           (self.pane_dimensions[0] // 2, self.pane_dimensions[1] // 2), SYSTEM_STAR_RADIUS)
+                           (self.dimensions[0] // 2, self.dimensions[1] // 2), SYSTEM_STAR_RADIUS)
         for p in range(len(self.star.planets)):
             pygame.draw.circle(self.layers[0], galaxy.MINERAL_COLORS[self.star.planets[p].mineral],
                                self.planet_locations[p], SYSTEM_PLANET_RADIUS)
@@ -167,8 +166,8 @@ class SystemDisplay(pane.Pane):
                                    SYSTEM_PLANET_RADIUS + SYSTEM_ARTIFACT_RING_WIDTH * 4, SYSTEM_ARTIFACT_RING_WIDTH)
         # Access
         if self.star.ruler is not None:
-            pane_left = (self.pane_dimensions[0] - ACCESS_PANE_WIDTH) // 2
-            pane_up = (self.pane_dimensions[1] - ACCESS_PANE_HEIGHT) // 2
+            pane_left = (self.dimensions[0] - ACCESS_PANE_WIDTH) // 2
+            pane_up = (self.dimensions[1] - ACCESS_PANE_HEIGHT) // 2
             pygame.draw.rect(self.layers[1], COLOR_ACCESS_PANE,
                              pygame.Rect(pane_left, pane_up, ACCESS_PANE_WIDTH, ACCESS_PANE_HEIGHT))
             for i in range(len(ACCESS_ELEMENT_POSITIONS)):
@@ -185,7 +184,7 @@ class SystemDisplay(pane.Pane):
             if s.planet is None:
                 star_ships.append(s)
         ship_display.draw_overlapping_ships(self.layers[4], star_ships,
-                                            (self.pane_dimensions[0] // 2, self.pane_dimensions[1] // 2),
+                                            (self.dimensions[0] // 2, self.dimensions[1] // 2),
                                             self.player)
         for p in range(len(self.star.planets)):
             ship_display.draw_overlapping_ships(self.layers[4], self.star.planets[p].ships,
@@ -293,7 +292,7 @@ class SystemDisplay(pane.Pane):
             if self.star.planets[p].colony is not None:
                 num_cities = self.star.planets[p].colony.cities
                 num_development = self.star.planets[p].colony.development
-            num_habit = self.star.planets[p].ecology.habitability * 3
+            num_habit = self.star.planets[p].ecology.habitability**2
             pip_locations = get_ring_distribution_coordinates((self.planet_locations[p][0] - 4,
                                                                self.planet_locations[p][1] - 4), SYSTEM_PLANET_RADIUS,
                                                               num_cities + num_development + num_habit)
@@ -329,8 +328,8 @@ class SystemDisplay(pane.Pane):
         return None
     
     def is_star_clicked(self, position):
-        return math.hypot(self.pane_dimensions[0] / 2 - position[0],
-                          self.pane_dimensions[1] / 2 - position[1]) <= SYSTEM_STAR_RADIUS
+        return math.hypot(self.dimensions[0] / 2 - position[0],
+                          self.dimensions[1] / 2 - position[1]) <= SYSTEM_STAR_RADIUS
 
     def handle_event(self, event, mouse_pos):
         super().handle_event(event, mouse_pos)
@@ -362,8 +361,8 @@ class SystemDisplay(pane.Pane):
         for s in self.star.ships:
             if s.planet is None:
                 all_star_ships.append(s)
-        star_ship = ship_display.find_overlapped_ship((self.pane_dimensions[0] // 2,
-                                                      self.pane_dimensions[1] // 2), all_star_ships,
+        star_ship = ship_display.find_overlapped_ship((self.dimensions[0] // 2,
+                                                       self.dimensions[1] // 2), all_star_ships,
                                                       position, SYSTEM_SHIP_RADIUS)
         if star_ship is not None:
             return star_ship

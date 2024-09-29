@@ -87,7 +87,7 @@ def main():
     galaxy_displays = generate_galaxy_displays(game)
 
     active_display = galaxy_displays[active_player.id]
-    active_display.refresh_all_layers()
+    active_display.update()
 
     text_explore = font.get_text_surface("explore")
     text_colonise = font.get_text_surface("colonise")

@@ -42,7 +42,7 @@ class GalaxyDisplay(pane.Pane):
     def __init__(self, game, player, galaxy_dimensions, pane_dimensions, pane_position):
         super().__init__(game, player, pane_dimensions, pane_position, 3, COLOR_BACKGROUND)
         self.galaxy_dimensions = galaxy_dimensions
-        self.refresh_all_layers()
+        self.update()
 
     def find_star(self, click_location):
         location = self.deproject_coordinate(click_location)
@@ -145,15 +145,15 @@ class GalaxyDisplay(pane.Pane):
             elif event.key == pygame.K_MINUS:
                 self.set_scale(self.view_scale / ZOOM_FACTOR, self.get_relative_pane_pos(mouse_pos))
             elif event.key == pygame.K_LEFT:
-                self.view_corner = (self.view_corner[0] - SCROLL_SPEED * self.pane_dimensions[0] / self.view_scale,
+                self.view_corner = (self.view_corner[0] - SCROLL_SPEED * self.dimensions[0] / self.view_scale,
                                     self.view_corner[1])
             elif event.key == pygame.K_RIGHT:
-                self.view_corner = (self.view_corner[0] + SCROLL_SPEED * self.pane_dimensions[0] / self.view_scale,
+                self.view_corner = (self.view_corner[0] + SCROLL_SPEED * self.dimensions[0] / self.view_scale,
                                     self.view_corner[1])
             elif event.key == pygame.K_UP:
                 self.view_corner = (self.view_corner[0],
-                                    self.view_corner[1] - SCROLL_SPEED * self.pane_dimensions[1] / self.view_scale)
+                                    self.view_corner[1] - SCROLL_SPEED * self.dimensions[1] / self.view_scale)
             elif event.key == pygame.K_DOWN:
                 self.view_corner = (self.view_corner[0],
-                                    self.view_corner[1] + SCROLL_SPEED * self.pane_dimensions[1] / self.view_scale)
+                                    self.view_corner[1] + SCROLL_SPEED * self.dimensions[1] / self.view_scale)
 
