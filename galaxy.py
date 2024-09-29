@@ -18,7 +18,7 @@ MINERAL_COLORS = [(200, 20, 20), (20, 200, 20), (20, 20, 200), (20, 200, 200), (
 # Expected number of artifacts in the galaxy
 ARTIFACT_TOTAL = 25
 AVERAGE_PLANETS = 3
-LIFE_DENSITY = 2.5  # approximate fraction of stars one expects to have life (in reality, less if higher)
+LIFE_DENSITY = 0.5  # approximate fraction of stars one expects to have life (in reality, less if higher)
 
 def generate_galaxy_boxes(galaxy, width, height, radius):
     i = 0

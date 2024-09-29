@@ -6,6 +6,7 @@ import font
 import galaxy
 
 import pane
+import planet_display
 import ship_display
 import uiframe
 
@@ -14,6 +15,7 @@ SYSTEM_PLANET_RADIUS = 20
 SYSTEM_HORIZONTAL_AXIS = 300
 SYSTEM_VERTICAL_AXIS = 150
 SYSTEM_ARTIFACT_RING_WIDTH = 2
+SYSTEM_COLONY_RADIUS = 30
 
 SYSTEM_SURFACE_WIDTH = 2 * SYSTEM_HORIZONTAL_AXIS + 4 * SYSTEM_PLANET_RADIUS + 2
 SYSTEM_SURFACE_HEIGHT = 2 * SYSTEM_VERTICAL_AXIS + 4 * SYSTEM_PLANET_RADIUS + 2
@@ -100,40 +102,17 @@ COLOR_BIOMASS_HALO = (110, 220, 110)
 COLOR_DEMAND_PROGRESS = (180, 180, 180)
 COLOR_ACCESS_PANE = (120, 80, 120)
 
-def get_ring_distribution_coordinates(center, radius, num_items):
-    coordinates = [[0, 0] for _ in range(num_items)]
-    num_rings = math.ceil(math.sqrt(num_items))
-    current_item = 0
-    for i in range(num_rings - 1):
-        ring_plots = 2 * i + 1
-        for j in range(ring_plots):
-            coordinates[current_item][0] = int(center[0] + radius * math.cos(2 * math.pi * j / ring_plots)
-                                               * i / num_rings)
-            coordinates[current_item][1] = int(center[1] + radius * math.sin(2 * math.pi * j / ring_plots)
-                                               * i / num_rings)
-            current_item += 1
-    remaining_items = num_items - current_item
-    for i in range(remaining_items):
-        coordinates[current_item][0] = int(center[0] + radius * math.cos(2 * math.pi * i / remaining_items)
-                                           * (num_rings - 1) / num_rings)
-        coordinates[current_item][1] = int(center[1] + radius * math.sin(2 * math.pi * i / remaining_items)
-                                           * (num_rings - 1) / num_rings)
-        current_item += 1
-    return coordinates
-
-def get_linear_stack_positions(start_boundary, end_boundary, num_items):
-    return [start_boundary + ((i + 1) / (num_items + 1) * (end_boundary - start_boundary)) for i in range(num_items)]
-
 def get_pane_id(star_id):
     return star_id + 1
 
 class SystemDisplay(pane.Pane):
 
     def __init__(self, game, player, pane_dimensions, pane_position, star):
-        super().__init__(game, player, pane_dimensions, pane_position, 5, COLOR_BACKGROUND)
+        super().__init__(game, player, pane_dimensions, pane_position, 4, COLOR_BACKGROUND)
         self.star = star
         self.planet_locations = []
         self.set_planet_locations()
+        self.planet_displays = [planet_display.PlanetDisplay(game, player, p) for p in self.star.planets]
         self.update()
 
     def set_planet_locations(self):
@@ -158,17 +137,12 @@ class SystemDisplay(pane.Pane):
         for p in range(len(self.star.planets)):
             if self.star.planets[p].colony is not None:
                 pygame.draw.circle(self.layers[1], self.star.planets[p].colony.ruler.color, self.planet_locations[p],
-                                   int(1.5 * SYSTEM_PLANET_RADIUS), SYSTEM_PLANET_RADIUS // 2 + 1)
-            if self.star.planets[p].artifacts > 0:
-                pygame.draw.circle(self.layers[1], COLOR_ARTIFACT_RING, self.planet_locations[p],
-                                   SYSTEM_PLANET_RADIUS + SYSTEM_ARTIFACT_RING_WIDTH * 2, SYSTEM_ARTIFACT_RING_WIDTH)
-                pygame.draw.circle(self.layers[1], COLOR_ARTIFACT_RING, self.planet_locations[p],
-                                   SYSTEM_PLANET_RADIUS + SYSTEM_ARTIFACT_RING_WIDTH * 4, SYSTEM_ARTIFACT_RING_WIDTH)
+                                   SYSTEM_COLONY_RADIUS, SYSTEM_PLANET_RADIUS - SYSTEM_COLONY_RADIUS + 1)
         # Access
         if self.star.ruler is not None:
             pane_left = (self.dimensions[0] - ACCESS_PANE_WIDTH) // 2
             pane_up = (self.dimensions[1] - ACCESS_PANE_HEIGHT) // 2
-            pygame.draw.rect(self.layers[1], COLOR_ACCESS_PANE,
+            pygame.draw.rect(self.layers[1], self.star.ruler.color,
                              pygame.Rect(pane_left, pane_up, ACCESS_PANE_WIDTH, ACCESS_PANE_HEIGHT))
             for i in range(len(ACCESS_ELEMENT_POSITIONS)):
                 self.layers[1].blit(ACCESS_IMAGES[i], (pane_left + ACCESS_ELEMENT_POSITIONS[i][0],
@@ -178,131 +152,25 @@ class SystemDisplay(pane.Pane):
                                                           pane_up + ACCESS_ELEMENT_POSITIONS[i][1]))
 
     def sketch_ship_surface(self):
-        self.layers[4].fill(COLOR_BACKGROUND)
+        self.layers[3].fill(COLOR_BACKGROUND)
         star_ships = []
         for s in self.star.ships:
             if s.planet is None:
                 star_ships.append(s)
-        ship_display.draw_overlapping_ships(self.layers[4], star_ships,
+        ship_display.draw_overlapping_ships(self.layers[3], star_ships,
                                             (self.dimensions[0] // 2, self.dimensions[1] // 2),
                                             self.player)
         for p in range(len(self.star.planets)):
-            ship_display.draw_overlapping_ships(self.layers[4], self.star.planets[p].ships,
+            ship_display.draw_overlapping_ships(self.layers[3], self.star.planets[p].ships,
                                                 self.planet_locations[p], self.player)
-
-    def sketch_ecology_surface(self):
-        # TODO: include in separate file and/or class, as "planet display"
-        self.layers[3].fill(COLOR_BACKGROUND)
-        for p in range(len(self.star.planets)):
-            # Biomass Bar
-            if self.star.planets[p].ecology.habitability > 0:
-                if self.star.planets[p].ecology.biomass_level == 1:
-                    pygame.draw.rect(self.layers[3], COLOR_BIOMASS_HALO,
-                                     pygame.Rect(self.planet_locations[p][0] - ECOLOGY_BIOMASS_WIDTH // 2
-                                                 - ECOLOGY_BIOMASS_HALO_WIDTH,
-                                                 self.planet_locations[p][1] - ECOLOGY_BIOMASS_HEIGHT
-                                                 - ECOLOGY_BIOMASS_ALTITUDE - ECOLOGY_BIOMASS_HALO_WIDTH,
-                                                 ECOLOGY_BIOMASS_WIDTH + ECOLOGY_BIOMASS_HALO_WIDTH * 2,
-                                                 ECOLOGY_BIOMASS_HEIGHT + ECOLOGY_BIOMASS_HALO_WIDTH * 2))
-                else:
-                    pygame.draw.rect(self.layers[3], COLOR_BIOMASS_EMPTY,
-                                     pygame.Rect(self.planet_locations[p][0] - ECOLOGY_BIOMASS_WIDTH // 2,
-                                                 self.planet_locations[p][1] - ECOLOGY_BIOMASS_HEIGHT
-                                                 - ECOLOGY_BIOMASS_ALTITUDE, ECOLOGY_BIOMASS_WIDTH,
-                                                 ECOLOGY_BIOMASS_HEIGHT))
-                pygame.draw.rect(self.layers[3], COLOR_BIOMASS_FULL,
-                                 pygame.Rect(self.planet_locations[p][0] - ECOLOGY_BIOMASS_WIDTH // 2,
-                                             self.planet_locations[p][1] - ECOLOGY_BIOMASS_HEIGHT
-                                             - ECOLOGY_BIOMASS_ALTITUDE,
-                                             int(ECOLOGY_BIOMASS_WIDTH * self.star.planets[p].ecology.biomass_level),
-                                             ECOLOGY_BIOMASS_HEIGHT))
-            # Species Icons
-            species = []
-            for j in range(len(self.star.planets[p].ecology.species)):
-                if self.star.planets[p].ecology.species[j]:
-                    species.append(j)
-            for s in range(len(species)):
-                self.layers[3].blit(ECOLOGY_SPECIES_IMAGES[species[s]],
-                                    (self.planet_locations[p][0] - (ECOLOGY_SPECIES_SPACING * (len(species) - 1)
-                                     + ECOLOGY_SPECIES_WIDTH * len(species)) // 2
-                                     + s * (ECOLOGY_SPECIES_WIDTH + ECOLOGY_SPECIES_SPACING),
-                                     self.planet_locations[p][1] - ECOLOGY_SPECIES_ALTITUDE - ECOLOGY_SPECIES_HEIGHT))
-            # TEMP demand and production indicators
-            if self.star.planets[p].colony is not None:
-                # Demand
-                self.layers[3].blit(MINERAL_IMAGES[self.star.planets[p].colony.demand.mineral_demanded],
-                                    (self.planet_locations[p][0] - TRADE_MINERAL_DEMAND_OFFSET,
-                                     self.planet_locations[p][1] + TRADE_DEMAND_DEPTH))
-                demand_img = font.get_text_surface(TRADE_LEAD_STRING
-                                                   + str(self.star.planets[p].colony.demand.demand_quantity))
-                self.layers[3].blit(demand_img, (self.planet_locations[p][0] - TRADE_DEMAND_TEXT_OFFSET,
-                                                 self.planet_locations[p][1] + TRADE_DEMAND_DEPTH))
-                progress_height = int(self.star.planets[p].colony.demand.change_progress * TRADE_DEMAND_PROGRESS_HEIGHT)
-                pygame.draw.rect(self.layers[3], COLOR_DEMAND_PROGRESS,
-                                 pygame.Rect(self.planet_locations[p][0] + TRADE_DEMAND_PROGRESS_OFFSET,
-                                             self.planet_locations[p][1] + TRADE_DEMAND_DEPTH
-                                             + TRADE_DEMAND_PROGRESS_HEIGHT - progress_height,
-                                             TRADE_DEMAND_PROGRESS_WIDTH, progress_height))
-                # Production
-                production_img = font.get_text_surface("+" + str(int(self.star.planets[p].colony.get_production(1))))
-                self.layers[3].blit(production_img, (self.planet_locations[p][0] + PRODUCTION_DEPTH,
-                                                     self.planet_locations[p][1] - PRODUCTION_ALTITUDE))
-                self.layers[3].blit(MINERAL_IMAGES[self.star.planets[p].mineral],
-                                    (self.planet_locations[p][0] + PRODUCTION_DEPTH + PRODUCTION_ICON_OFFSET,
-                                     self.planet_locations[p][1] - PRODUCTION_ALTITUDE - 2))
-                self.layers[3].blit(SLASH_MIN_IMAGE, (self.planet_locations[p][0] + PRODUCTION_DEPTH
-                                                      + PRODUCTION_TIME_OFFSET, self.planet_locations[p][1]
-                                                      - PRODUCTION_ALTITUDE))
-                # Storage
-                storage_img = font.get_text_surface(str(int(self.star.planets[p].colony.minerals)) + " / "
-                                                    + str(int(self.star.planets[p].colony.get_mineral_capacity())))
-                self.layers[3].blit(storage_img, (self.planet_locations[p][0] + STORAGE_OFFSET,
-                                                  self.planet_locations[p][1] - STORAGE_DEPTH))
-                # Summary
-                self.layers[3].blit(SUMMARY_CITY_ICON_IMG, (self.planet_locations[p][0] - SUMMARY_CITY_ICON_OFFSET,
-                                                            self.planet_locations[p][1] - SUMMARY_CITY_ICON_ALTITUDE))
-                city_img = font.get_text_surface(str(int(self.star.planets[p].colony.cities)))
-                self.layers[3].blit(city_img, (self.planet_locations[p][0] - SUMMARY_CITY_TEXT_OFFSET,
-                                               self.planet_locations[p][1] - SUMMARY_CITY_TEXT_ALTITUDE))
-                self.layers[3].blit(SUMMARY_DEVELOPMENT_ICON_IMG,
-                                    (self.planet_locations[p][0] - SUMMARY_DEVELOPMENT_ICON_OFFSET,
-                                     self.planet_locations[p][1] - SUMMARY_DEVELOPMENT_ICON_ALTITUDE))
-                development_img = font.get_text_surface(str(int(self.star.planets[p].colony.development)) + "/"
-                                                        + str(int(self.star.planets[p].colony
-                                                                  .get_maximum_development())))
-                self.layers[3].blit(development_img, (self.planet_locations[p][0] - SUMMARY_DEVELOPMENT_TEXT_OFFSET,
-                                                      self.planet_locations[p][1] - SUMMARY_DEVELOPMENT_TEXT_ALTITUDE))
-                # Shields
-                positions = get_linear_stack_positions(self.planet_locations[p][0] - SHIELD_STACK_LEFT,
-                                                       self.planet_locations[p][0] - SHIELD_STACK_RIGHT,
-                                                       self.star.planets[p].colony.cities)
-                for pos in positions:
-                    # TODO: include conquest progress, if under siege
-                    pygame.draw.rect(self.layers[3], self.star.ruler.color,
-                                     pygame.Rect(pos, self.planet_locations[p][1] + SHIELD_STACK_DEPTH
-                                                 + SHIELD_FILL_OFFSET, SHIELD_WIDTH, SHIELD_FILL_HEIGHT))
-                    self.layers[3].blit(SHIELD_ICON, (pos, self.planet_locations[p][1] + SHIELD_STACK_DEPTH))
 
     def sketch_planet_detail_surface(self):
         self.layers[2].fill(COLOR_BACKGROUND)
         for p in range(len(self.star.planets)):
-            # Draw cities, development pips, then trees, in a spiral fashion
-            num_cities = 0
-            num_development = 0
-            if self.star.planets[p].colony is not None:
-                num_cities = self.star.planets[p].colony.cities
-                num_development = self.star.planets[p].colony.development
-            num_habit = self.star.planets[p].ecology.habitability**2
-            pip_locations = get_ring_distribution_coordinates((self.planet_locations[p][0] - 4,
-                                                               self.planet_locations[p][1] - 4), SYSTEM_PLANET_RADIUS,
-                                                              num_cities + num_development + num_habit)
-            for i in range(len(pip_locations)):
-                if i < num_cities:
-                    self.layers[2].blit(INDICATOR_CITY_IMG, pip_locations[i])
-                elif i < num_cities + num_development:
-                    self.layers[2].blit(INDICATOR_DEVELOPMENT_IMG, pip_locations[i])
-                else:
-                    self.layers[2].blit(INDICATOR_HABITAT_IMG, pip_locations[i])
+            # TODO: Only make planet display update when it is visible to the player,
+            #   with both in-game meaning of having a ship/colony there, and if the layer is drawn
+            self.planet_displays[p].update()
+            self.planet_displays[p].draw(self.layers[2], self.planet_locations[p])
 
     def refresh_layer(self, index):
         super().refresh_layer(index)
@@ -313,8 +181,6 @@ class SystemDisplay(pane.Pane):
         elif index == 2:
             self.sketch_planet_detail_surface()
         elif index == 3:
-            self.sketch_ecology_surface()
-        elif index == 4:
             self.sketch_ship_surface()
 
     def find_planet(self, position):

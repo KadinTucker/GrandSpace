@@ -77,14 +77,6 @@ class GalaxyDisplay(pane.Pane):
                                        int(self.view_scale * GALAXY_PLANET_RADIUS))
 
     def sketch_player_surface(self):
-        # Draw player territory
-        for p in self.game.players:
-            for s in p.ruled_stars:
-                if self.player.explored_stars[s.id]:
-                    # TODO: make territory radius a function of player's technology
-                    pygame.draw.circle(self.layers[0], get_color_blend(s.ruler.color, COLOR_BACKGROUND, 0.2),
-                                       self.project_coordinate(s.location),
-                                       int(self.view_scale * 45))
         # Draw empire connection lines
         for p in self.game.players:
             for s in p.ruled_stars:

@@ -30,6 +30,9 @@ class Colony(object):
     def produce(self, time):
         self.minerals = min(self.get_mineral_capacity(), self.minerals + self.get_production(time))
 
+    def get_defense(self):
+        return self.cities
+
 
 class HomeworldColony(Colony):
 

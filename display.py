@@ -163,7 +163,8 @@ def main():
                                 if (active_player.selected_ship.planet.colony.cities < active_player.selected_ship
                                         .planet.colony.get_maximum_cities()):
                                     active_player.selected_ship.planet.colony.cities += 1
-                                    system_displays[active_player.id][active_player.selected_ship.planet.star.id].refresh_layer(2)
+                                    (system_displays[active_player.id][active_player.selected_ship.planet.star.id]
+                                     .refresh_layer(2))
                 elif event.key == pygame.K_d:
                     if active_player.selected_ship.planet is not None:
                         if active_player.selected_ship.planet.colony is not None:
@@ -171,7 +172,8 @@ def main():
                                 if (active_player.selected_ship.planet.colony.development < active_player.selected_ship
                                         .planet.colony.get_maximum_development()):
                                     active_player.selected_ship.planet.colony.development += 1
-                                    system_displays[active_player.id][active_player.selected_ship.planet.star.id].refresh_layer(2)
+                                    (system_displays[active_player.id][active_player.selected_ship.planet.star.id]
+                                     .refresh_layer(2))
                 elif event.key == pygame.K_s:
                     active_player.add_ship(active_player.homeworld)
 
@@ -205,7 +207,7 @@ def main():
         display.fill(active_player.color)
         active_display.refresh_layer(len(active_display.layers) - 1)  # refresh top layer every tick
         if isinstance(active_display, system_display.SystemDisplay):
-            active_display.refresh_layer(3)  # refresh ecology layer every tick, because it has moving bars
+            active_display.refresh_layer(2)
         active_display.draw(display)
 
         # TEMP: manually drawing all UI elements

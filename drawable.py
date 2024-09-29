@@ -1,5 +1,8 @@
 import pygame
 
+def draw_centered(dest_surface, to_draw, position):
+    to_draw.draw(dest_surface, (position[0] - to_draw.dimensions[0] // 2, position[1] - to_draw.dimensions[1] // 2))
+
 def create_blank_surface(dimensions, background_color):
     """
     Creates a new surface that sets the background color as transparent
@@ -12,13 +15,9 @@ def create_blank_surface(dimensions, background_color):
 
 class Drawable:
 
-    def __init__(self, game, position, dimensions):
+    def __init__(self, game, dimensions):
         self.game = game
-        self.position = position
         self.dimensions = dimensions
 
-    def draw(self, dest_surface):
-        pass
-
-    def update(self):
+    def draw(self, dest_surface, position):
         pass

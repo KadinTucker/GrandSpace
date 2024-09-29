@@ -11,8 +11,9 @@ class Pane(drawable.Drawable):
         Subsequent layers lie on top
         Can also (optionally) zoom and handle events
         """
-        super().__init__(game, pane_position, pane_dimensions)
+        super().__init__(game, pane_dimensions)
         self.player = player
+        self.position = pane_position
         self.background_color = background_color
         self.next_pane_id = -1
         self.view_corner = (0, 0)
@@ -40,7 +41,7 @@ class Pane(drawable.Drawable):
         for i in range(len(self.layers)):
             self.refresh_layer(i)
 
-    def draw(self, dest_surface):
+    def draw(self, dest_surface, position=None):
         for layer in self.layers:
             dest_surface.blit(layer, self.position)
 
