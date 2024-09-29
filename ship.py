@@ -65,6 +65,11 @@ class Ship:
         self.destination_star = None
         self.destination_planet = None
 
+    def get_distance_to(self, position):
+        x_dist = position[0] - self.location[0]
+        y_dist = position[1] - self.location[1]
+        return math.hypot(x_dist, y_dist)
+
     def move(self, time):
         """
         Moves the ship, depending on where the ship currently is

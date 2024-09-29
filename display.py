@@ -13,6 +13,8 @@ import uiframe
 import galaxy_display
 import system_display
 
+MAX_FPS = 90
+
 DISPLAY_DIMENSIONS = (1300, 600)
 
 GALAXY_WIDTH = 14
@@ -68,12 +70,13 @@ def main():
         ship.SHIP_SPEED_PER_MINUTE = 10000
         ecology.BIOMASS_REGENERATION_PER_MINUTE = 15.0
 
-    g = galaxy.Galaxy(galaxy.generate_galaxy_boxes(GALAXY_WIDTH, GALAXY_HEIGHT, GALAXY_ZONE_RADIUS))
-    game = player.Game(5, g)
-    galaxy.populate_homeworlds(g, game)
-    galaxy.populate_artifacts(g)
-    g.generate_star_distance_matrix()
-    g.generate_star_distance_hierarchy()
+    galaxy_obj = galaxy.Galaxy(galaxy.generate_galaxy_boxes(GALAXY_WIDTH, GALAXY_HEIGHT, GALAXY_ZONE_RADIUS))
+    game = player.Game(5, galaxy_obj)
+    galaxy_obj.generate_star_distance_matrix()
+    galaxy_obj.generate_star_distance_hierarchy()
+    galaxy_obj.populate_homeworlds(game)
+    galaxy_obj.populate_life(game)
+    galaxy_obj.populate_artifacts()
 
     active_player = game.players[0]
     active_player.selected_ship = active_player.ships[0]
@@ -83,6 +86,8 @@ def main():
     display = pygame.display.set_mode(DISPLAY_DIMENSIONS)
     pygame.display.set_icon(pygame.image.load("assets/app.png"))
     pygame.display.set_caption("Grand Space")
+
+    clock = pygame.time.Clock()
 
     system_displays = generate_all_system_displays(game)
     galaxy_displays = generate_galaxy_displays(game)
@@ -196,7 +201,7 @@ def main():
                     galaxy_displays[active_player.id].refresh_layer(0)
                     galaxy_displays[active_player.id].refresh_layer(1)
         # Galaxy loop
-        for s in g.stars:
+        for s in galaxy_obj.stars:
             for p in s.planets:
                 p.ecology.regenerate_biomass(elapsed_time)
                 if p.colony is not None:
@@ -210,6 +215,8 @@ def main():
         if isinstance(active_display, system_display.SystemDisplay):
             active_display.refresh_layer(2)
         active_display.draw(display)
+        if elapsed_time > 0:
+            display.blit(font.get_text_surface(str(int(1 / (elapsed_time * 60)))), (0, 0))
 
         # TEMP: manually drawing all UI elements
 
@@ -269,6 +276,7 @@ def main():
 
         # Update; end tick
         pygame.display.update()
+        clock.tick(MAX_FPS)
 
 
 if __name__ == "__main__":

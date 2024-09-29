@@ -16,7 +16,7 @@ DISTANCE_RATIO_TOLERANCE = 1.5
 
 MINERAL_COLORS = [(200, 20, 20), (20, 200, 20), (20, 20, 200), (20, 200, 200), (200, 20, 200), (200, 200, 20)]
 # Expected number of artifacts in the galaxy
-ARTIFACT_TOTAL = 25
+ARTIFACT_TOTAL_PER_STAR = 0.15
 AVERAGE_PLANETS = 3
 LIFE_DENSITY = 0.5  # approximate fraction of stars one expects to have life (in reality, less if higher)
 
@@ -36,43 +36,6 @@ def generate_galaxy_boxes(width, height, radius):
             stars.append(Star(i, (int(basex), int(basey)), random.randint(1, 5)))
             i += 1
     return stars
-
-def populate_homeworlds(galaxy, game):
-    species = [i for i in range(len(ecology.BIOMASS_TYPES))]
-    random.shuffle(species)
-    for p in range(len(game.players)):
-        game.players[p].reset_explored_stars()
-        star = random.choice(galaxy.stars)
-        while len(star.planets) < 5:
-            star.planets.append(Planet(star))
-        planet = random.choice(star.planets)
-        planet.ecology.habitability = 3
-        for i in range(3):
-            planet.ecology.species[species[3 * p + i]] = True
-        new_colony = colony.HomeworldColony(game.players[p], planet)
-        game.players[p].colonies.append(new_colony)
-        game.players[p].homeworld = planet
-        planet.colony = new_colony
-        game.players[p].add_ruled_star(star)
-        star.ruler = game.players[p]
-        game.players[p].add_ship(planet)
-        game.players[p].selected_ship = game.players[p].ships[0]
-        game.players[p].explored_stars[star.id] = True
-    populate_life(galaxy, len(game.players) * 3, species, int(LIFE_DENSITY * len(galaxy.stars) / len(game.players) / 3))
-
-def populate_artifacts(galaxy):
-    for s in galaxy.stars:
-        for p in s.planets:
-            if random.random() < float(ARTIFACT_TOTAL) / AVERAGE_PLANETS / len(galaxy.stars):
-                p.artifacts = 1
-
-def populate_life(galaxy, num_species, species_list, num_repeats):
-    for _ in range(num_repeats):
-        for i in range(num_species):
-            star = random.choice(galaxy.stars)
-            planet = random.choice(star.planets)
-            planet.ecology.habitability += 1
-            planet.ecology.species[species_list[i]] = True
 
 class Planet:
     def __init__(self, star):
@@ -94,8 +57,8 @@ class Star:
         for _ in range(num_planets):
             self.planets.append(Planet(self))
         self.ruler = None  # Player object
+        self.connected_star = None  # for the purpose of drawing connection lines
         self.ships = []
-        self.connected_star = None  # Connected star, for drawing purposes
 
 class Galaxy:
     def __init__(self, stars):
@@ -132,3 +95,63 @@ class Galaxy:
             if self.stars[star_id].ruler is player:
                 return self.stars[star_id]
         return self.stars[origin_id]
+
+    def populate_homeworlds(self, game):
+        star_ids = [i for i in range(len(self.stars))]
+        random.shuffle(star_ids)
+        for p in range(len(game.players)):
+            # Reset the player's explored stars to nothing
+            game.players[p].reset_explored_stars()
+            # Select a star for the homeworld, in a way such that the same cannot be chosen for two players
+            star = self.stars[star_ids[p]]
+            # Home systems always have 5 planets
+            while len(star.planets) < 5:
+                star.planets.append(Planet(star))
+            # Choose a random planet on which to place the homeworld
+            planet = random.choice(star.planets)
+            # Instantiate the colony object, and add it to the player's list of colonies
+            new_colony = colony.HomeworldColony(game.players[p], planet)
+            game.players[p].colonies.append(new_colony)
+            # Set the player's unique homeworld field to be the planet chosen
+            game.players[p].homeworld = planet
+            # Add the colony to the planet
+            planet.colony = new_colony
+            # Make the player rule their home system
+            game.players[p].add_ruled_star(star)
+            star.ruler = game.players[p]
+            # Add a ship to the homeworld, and select it immediately
+            game.players[p].add_ship(planet)
+            game.players[p].selected_ship = game.players[p].ships[0]
+            # The player has explored its home system
+            game.players[p].explored_stars[star.id] = True
+
+    def populate_artifacts(self):
+        for s in self.stars:
+            for p in s.planets:
+                if random.random() < float(ARTIFACT_TOTAL_PER_STAR) / AVERAGE_PLANETS:
+                    p.artifacts = 1
+
+    def populate_life(self, game):
+        """
+        Adds ecological life to the galaxy
+        Adds three unique species to each homeworld, and then distributes species found on at least one
+        homeworld randomly across the galaxy a certain number of times
+        """
+        species = [i for i in range(len(ecology.BIOMASS_TYPES))]
+        random.shuffle(species)
+        # Start by adding species to players' homeworlds
+        for p in range(len(game.players)):
+            for i in range(3):
+                game.players[p].homeworld.ecology.species[p * 3 + i] = True
+                game.players[p].homeworld.ecology.habitability += 1
+        num_species = len(game.players) * 3
+        for _ in range(int(len(self.stars) * LIFE_DENSITY / num_species)):
+            for i in range(num_species):
+                star = random.choice(self.stars)
+                if star.ruler is not None:
+                    continue
+                planet = random.choice(star.planets)
+                if planet.ecology.species[species[i]]:
+                    continue
+                planet.ecology.habitability += 1
+                planet.ecology.species[species[i]] = True

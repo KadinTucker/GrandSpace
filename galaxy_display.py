@@ -20,7 +20,8 @@ COLOR_BACKGROUND = (20, 20, 20)
 COLOR_UNEXPLORED_STAR = (135, 135, 135)
 COLOR_STAR = (200, 170, 25)
 COLOR_STAR_IN_RANGE = (230, 190, 50)
-IN_RANGE_INDICATOR_RADIUS = 9
+IN_RANGE_INDICATOR_RADIUS = 8
+IN_RANGE_INDICATOR_WIDTH = 2
 
 COLONY_HALO_MODIFIER = 1.3
 CAPITAL_STAR_MINOR_MODIFIER = 1.0
@@ -114,8 +115,8 @@ class GalaxyDisplay(pane.Pane):
                         for r in stars_in_range:
                             pygame.draw.circle(self.layers[2], COLOR_STAR_IN_RANGE,
                                                self.project_coordinate(self.game.galaxy.stars[r].location),
-                                               IN_RANGE_INDICATOR_RADIUS * self.view_scale, 2 +
-                                               int((IN_RANGE_INDICATOR_RADIUS - GALAXY_STAR_RADIUS) * self.view_scale))
+                                               IN_RANGE_INDICATOR_RADIUS * self.view_scale,
+                                               int(IN_RANGE_INDICATOR_WIDTH * self.view_scale))
 
     def refresh_layer(self, index):
         super().refresh_layer(index)
@@ -131,7 +132,10 @@ class GalaxyDisplay(pane.Pane):
         if event.type == pygame.MOUSEBUTTONDOWN:
             if event.button == pygame.BUTTON_RIGHT:
                 self.player.selected_ship.reset_task()
-                self.player.selected_ship.set_destination_star(self.find_star(self.get_relative_pane_pos(mouse_pos)))
+                clicked_star = self.find_star(self.get_relative_pane_pos(mouse_pos))
+                if clicked_star is not None:
+                    if self.player.selected_ship.get_distance_to(clicked_star.location) < 90:
+                        self.player.selected_ship.set_destination_star(clicked_star)
             elif event.button == pygame.BUTTON_LEFT:
                 new_ship = self.find_player_ship(self.get_relative_pane_pos(mouse_pos))
                 if new_ship is not None:

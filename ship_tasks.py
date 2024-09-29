@@ -3,14 +3,14 @@ import math
 # TODO: implement a fast pathing system, implementing Dijkstra's algorithm and storing, in stars, sorted lists
 #  of stars' distances to each other from shortest to longest, to quickly easily find the best path to follow
 #  and initialising that pathing information before game run
-def find_nearest_star(position, game, blacklist=()):
+def find_nearest_star(position, galaxy, blacklist=()):
     """
     Finds the nearest star to the ship, except for a possible blacklist
     To be used only when the ship is not currently located at a star
     """
     nearest = None
     min_distance = -1
-    for s in game.galaxy.stars:
+    for s in galaxy.stars:
         if s in blacklist:
             continue
         distance = math.hypot(s.location[0] - position[0], s.location[1] - position[1])
@@ -42,9 +42,16 @@ def task_null(ship, game):
 
 def task_explore_superficial(ship, game):
     if ship.destination_star is None or ship.ruler.explored_stars[ship.destination_star.id]:
-        explored = get_explored_stars(ship.ruler, game.galaxy)
-        destination = find_nearest_star(ship.location, game, explored)
-        if destination is not None:
-            ship.set_destination_star(destination)
+        if ship.star is None:
+            ship.set_destination_star(find_nearest_star(ship.location, game.galaxy))
         else:
-            ship.task = 0
+            destination = None
+            available_stars = find_stars_in_range(ship.star, 90, game.galaxy)
+            for star_id in available_stars:
+                if not ship.ruler.explored_stars[star_id]:
+                    destination = game.galaxy.stars[star_id]
+                    break
+            if destination is not None:
+                ship.set_destination_star(destination)
+            else:
+                ship.task = 0
