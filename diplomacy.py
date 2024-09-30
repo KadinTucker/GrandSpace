@@ -10,8 +10,8 @@ IS_HOSTILE = [False, False, False, False, True, True, True]
 # In the case of hostile access types, the value is the negative access required to take that action
 ACCESS_LEVERAGE_VALUE = [35, 10, 10, 10, 10, 30, 50]
 # The default access level at the game start
-DEFAULT_ACCESS = [False, True, True, True, False, False, False]
-REFLEXIVE_ACCESS = [True, True, True, True, False, True, False]
+DEFAULT_ACCESS = [False, True, True, False, False, False, False]
+REFLEXIVE_ACCESS = [True, True, True, True, False, False, False]
 
 # The multiplier by which leverage is additionally lost for failing to repay a favour when asked
 BETRAYAL_PENALTY = 2

@@ -11,7 +11,14 @@ SHIP_RANGE_WIDTH = 1
 
 SHIP_STACK_RADIUS = 10
 
+SHIP_PROJECTILE_FRAMES = 45
+SHIP_PROJECTILE_LENGTH = 5
+SHIP_PROJECTILE_WIDTH = 2
+
 COLOR_SHIP_SELECTION = (225, 225, 225)
+COLOR_SHIP_PROJECTILE = (200, 50, 50)
+COLOR_SHIP_HEALTH = (10, 220, 10)
+COLOR_SHIP_DAMAGE = (180, 10, 10)
 
 def draw_ship_selection(surface, position):
     pygame.draw.circle(surface, COLOR_SHIP_SELECTION, position, SHIP_SELECTION_RADIUS)
@@ -25,6 +32,7 @@ def draw_ship(surface, ship_obj, position, player=None):
         draw_ship_selection(surface, position)
     pygame.draw.circle(surface, ship_obj.ruler.color, position, SHIP_COLOR_RADIUS)
     surface.blit(IMG_SHIP, (position[0] - SHIP_WIDTH // 2, position[1] - SHIP_HEIGHT // 2))
+    draw_ship_health(surface, ship_obj, position)
 
 def find_overlapped_ship(center, ships, position, radius):
     star_ship_positions = get_overlapped_ship_positions(center, ships)
@@ -45,3 +53,40 @@ def draw_overlapping_ships(surface, ships, center, player=None):
     positions = get_overlapped_ship_positions(center, ships)
     for i in range(len(positions)):
         draw_ship(surface, ships[i], positions[i], player)
+    return positions
+
+def find_overlapped_ship_position(ship, overlapped_ships, position):
+    ship_positions = get_overlapped_ship_positions(position, overlapped_ships)
+    for i in range(len(ship_positions)):
+        if overlapped_ships[i] is ship:
+            return ship_positions[i]
+    return None
+
+def draw_ship_projectile(surface, origin_pos, destination_pos, progress):
+    diffx = destination_pos[0] - origin_pos[0]
+    diffy = destination_pos[1] - origin_pos[1]
+    dist = math.hypot(diffx, diffy)
+    pygame.draw.line(surface, COLOR_SHIP_PROJECTILE,
+                     (origin_pos[0] + progress * diffx, origin_pos[1] + progress * diffy),
+                     (origin_pos[0] + (progress + SHIP_PROJECTILE_LENGTH / dist) * diffx,
+                      origin_pos[1] + (progress + SHIP_PROJECTILE_LENGTH / dist) * diffy), SHIP_PROJECTILE_WIDTH)
+
+def draw_ship_health(surface, ship, position):
+    if ship.health < 5:
+        pygame.draw.rect(surface, COLOR_SHIP_DAMAGE,
+                         pygame.Rect(position[0] - SHIP_WIDTH // 2, position[1] + SHIP_HEIGHT // 2,
+                                     SHIP_WIDTH, SHIP_HEIGHT // 4))
+        pygame.draw.rect(surface, COLOR_SHIP_HEALTH,
+                         pygame.Rect(position[0] - SHIP_WIDTH // 2, position[1] + SHIP_HEIGHT // 2,
+                                     int(SHIP_WIDTH * ship.health / 5), SHIP_HEIGHT // 4))
+
+class ProjectileAnim:
+
+    def __init__(self, ship_origin, ship_target):
+        self.ship_origin = ship_origin
+        self.ship_target = ship_target
+        self.last_position = None
+        self.progress = 0
+
+    def get_progress_fraction(self):
+        return self.progress / SHIP_PROJECTILE_FRAMES

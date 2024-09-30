@@ -1,9 +1,11 @@
+import math
 import random
 
 import diplomacy
 import ship
 
 STARTING_MONEY = 1000
+BASE_MILESTONE_COST = 50
 
 class Game:
 
@@ -11,6 +13,12 @@ class Game:
         self.galaxy = galaxy_obj
         self.players = [Player(self, i) for i in range(n_players)]
         self.diplomacy = diplomacy.Diplomacy(self)
+
+def get_milestone_cost(milestone):
+    return BASE_MILESTONE_COST * milestone * (milestone + 1)
+
+def get_milestone_from_progress(cost):
+    return (math.sqrt(1 + 4 * cost / BASE_MILESTONE_COST) - 1) / 2
 
 class Player:
 
@@ -26,7 +34,7 @@ class Player:
         self.ruled_stars = []
         self.explored_stars = []
         self.reset_explored_stars()
-        self.status_updated = False
+        self.milestone_progress = [0, 0, 0, 0, 0, 0]
 
     def add_ship(self, planet):
         self.ships.append(ship.Ship(planet.star.location, self))

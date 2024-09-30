@@ -1,3 +1,5 @@
+import random
+
 import pygame
 import sys
 
@@ -12,11 +14,12 @@ import ship_tasks
 import uiframe
 
 import galaxy_display
+import planet_display
 import system_display
 
 MAX_FPS = 90
 
-DISPLAY_DIMENSIONS = (1300, 600)
+DISPLAY_DIMENSIONS = (1300, 700)
 
 GALAXY_WIDTH = 14
 GALAXY_HEIGHT = 10
@@ -43,6 +46,7 @@ COLOR_UNEXPLORED_STAR = (135, 135, 135)
 COLOR_STAR = (200, 170, 25)
 COLOR_ARTIFACT_RING = (150, 125, 35)
 COLOR_SHIP_SELECTION = (225, 225, 225)
+COLOR_MILESTONES = [(200, 50, 50), (150, 150, 0), (50, 200, 50), (0, 150, 150), (50, 50, 200), (150, 0, 150)]
 
 def generate_galaxy_displays(game):
     galaxy_displays = []
@@ -96,10 +100,8 @@ def main():
     active_display = galaxy_displays[active_player.id]
     active_display.update()
 
-    text_explore = font.get_text_surface("explore")
-    text_colonise = font.get_text_surface("colonise")
+    milestone_frame = pygame.image.load("assets/milestone-frame.png")
 
-    panel_small = uiframe.get_panel_surface(20, 20)
     panel_large = uiframe.get_panel_surface(DISPLAY_DIMENSIONS[0] - 6, 52)
     panel_wide = uiframe.get_panel_surface(156, 26)
     panel_money = uiframe.get_panel_surface(108, 16)
@@ -110,6 +112,13 @@ def main():
     icon_mineral_c = uiframe.create_button("assets/minerals-cyan.png")
     icon_mineral_m = uiframe.create_button("assets/minerals-magenta.png")
     icon_mineral_y = uiframe.create_button("assets/minerals-yellow.png")
+
+    icon_diplomacy = pygame.image.load("assets/icon-diplomacy.png")
+    icon_empire = pygame.image.load("assets/icon-colonial.png")
+    icon_discovery = pygame.image.load("assets/icon-explore.png")
+    icon_trade = pygame.image.load("assets/icon-trade.png")
+    icon_battle = pygame.image.load("assets/icon-battle.png")
+    icon_ecology = pygame.image.load("assets/icon-ecology.png")
 
     button_diplomacy = uiframe.create_button("assets/icon-diplomacy.png")
     button_colonial = uiframe.create_button("assets/icon-colonial.png")
@@ -244,6 +253,7 @@ def main():
         for p in game.players:
             for s in p.ships:
                 s.do_task()
+                s.resolve_combat(elapsed_time)
                 s.move(elapsed_time)
                 if p == active_player:
                     galaxy_displays[active_player.id].refresh_layer(0)
@@ -267,6 +277,20 @@ def main():
             display.blit(font.get_text_surface(str(int(1 / (elapsed_time * 60)))), (0, 0))
 
         # TEMP: manually drawing all UI elements
+
+        for i in range(len(active_player.milestone_progress)):
+            height = int(121 * player.get_milestone_from_progress(active_player.milestone_progress[i]))
+            pygame.draw.rect(display, COLOR_MILESTONES[i],
+                             pygame.Rect(GALAXY_PANE_POSITION[0] + 6 + 29 * i, 156 - height, 20, height))
+
+        display.blit(milestone_frame, (GALAXY_PANE_POSITION[0], 0))
+
+        display.blit(icon_battle, (GALAXY_PANE_POSITION[0] + 6, 6))
+        display.blit(icon_discovery, (GALAXY_PANE_POSITION[0] + 35, 6))
+        display.blit(icon_ecology, (GALAXY_PANE_POSITION[0] + 64, 6))
+        display.blit(icon_diplomacy, (GALAXY_PANE_POSITION[0] + 93, 6))
+        display.blit(icon_trade, (GALAXY_PANE_POSITION[0] + 122, 6))
+        display.blit(icon_empire, (GALAXY_PANE_POSITION[0] + 151, 6))
 
         display.blit(panel_large, (0, DISPLAY_DIMENSIONS[1] - 58))
         display.blit(button_diplomacy, (DISPLAY_DIMENSIONS[0] - 29, DISPLAY_DIMENSIONS[1] - 55))
@@ -326,7 +350,7 @@ def main():
                 else:
                     pygame.draw.rect(display, (50, 15, 15),
                                      pygame.Rect(504 + biomasses * 14, DISPLAY_DIMENSIONS[1] - 49, 16, 18))
-                display.blit(system_display.ECOLOGY_SPECIES_IMAGES[i],
+                display.blit(planet_display.ECOLOGY_SPECIES_IMAGES[i],
                              (506 + biomasses * 14, DISPLAY_DIMENSIONS[1] - 48))
                 biomasses += 1
 

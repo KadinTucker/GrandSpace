@@ -50,25 +50,46 @@ STAR_ENTRY_DISTANCE = 1
 # TODO: make these tasks (or above constants) vary with technology
 TASKS = [ship_tasks.task_null, ship_tasks.task_explore_superficial]
 
+SHOT_COOLDOWN_PER_MIN = 20.0
+
 class Ship:
 
     def __init__(self, location, ruler):
-        self.health = 0
+        self.health = 5
         self.energy = 0
         self.ruler = ruler
         self.star = None  # Star object, or None if travelling interstellar
         self.planet = None  # Planet object, or None if not at a planet
         self.location = location  # tuple
         self.cargo = Cargo(self)  # Cargo object
-        self.task = 0
         self.destination = location
         self.destination_star = None
         self.destination_planet = None
+        self.task = 0
+        self.shot_cooldown = 0.0
 
     def get_distance_to(self, position):
         x_dist = position[0] - self.location[0]
         y_dist = position[1] - self.location[1]
         return math.hypot(x_dist, y_dist)
+
+    def attack(self, time):
+        if self.star is not None:
+            if self.shot_cooldown > 0.0:
+                self.shot_cooldown = max(0.0, self.shot_cooldown - SHOT_COOLDOWN_PER_MIN * time)
+            else:
+                for s in self.star.ships:
+                    if ship_tasks.is_enemy_ship(self, s):
+                        s.health -= 1
+                        self.shot_cooldown = 1.0
+                        break
+
+    def resolve_combat(self, time):
+        if self.health <= 0:
+            # TODO: make respawn time after ship destruction
+            self.get_destroyed()
+        else:
+            self.attack(time)
 
     def move(self, time):
         """
@@ -236,6 +257,19 @@ class Ship:
         assert self.planet is not None, "to exit a planet, ship must have a current planet"
         self.planet.ships.remove(self)
         self.planet = None
+
+    def get_destroyed(self):
+        if self.planet is not None:
+            self.exit_planet()
+        if self.star is not None:
+            self.exit_star()
+        self.location = self.ruler.homeworld.star.location
+        self.destination = self.location
+        self.destination_star = self.ruler.homeworld.star
+        self.destination_planet = self.ruler.homeworld
+        self.enter_star()
+        self.enter_planet()
+        self.health = 5
 
     def collect_biomass(self, ecology_obj):
         if ecology_obj is not None and ecology_obj.biomass_level == 1:

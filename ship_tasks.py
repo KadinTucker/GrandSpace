@@ -84,6 +84,13 @@ def has_space_for_development(ship):
     return (has_colony(ship) and rules_system(ship)
             and ship.planet.colony.development < ship.planet.colony.get_maximum_development())
 
+def is_enemy_ship(ship, other):
+    # Both ships have to be in the same star
+    # Either: this ship has access to battle the other, or the other ship does not have passage and we are in a
+    # system ruled by this ship
+    return ship.star is other.star and (ship.ruler.game.diplomacy.access_matrix[other.ruler.id][ship.ruler.id][5]
+                                        or (rules_system(ship) and not has_access(other, 3)))
+
 def task_null(ship, game):
     pass
 

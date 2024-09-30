@@ -1,14 +1,12 @@
 import pygame
 import math
 
-import ecology
-import font
 import galaxy
+import ship_tasks
 
 import pane
 import planet_display
 import ship_display
-import uiframe
 
 SYSTEM_STAR_RADIUS = 60
 SYSTEM_PLANET_RADIUS = 20
@@ -22,70 +20,11 @@ SYSTEM_SURFACE_HEIGHT = 2 * SYSTEM_VERTICAL_AXIS + 4 * SYSTEM_PLANET_RADIUS + 2
 
 SYSTEM_SHIP_RADIUS = 10
 
-ECOLOGY_SPECIES_ALTITUDE = SYSTEM_PLANET_RADIUS * 3
-ECOLOGY_SPECIES_WIDTH = 12
-ECOLOGY_SPECIES_HEIGHT = 16
-ECOLOGY_SPECIES_SPACING = 6
-
-ECOLOGY_BIOMASS_ALTITUDE = SYSTEM_PLANET_RADIUS * 2
-ECOLOGY_BIOMASS_HEIGHT = 10
-ECOLOGY_BIOMASS_WIDTH = 30
-ECOLOGY_BIOMASS_HALO_WIDTH = 2
-
-ECOLOGY_SPECIES_FILENAMES = ["assets/typeface/eco-serif/" + letter + ".png" for letter in ecology.BIOMASS_TYPES]
-ECOLOGY_SPECIES_IMAGES = [pygame.image.load(fn) for fn in ECOLOGY_SPECIES_FILENAMES]
-
-TRADE_DEMAND_DEPTH = SYSTEM_PLANET_RADIUS * 2
-TRADE_MINERAL_DEMAND_OFFSET = 34
-TRADE_DEMAND_TEXT_OFFSET = 14
-TRADE_DEMAND_PROGRESS_OFFSET = 36
-TRADE_DEMAND_PROGRESS_WIDTH = 3
-TRADE_DEMAND_PROGRESS_HEIGHT = 16
-TRADE_LEAD_STRING = " : "
-
-PRODUCTION_DEPTH = SYSTEM_PLANET_RADIUS * 2
-PRODUCTION_ALTITUDE = 18
-PRODUCTION_ICON_OFFSET = 32
-PRODUCTION_TIME_OFFSET = PRODUCTION_ICON_OFFSET + 20
-STORAGE_DEPTH = -4
-STORAGE_OFFSET = PRODUCTION_DEPTH + 16
-
-SUMMARY_CITY_ICON_OFFSET = SYSTEM_PLANET_RADIUS * 2 + 60
-SUMMARY_CITY_ICON_ALTITUDE = 44
-SUMMARY_CITY_TEXT_OFFSET = SUMMARY_CITY_ICON_OFFSET - 7
-SUMMARY_CITY_TEXT_ALTITUDE = SUMMARY_CITY_ICON_ALTITUDE - 28
-SUMMARY_DEVELOPMENT_ICON_OFFSET = SYSTEM_PLANET_RADIUS * 2 + 26
-SUMMARY_DEVELOPMENT_ICON_ALTITUDE = 44
-SUMMARY_DEVELOPMENT_TEXT_OFFSET = SUMMARY_DEVELOPMENT_ICON_OFFSET + 3
-SUMMARY_DEVELOPMENT_TEXT_ALTITUDE = SUMMARY_DEVELOPMENT_ICON_ALTITUDE - 28
-
-SHIELD_STACK_LEFT = SYSTEM_PLANET_RADIUS * 2 + 72
-SHIELD_STACK_RIGHT = SYSTEM_PLANET_RADIUS * 2 + 10
-SHIELD_STACK_DEPTH = 10
-SHIELD_WIDTH = 26
-SHIELD_FILL_HEIGHT = 18
-SHIELD_FILL_OFFSET = 3
-
 ACCESS_PANE_HEIGHT = 46
 ACCESS_PANE_WIDTH = 96
 ACCESS_ELEMENT_POSITIONS = [(0, 0), (24, 0), (48, 0), (72, 13), (48, 26), (24, 26), (0, 26)]
 
-MINERAL_FILENAMES = ["assets/minerals-red.png", "assets/minerals-green.png", "assets/minerals-blue.png",
-                     "assets/minerals-cyan.png", "assets/minerals-magenta.png", "assets/minerals-yellow.png",
-                     "assets/minerals-blank.png"]
-MINERAL_IMAGES = [pygame.image.load(fn) for fn in MINERAL_FILENAMES]
-SLASH_MIN_IMAGE = font.get_text_surface("/min")
-
-SUMMARY_CITY_ICON_IMG = uiframe.create_button("assets/icon-city.png")
-SUMMARY_DEVELOPMENT_ICON_IMG = uiframe.create_button("assets/icon-development.png")
-
-SHIELD_ICON = pygame.image.load("assets/defense_slot.png")
-
-INDICATOR_HABITAT_IMG = pygame.image.load("assets/indicator-habitat-new.png")
-INDICATOR_CITY_IMG = pygame.image.load("assets/indicator-city-new.png")
-INDICATOR_DEVELOPMENT_IMG = pygame.image.load("assets/indicator-development-new.png")
-
-ACCESS_IMAGE_FILENAMES = ["assets/icon-ecology.png", "assets/icon-diplomacy.png", "assets/icon-access-trade.png",
+ACCESS_IMAGE_FILENAMES = ["assets/icon-ecology.png", "assets/icon-diplomacy.png", "assets/icon-trade.png",
                           "assets/icon-access-passage.png", "assets/icon-access-piracy.png", "assets/icon-battle.png",
                           "assets/icon-access-siege.png"]
 
@@ -112,6 +51,7 @@ class SystemDisplay(pane.Pane):
         self.star = star
         self.planet_locations = []
         self.set_planet_locations()
+        self.projectile_anim_progress = 0  # TEMP
         self.planet_displays = [planet_display.PlanetDisplay(game, player, p) for p in self.star.planets]
         self.update()
 
@@ -123,7 +63,7 @@ class SystemDisplay(pane.Pane):
             angle = p * 2 * math.pi / num_planets - math.pi / 2
             self.planet_locations.append((int(self.dimensions[0] / 2 + SYSTEM_HORIZONTAL_AXIS * math.cos(angle)),
                                           int(self.dimensions[1] / 2 + SYSTEM_VERTICAL_AXIS * math.sin(angle))))
-        
+
     def sketch_primary_surface(self):
         self.layers[0].fill(COLOR_BACKGROUND)
         pygame.draw.circle(self.layers[0], COLOR_STAR,
@@ -131,7 +71,7 @@ class SystemDisplay(pane.Pane):
         for p in range(len(self.star.planets)):
             pygame.draw.circle(self.layers[0], galaxy.MINERAL_COLORS[self.star.planets[p].mineral],
                                self.planet_locations[p], SYSTEM_PLANET_RADIUS)
-            
+
     def sketch_player_surface(self):
         self.layers[1].fill(COLOR_BACKGROUND)
         for p in range(len(self.star.planets)):
@@ -153,16 +93,29 @@ class SystemDisplay(pane.Pane):
 
     def sketch_ship_surface(self):
         self.layers[3].fill(COLOR_BACKGROUND)
+        all_ships = []
+        all_ship_positions = []
         star_ships = []
         for s in self.star.ships:
             if s.planet is None:
                 star_ships.append(s)
-        ship_display.draw_overlapping_ships(self.layers[3], star_ships,
+        all_ships += star_ships
+        all_ship_positions += ship_display.draw_overlapping_ships(self.layers[3], star_ships,
                                             (self.dimensions[0] // 2, self.dimensions[1] // 2),
                                             self.player)
         for p in range(len(self.star.planets)):
-            ship_display.draw_overlapping_ships(self.layers[3], self.star.planets[p].ships,
-                                                self.planet_locations[p], self.player)
+            all_ships += self.star.planets[p].ships
+            all_ship_positions += ship_display.draw_overlapping_ships(self.layers[3], self.star.planets[p].ships,
+                                                                      self.planet_locations[p], self.player)
+        for i in range(len(all_ships)):
+            for j in range(len(all_ships)):
+                if ship_tasks.is_enemy_ship(all_ships[i], all_ships[j]):
+                    ship_display.draw_ship_projectile(self.layers[3], all_ship_positions[i], all_ship_positions[j],
+                                                      self.projectile_anim_progress
+                                                      / ship_display.SHIP_PROJECTILE_FRAMES)
+                    break
+        self.projectile_anim_progress += 1
+        self.projectile_anim_progress %= ship_display.SHIP_PROJECTILE_FRAMES
 
     def sketch_planet_detail_surface(self):
         self.layers[2].fill(COLOR_BACKGROUND)
@@ -192,7 +145,7 @@ class SystemDisplay(pane.Pane):
                           self.planet_locations[p][1] - position[1]) <= SYSTEM_PLANET_RADIUS:
                 return self.star.planets[p]
         return None
-    
+
     def is_star_clicked(self, position):
         return math.hypot(self.dimensions[0] / 2 - position[0],
                           self.dimensions[1] / 2 - position[1]) <= SYSTEM_STAR_RADIUS
@@ -202,17 +155,18 @@ class SystemDisplay(pane.Pane):
         if event.type == pygame.MOUSEBUTTONDOWN:
             if event.button == pygame.BUTTON_RIGHT:
                 self.player.selected_ship.reset_task()
-                if self.is_star_clicked(self.get_relative_pane_pos(mouse_pos)):
-                    if self.player.selected_ship.star is not self.star:
-                        self.player.selected_ship.set_destination_star(self.star)
-                    elif self.player.selected_ship.planet is None:
-                        self.player.selected_ship.set_destination_star(None)
+                if self.player.selected_ship.get_distance_to(self.star.location) < 90:
+                    if self.is_star_clicked(self.get_relative_pane_pos(mouse_pos)):
+                        if self.player.selected_ship.star is not self.star:
+                            self.player.selected_ship.set_destination_star(self.star)
+                        elif self.player.selected_ship.planet is None:
+                            self.player.selected_ship.set_destination_star(None)
+                        else:
+                            self.player.selected_ship.set_destination_planet(None)
                     else:
-                        self.player.selected_ship.set_destination_planet(None)
-                else:
-                    planet = self.find_planet(self.get_relative_pane_pos(mouse_pos))
-                    if planet is not None:
-                        self.player.selected_ship.set_destination_planet(planet)
+                        planet = self.find_planet(self.get_relative_pane_pos(mouse_pos))
+                        if planet is not None:
+                            self.player.selected_ship.set_destination_planet(planet)
             elif event.button == pygame.BUTTON_LEFT:
                 new_ship = self.find_ship(self.get_relative_pane_pos(mouse_pos))
                 if new_ship is not None and new_ship.ruler is self.player:
@@ -220,7 +174,7 @@ class SystemDisplay(pane.Pane):
         elif event.type == pygame.KEYDOWN:
             if event.key == pygame.K_ESCAPE:
                 self.next_pane_id = 0
-    
+
     def find_ship(self, position):
         # First, star ships:
         all_star_ships = []
