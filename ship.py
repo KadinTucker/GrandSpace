@@ -43,6 +43,24 @@ Task Enumeration:
 9 - Research
 """
 
+"""
+Action Enumeration:
+0 - Idle
+1 - Moving
+4 - Buying Buildings
+5 - Establishing Colony
+6 - Building City
+7 - Developing
+8 - Fighting
+9 - Besieging
+10 - Buying Minerals
+11 - Selling Minerals
+12 - Researching
+13 - Schmoozing
+14 - Collecting Biomass
+15 - Terraforming
+"""
+
 # Average distance of 80 units between stars and taking 2 seconds to traverse 80 units requires a speed of 2400
 STAR_ENTRY_DISTANCE = 1
 
@@ -63,23 +81,38 @@ class Ship:
         self.destination_star = None
         self.destination_planet = None
         self.task = 0
-        self.shot_cooldown = 0.0
+        self.action = 0
+        self.action_progress = 0.0
 
     def get_distance_to(self, position):
         x_dist = position[0] - self.location[0]
         y_dist = position[1] - self.location[1]
         return math.hypot(x_dist, y_dist)
 
+    def act(self, time):
+        if self.action == 0:
+            if self.health < self.ruler.technology.get_ship_max_health():
+                self.action_progress += ship_tasks.FULL_HEAL_RATE * self.ruler.technology.get_ship_max_health() * time
+                if self.action_progress >= 1.0:
+                    self.health += 1
+                    self.action_progress -= 1.0
+        elif self.action == 1:
+            self.move(time)
+
+    def set_action(self, action_idx):
+        self.action = action_idx
+        self.action_progress = 0.0
+
     def attack(self, time):
         if self.star is not None:
-            if self.shot_cooldown > 0.0:
-                self.shot_cooldown = max(0.0, self.shot_cooldown - self.ruler.technology.get_ship_firerate() * time)
+            if self.action_progress < 1.0:
+                self.action_progress = max(0.0, self.action_progress + self.ruler.technology.get_ship_firerate() * time)
             else:
                 for s in self.star.ships:
                     if ship_tasks.is_enemy_ship(self, s):
                         s.health -= 1
                         self.ruler.milestone_progress[0] += (25 * 1) // s.ruler.technology.get_ship_max_health()
-                        self.shot_cooldown = 1.0
+                        self.action_progress = 0.0
                         break
 
     def resolve_combat(self, time):
@@ -96,9 +129,12 @@ class Ship:
         Then, the ship moves between a system and the galaxy, if applicable (`move_between_system`)
         Lastly, the ship moves in the galaxy (`move_in_galaxy`)
         """
+        self.action_progress += time * ship_tasks.SYSTEM_CHANGE_RATE
         self.move_in_system()
         self.move_between_system()
         self.move_in_galaxy(time)
+        if self.is_done_moving():
+            self.set_action(0)
 
     def move_in_galaxy(self, time):
         """
@@ -106,16 +142,18 @@ class Ship:
         The ship moves the most direct path toward its destination
         The ship does not move if it is at its destination
         """
-        x_dist = self.destination[0] - self.location[0]
-        y_dist = self.destination[1] - self.location[1]
-        distance_to_destination = math.hypot(x_dist, y_dist)
-        if distance_to_destination != 0:
-            distance_travelled = time * self.ruler.technology.get_ship_speed()
-            if distance_travelled >= distance_to_destination:
-                self.location = self.destination
-            else:
-                self.location = (self.location[0] + x_dist * distance_travelled / distance_to_destination,
-                                 self.location[1] + y_dist * distance_travelled / distance_to_destination)
+        if self.star is None and self.planet is None:
+            x_dist = self.destination[0] - self.location[0]
+            y_dist = self.destination[1] - self.location[1]
+            distance_to_destination = math.hypot(x_dist, y_dist)
+            if distance_to_destination != 0:
+                self.action_progress = 0.0  # If a ship moves in the galaxy, it does not do anything else
+                distance_travelled = time * self.ruler.technology.get_ship_speed()
+                if distance_travelled >= distance_to_destination:
+                    self.location = self.destination
+                else:
+                    self.location = (self.location[0] + x_dist * distance_travelled / distance_to_destination,
+                                     self.location[1] + y_dist * distance_travelled / distance_to_destination)
 
     def move_between_system(self):
         """
@@ -128,14 +166,17 @@ class Ship:
            The ship will orient itself to get to its destination star accordingly via the `orient` method
          - The ship has a star, and it is also the ship's destination. No actions need to be taken
         """
-        if self.star is None:
-            if self.destination_star is not None:
-                distance = math.hypot(self.destination_star.location[0] - self.location[0],
-                                      self.destination_star.location[1] - self.location[1])
-                if distance <= STAR_ENTRY_DISTANCE:
-                    self.enter_star()
-        elif self.destination_star is not self.star:
-            self.exit_star()
+        if self.action_progress >= 1.0:
+            if self.star is None:
+                if self.destination_star is not None:
+                    distance = math.hypot(self.destination_star.location[0] - self.location[0],
+                                          self.destination_star.location[1] - self.location[1])
+                    if distance <= STAR_ENTRY_DISTANCE:
+                        self.enter_star()
+                        self.action_progress -= 1.0
+            elif self.destination_star is not self.star:
+                self.exit_star()
+                self.action_progress -= 1.0
 
     def move_in_system(self):
         """
@@ -146,12 +187,15 @@ class Ship:
            Then the ship exits its current planet.
          - The ship has a planet, and it is also the ship's destination. No actions need to be taken
         """
-        if self.planet is None:
-            if self.destination_planet is not None:
-                if self.star is not None and self.star is self.destination_planet.star:
-                    self.enter_planet()
-        elif self.destination_planet is not self.planet:
-            self.exit_planet()
+        if self.action_progress >= 1.0:
+            if self.planet is None:
+                if self.destination_planet is not None:
+                    if self.star is not None and self.star is self.destination_planet.star:
+                        self.enter_planet()
+                        self.action_progress -= 1.0
+            elif self.destination_planet is not self.planet:
+                self.exit_planet()
+                self.action_progress -= 1.0
 
     def orient(self):
         """
@@ -159,11 +203,16 @@ class Ship:
         Any planet destinations are the highest priority, then any star destinations, then galaxy destinations
         With a planet destination, the ship sets its star destination to be the planet's star.
         With a star destination, the ship sets its galaxy destination to be the star's location.
+        When a ship orients itself, it sets its action to movement
         """
+        self.set_action(1)
         if self.destination_planet is not None:
             self.destination_star = self.destination_planet.star
         if self.destination_star is not None:
             self.destination = self.destination_star.location
+
+    def is_done_moving(self):
+        return self.destination_planet is self.planet and self.destination_star is self.star
 
     def set_destination_planet(self, planet):
         """
@@ -190,6 +239,7 @@ class Ship:
         self.destination = destination
         self.destination_star = None
         self.destination_planet = None
+        self.orient()
 
     def do_task(self):
         TASKS[self.task](self, self.ruler.game)

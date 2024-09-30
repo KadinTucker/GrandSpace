@@ -266,9 +266,7 @@ def main():
         # Player loop
         for p in game.players:
             for s in p.ships:
-                s.do_task()
-                s.resolve_combat(elapsed_time)
-                s.move(elapsed_time)
+                s.act(elapsed_time)
                 if p == active_player:
                     galaxy_displays[active_player.id].refresh_layer(0)
                     galaxy_displays[active_player.id].refresh_layer(1)

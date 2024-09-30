@@ -33,6 +33,7 @@ def draw_ship(surface, ship_obj, position, player=None):
     pygame.draw.circle(surface, ship_obj.ruler.color, position, SHIP_COLOR_RADIUS)
     surface.blit(IMG_SHIP, (position[0] - SHIP_WIDTH // 2, position[1] - SHIP_HEIGHT // 2))
     draw_ship_health(surface, ship_obj, position)
+    draw_ship_action_progress(surface, ship_obj, position)
 
 def find_overlapped_ship(center, ships, position, radius):
     star_ship_positions = get_overlapped_ship_positions(center, ships)
@@ -73,13 +74,24 @@ def draw_ship_projectile(surface, origin_pos, destination_pos, progress):
 
 def draw_ship_health(surface, ship, position):
     if ship.health < ship.ruler.technology.get_ship_max_health():
-        pygame.draw.rect(surface, COLOR_SHIP_DAMAGE,
-                         pygame.Rect(position[0] - SHIP_WIDTH // 2, position[1] + SHIP_HEIGHT // 2,
-                                     SHIP_WIDTH, SHIP_HEIGHT // 4))
+        pygame.draw.rect(surface, (0, 0, 0),
+                         pygame.Rect(position[0] - SHIP_WIDTH // 2 - 1, position[1] + SHIP_HEIGHT // 2 - 1,
+                                     SHIP_WIDTH + 2, SHIP_HEIGHT // 4 + 2), 1)
+        pygame.draw.rect(surface, COLOR_SHIP_DAMAGE, pygame.Rect(position[0] - SHIP_WIDTH // 2, position[1]
+                                                                 + SHIP_HEIGHT // 2, SHIP_WIDTH, SHIP_HEIGHT // 4))
         pygame.draw.rect(surface, COLOR_SHIP_HEALTH,
                          pygame.Rect(position[0] - SHIP_WIDTH // 2, position[1] + SHIP_HEIGHT // 2,
                                      int(SHIP_WIDTH * ship.health / ship.ruler.technology.get_ship_max_health()),
                                      SHIP_HEIGHT // 4))
+
+def draw_ship_action_progress(surface, ship, position):
+    if ship.action_progress > 0.0:
+        pygame.draw.rect(surface, (150, 150, 150),
+                         pygame.Rect(position[0] + SHIP_WIDTH // 2, position[1] - SHIP_HEIGHT // 2, 5,
+                                     int(ship.action_progress * SHIP_HEIGHT) + 2), 1)
+        pygame.draw.rect(surface, (200, 200, 200),
+                         pygame.Rect(position[0] + SHIP_WIDTH // 2 + 1, position[1] - SHIP_HEIGHT // 2 + 1, 3,
+                                     int(ship.action_progress * SHIP_HEIGHT)))
 
 class ProjectileAnim:
 
