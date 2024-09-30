@@ -11,6 +11,11 @@ class Biomass:
     def __init__(self, ship):
         self.ship = ship
         self.quantities = [0 for _ in range(len(BIOMASS_TYPES))]
+        self.selected = -1
+        self.value = self.get_biological_value()
+
+    def select(self, new_selection):
+        self.selected = new_selection
         self.value = self.get_biological_value()
 
     def get_fullness(self):
@@ -18,9 +23,13 @@ class Biomass:
 
     def change_quantity(self, species, amount):
         self.quantities[species] += amount
+        if self.selected == species and self.quantities[species] <= 0:
+            self.selected = -1
         self.value = self.get_biological_value()
 
     def get_biological_value(self):
+        if self.selected != -1:
+            self.quantities[self.selected] -= 1
         highest = max(self.quantities)
         total = 0
         for i in range(highest):
@@ -29,6 +38,8 @@ class Biomass:
                 if self.quantities[j] > i:
                     count += 1
             total += (count * (count + 1)) // 2
+        if self.selected != -1:
+            self.quantities[self.selected] += 1
         return total
 
     def empty(self):
@@ -36,6 +47,7 @@ class Biomass:
         for i in range(len(self.quantities)):
             self.quantities[i] = 0
         self.value = 0
+        self.selected = -1
         return value
 
 class Ecology:

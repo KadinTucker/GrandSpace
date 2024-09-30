@@ -8,6 +8,7 @@ import player
 
 import font
 import ship
+import ship_tasks
 import uiframe
 
 import galaxy_display
@@ -80,7 +81,6 @@ def main():
 
     active_player = game.players[0]
     active_player.selected_ship = active_player.ships[0]
-    active_player.selected_biomass = -1
 
     pygame.init()
 
@@ -142,80 +142,76 @@ def main():
                     active_display = galaxy_displays[active_player.id]
                 # TEMP: conquer active ship's star
                 elif event.key == pygame.K_c:
-                    if active_player.selected_ship.planet is not None:
-                        if (active_player.selected_ship.planet.colony is None
-                                and (active_player.selected_ship.planet.star.ruler is None or
-                                     active_player.selected_ship.planet.star.ruler is active_player)):
-                            new_colony = colony.Colony(active_player, active_player.selected_ship.planet)
-                            active_player.selected_ship.planet.colony = new_colony
-                            active_player.colonies.append(new_colony)
-                            active_player.add_ruled_star(active_player.selected_ship.star)
-                            galaxy_displays[active_player.id].refresh_layer(0)
-                            (system_displays[active_player.id][active_player.selected_ship.planet.star.id]
-                             .refresh_layer(1))
-                            (system_displays[active_player.id][active_player.selected_ship.planet.star.id]
-                             .refresh_layer(2))
+                    if ((ship_tasks.is_system_neutral(active_player.selected_ship)
+                            or ship_tasks.rules_system(active_player.selected_ship))
+                            and not ship_tasks.has_colony(active_player.selected_ship)
+                            and ship_tasks.has_buildings(active_player.selected_ship, 2)):
+                        new_colony = colony.Colony(active_player, active_player.selected_ship.planet)
+                        active_player.selected_ship.planet.colony = new_colony
+                        active_player.colonies.append(new_colony)
+                        active_player.add_ruled_star(active_player.selected_ship.star)
+                        galaxy_displays[active_player.id].refresh_layer(0)
+                        system_displays[active_player.id][active_player.selected_ship.planet.star.id].refresh_layer(1)
+                        system_displays[active_player.id][active_player.selected_ship.planet.star.id].refresh_layer(2)
+                        active_player.selected_ship.cargo.buildings -= 2
                 # TEMP: auto explore
                 elif event.key == pygame.K_e:
                     active_player.selected_ship.task = 1
                 # TEMP: collect biomass
                 elif event.key == pygame.K_b:
-                    if active_player.selected_ship.planet is not None:
+                    if (ship_tasks.has_access(active_player.selected_ship, 0)
+                            and active_player.selected_ship.planet is not None):
                         active_player.selected_ship.collect_biomass(active_player.selected_ship.planet.ecology)
                 # TEMP: build city
                 elif event.key == pygame.K_y:
-                    if active_player.selected_ship.planet is not None:
-                        if active_player.selected_ship.planet.colony is not None:
-                            if active_player.selected_ship.planet.colony.ruler is active_player:
-                                if (active_player.selected_ship.planet.colony.cities < active_player.selected_ship
-                                        .planet.colony.get_maximum_cities()):
-                                    active_player.selected_ship.planet.colony.cities += 1
-                                    (system_displays[active_player.id][active_player.selected_ship.planet.star.id]
-                                     .refresh_layer(2))
+                    if (ship_tasks.has_space_for_city(active_player.selected_ship)
+                            and ship_tasks.has_buildings(active_player.selected_ship, 2)):
+                        active_player.selected_ship.planet.colony.cities += 1
+                        system_displays[active_player.id][active_player.selected_ship.planet.star.id].refresh_layer(2)
+                        active_player.selected_ship.cargo.buildings -= 2
                 elif event.key == pygame.K_d:
-                    if active_player.selected_ship.planet is not None:
-                        if active_player.selected_ship.planet.colony is not None:
-                            if active_player.selected_ship.planet.colony.ruler is active_player:
-                                if (active_player.selected_ship.planet.colony.development < active_player.selected_ship
-                                        .planet.colony.get_maximum_development()):
-                                    active_player.selected_ship.planet.colony.development += 1
-                                    (system_displays[active_player.id][active_player.selected_ship.planet.star.id]
-                                     .refresh_layer(2))
+                    if (ship_tasks.has_space_for_development(active_player.selected_ship)
+                            and ship_tasks.has_buildings(active_player.selected_ship, 1)):
+                        active_player.selected_ship.planet.colony.development += 1
+                        system_displays[active_player.id][active_player.selected_ship.planet.star.id].refresh_layer(2)
+                        active_player.selected_ship.cargo.buildings -= 1
                 elif event.key == pygame.K_s:
                     active_player.add_ship(active_player.homeworld)
                 elif event.key == pygame.K_t:
                     if active_player.selected_ship.planet is not None:
-                        if active_player.selected_biomass != -1 and active_player.selected_ship.cargo.biomass.quantities[active_player.selected_biomass] >= 1:
-                            if active_player.selected_ship.cargo.biomass.value >= active_player.selected_ship.planet.ecology.get_terraform_cost():
-                                if not active_player.selected_ship.planet.ecology.species[active_player.selected_biomass]:
-                                    active_player.selected_ship.planet.ecology.species[active_player.selected_biomass] = True
-                                    active_player.selected_ship.planet.ecology.habitability += 1
-                                    active_player.selected_ship.cargo.biomass.empty()
-                                    active_player.selected_biomass = -1
+                        if ship_tasks.has_enough_biomass_to_terraform(active_player.selected_ship):
+                            (active_player.selected_ship.planet.ecology
+                                .species[active_player.selected_ship.cargo.biomass.selected]) = True
+                            active_player.selected_ship.planet.ecology.habitability += 1
+                            active_player.selected_ship.cargo.biomass.empty()
 
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == pygame.BUTTON_LEFT:
                     mouse_pos = pygame.mouse.get_pos()
                     if DISPLAY_DIMENSIONS[1] - 49 < mouse_pos[1] < DISPLAY_DIMENSIONS[1] - 31:
                         biomass_index = (mouse_pos[0] - 504) // 14 + 1
-                        print(biomass_index)
                         if 0 <= biomass_index < 26:
                             biomasses = 0
                             for i in range(len(active_player.selected_ship.cargo.biomass.quantities)):
-                                if active_player.selected_ship.cargo.biomass.quantities[i] > 0 or active_player.selected_biomass == i:
+                                if active_player.selected_ship.cargo.biomass.quantities[i] > 0:
                                     biomasses += 1
                                     if biomasses == biomass_index:
-                                        print("clicked " + str(ecology.BIOMASS_TYPES[i]))
-                                        if i == active_player.selected_biomass:
-                                            active_player.selected_biomass = -1
-                                            active_player.selected_ship.cargo.biomass.change_quantity(i, 1)
+                                        if i == active_player.selected_ship.cargo.biomass.selected:
+                                            active_player.selected_ship.cargo.biomass.select(-1)
                                         else:
-                                            if active_player.selected_biomass != -1:
-                                                (active_player.selected_ship.cargo.biomass
-                                                 .change_quantity(active_player.selected_biomass, 1))
-                                            active_player.selected_biomass = i
-                                            active_player.selected_ship.cargo.biomass.change_quantity(i, -1)
+                                            active_player.selected_ship.cargo.biomass.select(i)
                                         break
+                    if DISPLAY_DIMENSIONS[1] - 52 < mouse_pos[1] < DISPLAY_DIMENSIONS[1] - 26:
+                        if 175 < mouse_pos[0] < 201:
+                            if (ship_tasks.rules_planet(active_player.selected_ship)
+                                    and active_player.selected_ship.cargo.artifacts > 0):
+                                active_player.selected_ship.cargo.artifacts -= 1
+                                active_player.money += 500
+                        elif 425 < mouse_pos[0] < 451:
+                            if (ship_tasks.rules_planet(active_player.selected_ship)
+                                    and ship_tasks.has_enough_money(active_player.selected_ship, 500)):
+                                active_player.money -= 500
+                                active_player.selected_ship.cargo.buildings += 1
 
         if active_display.next_pane_id != -1:
             next_id = active_display.next_pane_id
@@ -299,10 +295,10 @@ def main():
         display.blit(value_biomass, (476, DISPLAY_DIMENSIONS[1] - 26))
         biomasses = 0
         for i in range(len(active_player.selected_ship.cargo.biomass.quantities)):
-            if active_player.selected_ship.cargo.biomass.quantities[i] > 0 or active_player.selected_biomass == i:
+            if active_player.selected_ship.cargo.biomass.quantities[i] > 0:
                 biomass_amount = font.get_text_surface(str(active_player.selected_ship.cargo.biomass.quantities[i]))
                 display.blit(biomass_amount, (506 + biomasses * 14, DISPLAY_DIMENSIONS[1] - 22))
-                if active_player.selected_biomass == i:
+                if active_player.selected_ship.cargo.biomass.selected == i:
                     pygame.draw.rect(display, (160, 200, 120),
                                      pygame.Rect(504 + biomasses * 14 - 2, DISPLAY_DIMENSIONS[1] - 49 - 2, 20, 22))
                     pygame.draw.rect(display, (30, 10, 10),

@@ -1,5 +1,7 @@
 import math
 
+import ecology
+
 # TODO: implement a fast pathing system, implementing Dijkstra's algorithm and storing, in stars, sorted lists
 #  of stars' distances to each other from shortest to longest, to quickly easily find the best path to follow
 #  and initialising that pathing information before game run
@@ -36,6 +38,48 @@ def get_explored_stars(player, galaxy):
         if player.explored_stars[e]:
             explored.append(galaxy.stars[e])
     return explored
+
+def has_enough_money(ship, requirement):
+    return ship.ruler.money >= requirement
+
+def has_buildings(ship, requirement):
+    return ship.cargo.buildings >= requirement
+
+def has_enough_biomass(ship, requirement):
+    return ship.cargo.biomass.value >= requirement
+
+def has_enough_biomass_to_terraform(ship):
+    return ship.planet is not None and has_enough_biomass(ship, ship.planet.ecology.get_terraform_cost())
+
+def has_access(ship, access_index):
+    return (ship.star is not None and (ship.star.ruler is None
+            or ship.ruler.game.diplomacy.access_matrix[ship.ruler.id][ship.star.ruler.id][access_index]))
+
+def is_system_neutral(ship):
+    return ship.star.ruler is None
+
+def rules_system(ship):
+    return ship.star is not None and ship.ruler is ship.star.ruler
+
+def rules_planet(ship):
+    return ship.planet is not None and ship.planet.colony is not None and ship.planet.colony.ruler is ship.ruler
+
+def has_species(ship, species_index):
+    return ship.planet is not None and ship.planet.ecology.species[species_index]
+
+def has_max_habitability(ship):
+    return ship.planet is not None and ship.planet.ecology.habitability < ecology.MAX_HABITABILITY
+
+def has_colony(ship):
+    return ship.planet is not None and ship.planet.colony is not None
+
+def has_space_for_city(ship):
+    return (has_colony(ship) and rules_system(ship)
+            and ship.planet.colony.cities < ship.planet.colony.get_maximum_cities())
+
+def has_space_for_development(ship):
+    return (has_colony(ship) and rules_system(ship)
+            and ship.planet.colony.development < ship.planet.colony.get_maximum_development())
 
 def task_null(ship, game):
     pass

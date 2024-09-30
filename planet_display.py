@@ -7,6 +7,7 @@ import ecology
 import font
 import snapshot
 import system_display
+import trade
 import uiframe
 
 SYSTEM_PLANET_RADIUS = 20
@@ -168,7 +169,7 @@ class ColonySnapshot(snapshot.Snapshot):
     def __init__(self, game, planet):
         self.planet = planet
         self.colony = planet.colony
-        super().__init__(game, (COLONY_MARGIN + max(MINERAL_WIDTH + 5 * TEXT_WIDTH
+        super().__init__(game, (COLONY_MARGIN + max(MINERAL_WIDTH + 6 * TEXT_WIDTH
                                                     + COLONY_DEMAND_PROGRESS_WIDTH, 2 * COLONY_ICON_WIDTH
                                                     + COLONY_SUMMARY_SPACING + TEXT_WIDTH),
                                 COLONY_ICON_HEIGHT + TEXT_HEIGHT + COLONY_VERTICAL_SPACING
@@ -192,15 +193,15 @@ class ColonySnapshot(snapshot.Snapshot):
         # Demand
         self.surface.blit(MINERAL_IMAGES[self.colony.demand.mineral_demanded],
                           (COLONY_MARGIN, COLONY_ICON_HEIGHT + TEXT_HEIGHT + COLONY_VERTICAL_SPACING))
-        demand_str = " : " + str(self.colony.demand.demand_quantity)
+        demand_str = " : " + str(max(self.colony.demand.demand_quantity * trade.TRADE_PRICE_PER_DEMAND,
+                                     trade.TRADE_PRICE_NON_DEMAND))
         demand_img = font.get_text_surface(demand_str)
         self.surface.blit(demand_img, (COLONY_MARGIN + MINERAL_WIDTH,
                                        COLONY_ICON_HEIGHT + TEXT_HEIGHT + COLONY_VERTICAL_SPACING))
         progress_height = int(self.colony.demand.change_progress * COLONY_DEMAND_PROGRESS_HEIGHT)
         pygame.draw.rect(self.surface, COLOR_DEMAND_PROGRESS,
                          pygame.Rect(COLONY_MARGIN + MINERAL_WIDTH + len(demand_str) * TEXT_WIDTH,
-                                     COLONY_ICON_HEIGHT + TEXT_HEIGHT + COLONY_VERTICAL_SPACING
-                                     + MINERAL_HEIGHT - progress_height,
+                                     COLONY_ICON_HEIGHT + 2 * TEXT_HEIGHT + COLONY_VERTICAL_SPACING - progress_height,
                                      COLONY_DEMAND_PROGRESS_WIDTH, progress_height))
 
 

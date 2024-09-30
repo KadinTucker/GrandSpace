@@ -3,6 +3,8 @@ import random
 import diplomacy
 import ship
 
+STARTING_MONEY = 1000
+
 class Game:
 
     def __init__(self, n_players, galaxy_obj):
@@ -15,7 +17,7 @@ class Player:
     def __init__(self, game, p_id):
         self.game = game
         self.id = p_id
-        self.money = 0
+        self.money = STARTING_MONEY
         self.color = (random.randint(20, 255), random.randint(20, 255), random.randint(20, 255))
         self.ships = []
         self.selected_ship = None

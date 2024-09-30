@@ -16,7 +16,7 @@ DISTANCE_RATIO_TOLERANCE = 1.5
 
 MINERAL_COLORS = [(200, 20, 20), (20, 200, 20), (20, 20, 200), (20, 200, 200), (200, 20, 200), (200, 200, 20)]
 # Expected number of artifacts in the galaxy
-ARTIFACT_TOTAL_PER_STAR = 0.15
+ARTIFACT_TOTAL_PER_STAR = 0.5
 AVERAGE_PLANETS = 3
 LIFE_DENSITY = 0.5  # approximate fraction of stars one expects to have life (in reality, less if higher)
 
@@ -144,6 +144,8 @@ class Galaxy:
             for i in range(3):
                 game.players[p].homeworld.ecology.species[species[p * 3 + i]] = True
                 game.players[p].homeworld.ecology.habitability += 1
+            game.players[p].homeworld.colony.cities = game.players[p].homeworld.colony.get_maximum_cities()
+            game.players[p].homeworld.colony.development = game.players[p].homeworld.colony.get_maximum_development()//2
         num_species = len(game.players) * 3
         for _ in range(int(len(self.stars) * LIFE_DENSITY / num_species)):
             for i in range(num_species):
