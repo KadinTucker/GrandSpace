@@ -42,6 +42,8 @@ class Player:
         self.ships.append(ship.Ship(planet.star.location, self))
         self.ships[-1].destination_star = planet.star
         self.ships[-1].destination_planet = planet
+        self.ships[-1].enter_star()
+        self.ships[-1].enter_planet()
 
     def add_ruled_star(self, star):
         if star.ruler is not None:

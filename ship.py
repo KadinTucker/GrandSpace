@@ -43,24 +43,6 @@ Task Enumeration:
 9 - Research
 """
 
-"""
-Action Enumeration:
-0 - Idle
-1 - Moving
-4 - Buying Buildings
-5 - Establishing Colony
-6 - Building City
-7 - Developing
-8 - Fighting
-9 - Besieging
-10 - Buying Minerals
-11 - Selling Minerals
-12 - Researching
-13 - Schmoozing
-14 - Collecting Biomass
-15 - Terraforming
-"""
-
 # Average distance of 80 units between stars and taking 2 seconds to traverse 80 units requires a speed of 2400
 STAR_ENTRY_DISTANCE = 1
 
@@ -91,13 +73,17 @@ class Ship:
 
     def act(self, time):
         if self.action == 0:
-            if self.health < self.ruler.technology.get_ship_max_health():
+            if (self.health < self.ruler.technology.get_ship_max_health()
+                    and self.planet is not None and self.planet.colony is not None
+                    and self.planet.colony.ruler == self.ruler):
                 self.action_progress += ship_tasks.FULL_HEAL_RATE * self.ruler.technology.get_ship_max_health() * time
                 if self.action_progress >= 1.0:
                     self.health += 1
                     self.action_progress -= 1.0
         elif self.action == 1:
             self.move(time)
+        else:
+            ship_tasks.SHIP_ACTIONS[self.action].perform(self, time)
 
     def set_action(self, action_idx):
         self.action = action_idx
@@ -312,23 +298,16 @@ class Ship:
             self.exit_planet()
         if self.star is not None:
             self.exit_star()
+        self.set_action(0)
         self.location = self.ruler.homeworld.star.location
         self.destination = self.location
         self.destination_star = self.ruler.homeworld.star
         self.destination_planet = self.ruler.homeworld
         self.enter_star()
         self.enter_planet()
-        self.health = self.ruler.technology.get_ship_max_health()
+        self.health = 1
         self.cargo.empty()
         self.ruler.milestone_progress[0] += 50
-
-    def collect_biomass(self, ecology_obj):
-        if ecology_obj is not None and ecology_obj.biomass_level == 1:
-            for i in range(len(ecology_obj.species)):
-                if ecology_obj.species[i]:
-                    self.cargo.biomass.change_quantity(i, 1)
-            ecology_obj.biomass_level = 0
-
 
 class Cargo:
 

@@ -153,60 +153,21 @@ def main():
                     active_display = galaxy_displays[active_player.id]
                 # TEMP: conquer active ship's star
                 elif event.key == pygame.K_c:
-                    if ((ship_tasks.is_system_neutral(active_player.selected_ship)
-                            or ship_tasks.rules_system(active_player.selected_ship))
-                            and not ship_tasks.has_colony(active_player.selected_ship)
-                            and ship_tasks.has_buildings(active_player.selected_ship, 2)):
-                        new_colony = colony.Colony(active_player, active_player.selected_ship.planet)
-                        active_player.selected_ship.planet.colony = new_colony
-                        active_player.colonies.append(new_colony)
-                        if active_player.selected_ship.star.ruler is None:
-                            active_player.milestone_progress[5] += 25
-                        active_player.add_ruled_star(active_player.selected_ship.star)
-                        galaxy_displays[active_player.id].refresh_layer(0)
-                        system_displays[active_player.id][active_player.selected_ship.planet.star.id].refresh_layer(1)
-                        system_displays[active_player.id][active_player.selected_ship.planet.star.id].refresh_layer(2)
-                        active_player.selected_ship.cargo.buildings -= 2
-                        active_player.milestone_progress[5] += 15 + 10
+                    active_player.selected_ship.set_action(4)
                 # TEMP: auto explore
                 elif event.key == pygame.K_e:
                     active_player.selected_ship.task = 1
                 # TEMP: collect biomass
                 elif event.key == pygame.K_b:
-                    if (ship_tasks.has_access(active_player.selected_ship, 0)
-                            and active_player.selected_ship.planet is not None):
-                        active_player.selected_ship.collect_biomass(active_player.selected_ship.planet.ecology)
-                        active_player.milestone_progress[2] += (
-                                5 * active_player.selected_ship.planet.ecology.habitability)
-                # TEMP: build city
+                    active_player.selected_ship.set_action(5)
                 elif event.key == pygame.K_y:
-                    if (ship_tasks.has_space_for_city(active_player.selected_ship)
-                            and ship_tasks.has_buildings(active_player.selected_ship, 2)):
-                        active_player.selected_ship.planet.colony.cities += 1
-                        system_displays[active_player.id][active_player.selected_ship.planet.star.id].refresh_layer(2)
-                        active_player.selected_ship.cargo.buildings -= 2
-                        active_player.milestone_progress[5] += 10
+                    active_player.selected_ship.set_action(2)
                 elif event.key == pygame.K_d:
-                    if (ship_tasks.has_space_for_development(active_player.selected_ship)
-                            and ship_tasks.has_buildings(active_player.selected_ship, 1)):
-                        active_player.selected_ship.planet.colony.development += 1
-                        system_displays[active_player.id][active_player.selected_ship.planet.star.id].refresh_layer(2)
-                        active_player.selected_ship.cargo.buildings -= 1
-                        active_player.milestone_progress[5] += 5
+                    active_player.selected_ship.set_action(3)
                 elif event.key == pygame.K_s:
                     active_player.add_ship(active_player.homeworld)
                 elif event.key == pygame.K_t:
-                    if active_player.selected_ship.planet is not None:
-                        if ship_tasks.has_enough_biomass_to_terraform(active_player.selected_ship)\
-                                and ship_tasks.can_be_terraformed(active_player.selected_ship)\
-                                and ship_tasks.has_enough_money(active_player.selected_ship,
-                                                                active_player.technology.get_terraform_monetary_cost()):
-                            (active_player.selected_ship.planet.ecology
-                                .species[active_player.selected_ship.cargo.biomass.selected]) = True
-                            active_player.selected_ship.planet.ecology.habitability += 1
-                            spent = active_player.selected_ship.cargo.biomass.empty()
-                            active_player.money -= active_player.technology.get_terraform_monetary_cost()
-                            active_player.milestone_progress[2] += spent + 25
+                    active_player.selected_ship.set_action(6)
                 elif event.key == pygame.K_m:
                     if ship_tasks.rules_planet(active_player.selected_ship):
                         active_player.selected_ship.cargo.minerals[active_player.selected_ship.planet.mineral] \
