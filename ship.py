@@ -44,18 +44,15 @@ Task Enumeration:
 """
 
 # Average distance of 80 units between stars and taking 2 seconds to traverse 80 units requires a speed of 2400
-SHIP_SPEED_PER_MINUTE = 800
 STAR_ENTRY_DISTANCE = 1
 
 # TODO: make these tasks (or above constants) vary with technology
 TASKS = [ship_tasks.task_null, ship_tasks.task_explore_superficial]
 
-SHOT_COOLDOWN_PER_MIN = 20.0
-
 class Ship:
 
     def __init__(self, location, ruler):
-        self.health = 5
+        self.health = ruler.technology.get_ship_max_health()
         self.energy = 0
         self.ruler = ruler
         self.star = None  # Star object, or None if travelling interstellar
@@ -76,12 +73,12 @@ class Ship:
     def attack(self, time):
         if self.star is not None:
             if self.shot_cooldown > 0.0:
-                self.shot_cooldown = max(0.0, self.shot_cooldown - SHOT_COOLDOWN_PER_MIN * time)
+                self.shot_cooldown = max(0.0, self.shot_cooldown - self.ruler.technology.get_ship_firerate() * time)
             else:
                 for s in self.star.ships:
                     if ship_tasks.is_enemy_ship(self, s):
                         s.health -= 1
-                        self.ruler.milestone_progress[0] += (25 * 1) // 5
+                        self.ruler.milestone_progress[0] += (25 * 1) // s.ruler.technology.get_ship_max_health()
                         self.shot_cooldown = 1.0
                         break
 
@@ -113,7 +110,7 @@ class Ship:
         y_dist = self.destination[1] - self.location[1]
         distance_to_destination = math.hypot(x_dist, y_dist)
         if distance_to_destination != 0:
-            distance_travelled = time * SHIP_SPEED_PER_MINUTE
+            distance_travelled = time * self.ruler.technology.get_ship_speed()
             if distance_travelled >= distance_to_destination:
                 self.location = self.destination
             else:
@@ -271,7 +268,8 @@ class Ship:
         self.destination_planet = self.ruler.homeworld
         self.enter_star()
         self.enter_planet()
-        self.health = 5
+        self.health = self.ruler.technology.get_ship_max_health()
+        self.cargo.empty()
         self.ruler.milestone_progress[0] += 50
 
     def collect_biomass(self, ecology_obj):
@@ -289,6 +287,12 @@ class Cargo:
         self.minerals = [0, 0, 0, 0, 0, 0]
         self.artifacts = 0
         self.biomass = ecology.Biomass(ship)
+        self.buildings = 0
+
+    def empty(self):
+        self.minerals = [0, 0, 0, 0, 0, 0]
+        self.artifacts = 0
+        self.biomass.empty()
         self.buildings = 0
     
     def get_fullness(self):

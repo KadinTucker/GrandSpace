@@ -109,9 +109,10 @@ class GalaxyDisplay(pane.Pane):
                 ship_display.draw_ship(self.layers[2], s, self.project_coordinate(s.location), self.player)
                 if s is self.player.selected_ship:
                     ship_display.draw_ship_galaxy_range(self.layers[2], self.project_coordinate(s.location),
-                                                        90, self.view_scale)
+                                                        self.player.technology.get_ship_range(), self.view_scale)
                     if s.star is not None:
-                        stars_in_range = ship_tasks.find_stars_in_range(s.star, 90, self.game.galaxy)
+                        stars_in_range = ship_tasks.find_stars_in_range(s.star, self.player.technology.get_ship_range(),
+                                                                        self.game.galaxy)
                         for r in stars_in_range:
                             pygame.draw.circle(self.layers[2], COLOR_STAR_IN_RANGE,
                                                self.project_coordinate(self.game.galaxy.stars[r].location),
@@ -134,7 +135,8 @@ class GalaxyDisplay(pane.Pane):
                 self.player.selected_ship.reset_task()
                 clicked_star = self.find_star(self.get_relative_pane_pos(mouse_pos))
                 if clicked_star is not None:
-                    if self.player.selected_ship.get_distance_to(clicked_star.location) < 90:
+                    if (self.player.selected_ship.get_distance_to(clicked_star.location)
+                            < self.player.technology.get_ship_range()):
                         self.player.selected_ship.set_destination_star(clicked_star)
             elif event.button == pygame.BUTTON_LEFT:
                 new_ship = self.find_player_ship(self.get_relative_pane_pos(mouse_pos))

@@ -3,7 +3,6 @@ import trade
 MINERAL_PER_DEVELOPMENT_PER_MINUTE = 1
 HOMEWORLD_PRODUCTION_FACTOR = 1  # amount by which production is divided for homeworld
 MAX_DEVELOPMENT_PER_CITY_PER_HABITABILITY = 1
-MINERAL_CAPACITY_PER_CITY = 5
 
 class Colony(object):
 
@@ -22,7 +21,7 @@ class Colony(object):
         return self.development * time * MINERAL_PER_DEVELOPMENT_PER_MINUTE
     
     def get_mineral_capacity(self):
-        return self.cities * MINERAL_CAPACITY_PER_CITY
+        return self.cities * self.ruler.technology.get_mineral_storage()
     
     def get_maximum_development(self):
         return self.planet.get_habitability() * self.cities * MAX_DEVELOPMENT_PER_CITY_PER_HABITABILITY
@@ -31,8 +30,7 @@ class Colony(object):
         self.minerals = min(self.get_mineral_capacity(), self.minerals + self.get_production(time))
 
     def get_defense(self):
-        return self.cities
-
+        return self.cities + self.ruler.technology.get_bonus_shields()
 
 class HomeworldColony(Colony):
 

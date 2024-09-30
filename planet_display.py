@@ -166,9 +166,10 @@ class EcologySnapshot(snapshot.Snapshot):
 
 
 class ColonySnapshot(snapshot.Snapshot):
-    def __init__(self, game, planet):
+    def __init__(self, game, planet, player):
         self.planet = planet
         self.colony = planet.colony
+        self.player = player
         super().__init__(game, (COLONY_MARGIN + max(MINERAL_WIDTH + 6 * TEXT_WIDTH
                                                     + COLONY_DEMAND_PROGRESS_WIDTH, 2 * COLONY_ICON_WIDTH
                                                     + COLONY_SUMMARY_SPACING + TEXT_WIDTH),
@@ -193,8 +194,7 @@ class ColonySnapshot(snapshot.Snapshot):
         # Demand
         self.surface.blit(MINERAL_IMAGES[self.colony.demand.mineral_demanded],
                           (COLONY_MARGIN, COLONY_ICON_HEIGHT + TEXT_HEIGHT + COLONY_VERTICAL_SPACING))
-        demand_str = " :$" + str(max(self.colony.demand.demand_quantity * trade.TRADE_PRICE_PER_DEMAND,
-                                     trade.TRADE_PRICE_NON_DEMAND))
+        demand_str = " :$" + str(self.colony.demand.get_price(self.colony.demand.mineral_demanded, self.player))
         demand_img = font.get_text_surface(demand_str)
         self.surface.blit(demand_img, (COLONY_MARGIN + MINERAL_WIDTH,
                                        COLONY_ICON_HEIGHT + TEXT_HEIGHT + COLONY_VERTICAL_SPACING))
@@ -265,7 +265,7 @@ class PlanetDisplay(drawable.Drawable):
         self.planet = planet
         self.center_surface = PlanetSnapshot(game, planet)
         self.above_surface = EcologySnapshot(game, planet)
-        self.right_surface = ColonySnapshot(game, planet)
+        self.right_surface = ColonySnapshot(game, planet, player)
         self.below_surface = DefenseSnapshot(game, planet)
         self.left_surface = ProductionSnapshot(game, planet)
         self.update()

@@ -2,9 +2,10 @@ import math
 
 import ecology
 
-# TODO: implement a fast pathing system, implementing Dijkstra's algorithm and storing, in stars, sorted lists
-#  of stars' distances to each other from shortest to longest, to quickly easily find the best path to follow
-#  and initialising that pathing information before game run
+COLONY_PLACEMENT_RATE = 60.0
+CITY_PLACEMENT_RATE = 120.0
+DEVELOPMENT_PLACEMENT_RATE = 120.0
+
 def find_nearest_star(position, galaxy, blacklist=()):
     """
     Finds the nearest star to the ship, except for a possible blacklist

@@ -70,11 +70,6 @@ def get_pane_mouse_pos(pane_location):
 
 def main():
 
-    if len(sys.argv) > 1 and sys.argv[1] == 'cheat':
-        print("*** CHEAT MODE ACTIVATED ***")
-        ship.SHIP_SPEED_PER_MINUTE = 10000
-        ecology.BIOMASS_REGENERATION_PER_MINUTE = 15.0
-
     galaxy_obj = galaxy.Galaxy(galaxy.generate_galaxy_boxes(GALAXY_WIDTH, GALAXY_HEIGHT, GALAXY_ZONE_RADIUS))
     game = player.Game(5, galaxy_obj)
     galaxy_obj.generate_star_distance_matrix()
@@ -85,6 +80,13 @@ def main():
 
     active_player = game.players[0]
     active_player.selected_ship = active_player.ships[0]
+
+    if len(sys.argv) > 1 and sys.argv[1] == 'cheat':
+        print("*** CHEAT MODE ACTIVATED ***")
+        for p in game.players:
+            for t in range(len(p.technology.tech_level)):
+                p.technology.tech_level[t] = [5, 5, 2]
+        ecology.BIOMASS_REGENERATION_PER_MINUTE = 15.0
 
     pygame.init()
 
@@ -198,12 +200,12 @@ def main():
                         if ship_tasks.has_enough_biomass_to_terraform(active_player.selected_ship)\
                                 and ship_tasks.can_be_terraformed(active_player.selected_ship)\
                                 and ship_tasks.has_enough_money(active_player.selected_ship,
-                                                                ecology.TERRAFORM_MONETARY_COST):
+                                                                active_player.technology.get_terraform_monetary_cost()):
                             (active_player.selected_ship.planet.ecology
                                 .species[active_player.selected_ship.cargo.biomass.selected]) = True
                             active_player.selected_ship.planet.ecology.habitability += 1
                             spent = active_player.selected_ship.cargo.biomass.empty()
-                            active_player.money -= ecology.TERRAFORM_MONETARY_COST
+                            active_player.money -= active_player.technology.get_terraform_monetary_cost()
                             active_player.milestone_progress[2] += spent + 25
                 elif event.key == pygame.K_m:
                     if ship_tasks.rules_planet(active_player.selected_ship):
@@ -241,13 +243,15 @@ def main():
                                 assert 0 <= mineral_num < 6
                                 if active_player.selected_ship.cargo.minerals[mineral_num] > 0:
                                     active_player.selected_ship.cargo.minerals[mineral_num] -= 1
-                                    price = active_player.selected_ship.planet.colony.demand.get_price(mineral_num)
+                                    price = (active_player.selected_ship.planet.colony
+                                             .demand.get_price(mineral_num, active_player))
                                     active_player.money += price
                                     active_player.milestone_progress[4] += 250 / price + 1
                         elif 425 < mouse_pos[0] < 451:
                             if (ship_tasks.rules_planet(active_player.selected_ship)
-                                    and ship_tasks.has_enough_money(active_player.selected_ship, 500)):
-                                active_player.money -= 500
+                                    and ship_tasks.has_enough_money(active_player.selected_ship,
+                                                                    active_player.technology.get_building_cost())):
+                                active_player.money -= active_player.technology.get_building_cost()
                                 active_player.selected_ship.cargo.buildings += 1
 
         if active_display.next_pane_id != -1:

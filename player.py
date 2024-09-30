@@ -3,6 +3,7 @@ import random
 
 import diplomacy
 import ship
+import technology
 
 STARTING_MONEY = 1000
 BASE_MILESTONE_COST = 50
@@ -35,6 +36,7 @@ class Player:
         self.explored_stars = []
         self.reset_explored_stars()
         self.milestone_progress = [0, 0, 0, 0, 0, 0]
+        self.technology = technology.TechnologyTree(self)
 
     def add_ship(self, planet):
         self.ships.append(ship.Ship(planet.star.location, self))

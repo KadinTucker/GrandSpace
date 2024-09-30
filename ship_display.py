@@ -72,13 +72,14 @@ def draw_ship_projectile(surface, origin_pos, destination_pos, progress):
                       origin_pos[1] + (progress + SHIP_PROJECTILE_LENGTH / dist) * diffy), SHIP_PROJECTILE_WIDTH)
 
 def draw_ship_health(surface, ship, position):
-    if ship.health < 5:
+    if ship.health < ship.ruler.technology.get_ship_max_health():
         pygame.draw.rect(surface, COLOR_SHIP_DAMAGE,
                          pygame.Rect(position[0] - SHIP_WIDTH // 2, position[1] + SHIP_HEIGHT // 2,
                                      SHIP_WIDTH, SHIP_HEIGHT // 4))
         pygame.draw.rect(surface, COLOR_SHIP_HEALTH,
                          pygame.Rect(position[0] - SHIP_WIDTH // 2, position[1] + SHIP_HEIGHT // 2,
-                                     int(SHIP_WIDTH * ship.health / 5), SHIP_HEIGHT // 4))
+                                     int(SHIP_WIDTH * ship.health / ship.ruler.technology.get_ship_max_health()),
+                                     SHIP_HEIGHT // 4))
 
 class ProjectileAnim:
 

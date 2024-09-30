@@ -7,7 +7,6 @@ TRADE_DEMAND_RESET_CHANCE = 1
 TRADE_DEMAND_MODIFY_PER_MINUTE = 2.0  # in changes per minute
 
 TRADE_PRICE_PER_DEMAND = 50
-TRADE_PRICE_NON_DEMAND = 10
 
 class Demand:
 
@@ -64,7 +63,8 @@ class Demand:
                     self.reset_demand()
             self.change_progress -= 1.0
 
-    def get_price(self, mineral):
-        if mineral == self.mineral_demanded:
-            return TRADE_PRICE_PER_DEMAND * self.demand_quantity
-        return TRADE_PRICE_NON_DEMAND
+    def get_price(self, mineral, buyer):
+        if self.mineral_demanded != -1 and mineral == self.mineral_demanded:
+            return (max(buyer.technology.get_minimum_price(), TRADE_PRICE_PER_DEMAND * self.demand_quantity)
+                    + buyer.technology.get_trade_bonus())
+        return buyer.technology.get_minimum_price() + buyer.technology.get_trade_bonus()

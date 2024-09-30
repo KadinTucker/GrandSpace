@@ -155,7 +155,8 @@ class SystemDisplay(pane.Pane):
         if event.type == pygame.MOUSEBUTTONDOWN:
             if event.button == pygame.BUTTON_RIGHT:
                 self.player.selected_ship.reset_task()
-                if self.player.selected_ship.get_distance_to(self.star.location) < 90:
+                if (self.player.selected_ship.get_distance_to(self.star.location)
+                        < self.player.technology.get_ship_range()):
                     if self.is_star_clicked(self.get_relative_pane_pos(mouse_pos)):
                         if self.player.selected_ship.star is not self.star:
                             self.player.selected_ship.set_destination_star(self.star)
