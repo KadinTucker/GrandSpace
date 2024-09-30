@@ -94,3 +94,9 @@ class Diplomacy:
         self.leverage_matrix[origin_id][dest_id] += amount
         if old_leverage < 0:
             self.update_access()
+
+    def get_milestone_state(self, player_id):
+        total = 0
+        for i in range(len(self.game.players)):
+            total += self.leverage_matrix[i][player_id]
+        return total / (len(self.game.players) - 1) / 100 * 2 * 1500

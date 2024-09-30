@@ -81,6 +81,7 @@ class Ship:
                 for s in self.star.ships:
                     if ship_tasks.is_enemy_ship(self, s):
                         s.health -= 1
+                        self.ruler.milestone_progress[0] += (25 * 1) // 5
                         self.shot_cooldown = 1.0
                         break
 
@@ -204,6 +205,7 @@ class Ship:
             self.ruler.explored_stars[self.star.id] = True
         if self.planet is not None:
             if self.planet.artifacts > 0:
+                self.ruler.milestone_progress[1] += 15
                 self.cargo.artifacts += 1
                 self.planet.artifacts -= 1
 
@@ -270,6 +272,7 @@ class Ship:
         self.enter_star()
         self.enter_planet()
         self.health = 5
+        self.ruler.milestone_progress[0] += 50
 
     def collect_biomass(self, ecology_obj):
         if ecology_obj is not None and ecology_obj.biomass_level == 1:

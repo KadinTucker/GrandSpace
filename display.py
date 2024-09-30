@@ -158,11 +158,14 @@ def main():
                         new_colony = colony.Colony(active_player, active_player.selected_ship.planet)
                         active_player.selected_ship.planet.colony = new_colony
                         active_player.colonies.append(new_colony)
+                        if active_player.selected_ship.star.ruler is None:
+                            active_player.milestone_progress[5] += 25
                         active_player.add_ruled_star(active_player.selected_ship.star)
                         galaxy_displays[active_player.id].refresh_layer(0)
                         system_displays[active_player.id][active_player.selected_ship.planet.star.id].refresh_layer(1)
                         system_displays[active_player.id][active_player.selected_ship.planet.star.id].refresh_layer(2)
                         active_player.selected_ship.cargo.buildings -= 2
+                        active_player.milestone_progress[5] += 15 + 10
                 # TEMP: auto explore
                 elif event.key == pygame.K_e:
                     active_player.selected_ship.task = 1
@@ -171,6 +174,8 @@ def main():
                     if (ship_tasks.has_access(active_player.selected_ship, 0)
                             and active_player.selected_ship.planet is not None):
                         active_player.selected_ship.collect_biomass(active_player.selected_ship.planet.ecology)
+                        active_player.milestone_progress[2] += (
+                                5 * active_player.selected_ship.planet.ecology.habitability)
                 # TEMP: build city
                 elif event.key == pygame.K_y:
                     if (ship_tasks.has_space_for_city(active_player.selected_ship)
@@ -178,12 +183,14 @@ def main():
                         active_player.selected_ship.planet.colony.cities += 1
                         system_displays[active_player.id][active_player.selected_ship.planet.star.id].refresh_layer(2)
                         active_player.selected_ship.cargo.buildings -= 2
+                        active_player.milestone_progress[5] += 10
                 elif event.key == pygame.K_d:
                     if (ship_tasks.has_space_for_development(active_player.selected_ship)
                             and ship_tasks.has_buildings(active_player.selected_ship, 1)):
                         active_player.selected_ship.planet.colony.development += 1
                         system_displays[active_player.id][active_player.selected_ship.planet.star.id].refresh_layer(2)
                         active_player.selected_ship.cargo.buildings -= 1
+                        active_player.milestone_progress[5] += 5
                 elif event.key == pygame.K_s:
                     active_player.add_ship(active_player.homeworld)
                 elif event.key == pygame.K_t:
@@ -195,8 +202,9 @@ def main():
                             (active_player.selected_ship.planet.ecology
                                 .species[active_player.selected_ship.cargo.biomass.selected]) = True
                             active_player.selected_ship.planet.ecology.habitability += 1
-                            active_player.selected_ship.cargo.biomass.empty()
+                            spent = active_player.selected_ship.cargo.biomass.empty()
                             active_player.money -= ecology.TERRAFORM_MONETARY_COST
+                            active_player.milestone_progress[2] += spent + 25
                 elif event.key == pygame.K_m:
                     if ship_tasks.rules_planet(active_player.selected_ship):
                         active_player.selected_ship.cargo.minerals[active_player.selected_ship.planet.mineral] \
@@ -226,6 +234,7 @@ def main():
                                     and active_player.selected_ship.cargo.artifacts > 0):
                                 active_player.selected_ship.cargo.artifacts -= 1
                                 active_player.money += 500
+                                active_player.milestone_progress[4] += 2
                         elif 229 < mouse_pos[0] < 386:
                             if ship_tasks.is_at_colony(active_player.selected_ship):
                                 mineral_num = (mouse_pos[0] - 229) // 26
@@ -234,6 +243,7 @@ def main():
                                     active_player.selected_ship.cargo.minerals[mineral_num] -= 1
                                     price = active_player.selected_ship.planet.colony.demand.get_price(mineral_num)
                                     active_player.money += price
+                                    active_player.milestone_progress[4] += 250 / price + 1
                         elif 425 < mouse_pos[0] < 451:
                             if (ship_tasks.rules_planet(active_player.selected_ship)
                                     and ship_tasks.has_enough_money(active_player.selected_ship, 500)):
@@ -258,6 +268,7 @@ def main():
                 if p == active_player:
                     galaxy_displays[active_player.id].refresh_layer(0)
                     galaxy_displays[active_player.id].refresh_layer(1)
+            p.milestone_progress[3] = game.diplomacy.get_milestone_state(p.id)
         # Galaxy loop
         for s in galaxy_obj.stars:
             for p in s.planets:
@@ -279,7 +290,7 @@ def main():
         # TEMP: manually drawing all UI elements
 
         for i in range(len(active_player.milestone_progress)):
-            height = int(121 * player.get_milestone_from_progress(active_player.milestone_progress[i]))
+            height = int(121 * player.get_milestone_from_progress(active_player.milestone_progress[i]) / 5)
             pygame.draw.rect(display, COLOR_MILESTONES[i],
                              pygame.Rect(GALAXY_PANE_POSITION[0] + 6 + 29 * i, 156 - height, 20, height))
 
