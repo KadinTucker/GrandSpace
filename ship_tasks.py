@@ -58,6 +58,9 @@ def has_access(ship, access_index):
 def is_system_neutral(ship):
     return ship.star.ruler is None
 
+def is_at_colony(ship):
+    return ship.planet is not None and ship.planet.colony is not None
+
 def rules_system(ship):
     return ship.star is not None and ship.ruler is ship.star.ruler
 
@@ -65,9 +68,9 @@ def rules_planet(ship):
     return ship.planet is not None and ship.planet.colony is not None and ship.planet.colony.ruler is ship.ruler
 
 def has_species(ship, species_index):
-    return ship.planet is not None and ship.planet.ecology.species[species_index]
+    return species_index != -1 and ship.planet is not None and ship.planet.ecology.species[species_index]
 
-def has_max_habitability(ship):
+def can_be_terraformed(ship):
     return ship.planet is not None and ship.planet.ecology.habitability < ecology.MAX_HABITABILITY
 
 def has_colony(ship):

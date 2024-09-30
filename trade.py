@@ -1,9 +1,10 @@
 import random
 
 TRADE_MAX_DEMAND = 9
-TRADE_DEMAND_INCREASE_CHANCE = 0.7
-TRADE_DEMAND_DECREASE_CHANCE = 0.25
-TRADE_DEMAND_MODIFY_PER_MINUTE_CITY = 1.0  # in changes per minute and city
+TRADE_DEMAND_INCREASE_CHANCE = 5
+TRADE_DEMAND_DECREASE_CHANCE = 4
+TRADE_DEMAND_RESET_CHANCE = 1
+TRADE_DEMAND_MODIFY_PER_MINUTE = 2.0  # in changes per minute
 
 TRADE_PRICE_PER_DEMAND = 50
 TRADE_PRICE_NON_DEMAND = 10
@@ -30,22 +31,37 @@ class Demand:
         self.demand_quantity = 1
 
     def modify_mineral_demand(self):
-        roll = random.random()
-        if roll < TRADE_DEMAND_INCREASE_CHANCE:
+        """
+        Modify the mineral demand randomly, as happens periodically
+        The chance for demand to increase increases with number of cities
+        The following table is for base increase change of 5, base decrease of 4, base reset of 1:
+         - num cities | increase chance | decrease chance | reset chance
+         -      1              50%              40%             10%
+         -      2              67%              27%             7%          * values are rounded
+         -      3              75%              20%             5%
+         -      4              80%              16%             4%
+         -      5              83%              13%             3%          * values are rounded
+         -      6              86%              11%             3%          * values are rounded
+         -      7              87%              11%             2%          * values are rounded
+        """
+        roll = random.random() * (TRADE_DEMAND_INCREASE_CHANCE * self.colony.cities + TRADE_DEMAND_INCREASE_CHANCE
+                                  + TRADE_DEMAND_RESET_CHANCE)
+        if roll < TRADE_DEMAND_INCREASE_CHANCE * self.colony.cities:
             self.demand_quantity += 1
-        elif roll < TRADE_DEMAND_DECREASE_CHANCE + TRADE_DEMAND_INCREASE_CHANCE:
+        elif roll < TRADE_DEMAND_DECREASE_CHANCE + TRADE_DEMAND_INCREASE_CHANCE * self.colony.cities:
             self.demand_quantity -= 1
-        if (self.demand_quantity < 1 or self.demand_quantity > TRADE_MAX_DEMAND or
-                roll >= TRADE_DEMAND_INCREASE_CHANCE + TRADE_DEMAND_DECREASE_CHANCE):
+        else:
             self.reset_demand()
 
     def progress_demand(self, time):
-        self.change_progress += TRADE_DEMAND_MODIFY_PER_MINUTE_CITY * self.colony.cities * time
+        self.change_progress += TRADE_DEMAND_MODIFY_PER_MINUTE * time
         if self.change_progress > 1.0:
             if self.mineral_demanded == -1:
                 self.set_new_mineral_demand()
             else:
                 self.modify_mineral_demand()
+                if self.demand_quantity <= 0 or self.demand_quantity > TRADE_MAX_DEMAND:
+                    self.reset_demand()
             self.change_progress -= 1.0
 
     def get_price(self, mineral):

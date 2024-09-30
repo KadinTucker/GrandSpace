@@ -179,11 +179,21 @@ def main():
                     active_player.add_ship(active_player.homeworld)
                 elif event.key == pygame.K_t:
                     if active_player.selected_ship.planet is not None:
-                        if ship_tasks.has_enough_biomass_to_terraform(active_player.selected_ship):
+                        if ship_tasks.has_enough_biomass_to_terraform(active_player.selected_ship)\
+                                and ship_tasks.can_be_terraformed(active_player.selected_ship)\
+                                and ship_tasks.has_enough_money(active_player.selected_ship,
+                                                                ecology.TERRAFORM_MONETARY_COST):
                             (active_player.selected_ship.planet.ecology
                                 .species[active_player.selected_ship.cargo.biomass.selected]) = True
                             active_player.selected_ship.planet.ecology.habitability += 1
                             active_player.selected_ship.cargo.biomass.empty()
+                            active_player.money -= ecology.TERRAFORM_MONETARY_COST
+                elif event.key == pygame.K_m:
+                    if ship_tasks.rules_planet(active_player.selected_ship):
+                        active_player.selected_ship.cargo.minerals[active_player.selected_ship.planet.mineral] \
+                            += int(active_player.selected_ship.planet.colony.minerals)
+                        active_player.selected_ship.planet.colony.minerals \
+                            -= int(active_player.selected_ship.planet.colony.minerals)
 
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == pygame.BUTTON_LEFT:
@@ -207,6 +217,14 @@ def main():
                                     and active_player.selected_ship.cargo.artifacts > 0):
                                 active_player.selected_ship.cargo.artifacts -= 1
                                 active_player.money += 500
+                        elif 229 < mouse_pos[0] < 386:
+                            if ship_tasks.is_at_colony(active_player.selected_ship):
+                                mineral_num = (mouse_pos[0] - 229) // 26
+                                assert 0 <= mineral_num < 6
+                                if active_player.selected_ship.cargo.minerals[mineral_num] > 0:
+                                    active_player.selected_ship.cargo.minerals[mineral_num] -= 1
+                                    price = active_player.selected_ship.planet.colony.demand.get_price(mineral_num)
+                                    active_player.money += price
                         elif 425 < mouse_pos[0] < 451:
                             if (ship_tasks.rules_planet(active_player.selected_ship)
                                     and ship_tasks.has_enough_money(active_player.selected_ship, 500)):

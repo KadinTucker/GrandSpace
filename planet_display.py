@@ -193,7 +193,7 @@ class ColonySnapshot(snapshot.Snapshot):
         # Demand
         self.surface.blit(MINERAL_IMAGES[self.colony.demand.mineral_demanded],
                           (COLONY_MARGIN, COLONY_ICON_HEIGHT + TEXT_HEIGHT + COLONY_VERTICAL_SPACING))
-        demand_str = " : " + str(max(self.colony.demand.demand_quantity * trade.TRADE_PRICE_PER_DEMAND,
+        demand_str = " :$" + str(max(self.colony.demand.demand_quantity * trade.TRADE_PRICE_PER_DEMAND,
                                      trade.TRADE_PRICE_NON_DEMAND))
         demand_img = font.get_text_surface(demand_str)
         self.surface.blit(demand_img, (COLONY_MARGIN + MINERAL_WIDTH,
