@@ -76,7 +76,8 @@ def main():
     galaxy_obj.generate_star_distance_hierarchy()
     galaxy_obj.populate_homeworlds(game)
     galaxy_obj.populate_life(game)
-    galaxy_obj.populate_artifacts()
+
+    artifact_spawner = galaxy.ArtifactSpawner(galaxy_obj)
 
     active_player = game.players[0]
     active_player.selected_ship = active_player.ships[0]
@@ -233,6 +234,7 @@ def main():
                     galaxy_displays[active_player.id].refresh_layer(1)
             p.milestone_progress[3] = game.diplomacy.get_milestone_state(p.id)
         # Galaxy loop
+        artifact_spawner.try_place_artifact(elapsed_time)
         for s in galaxy_obj.stars:
             for p in s.planets:
                 p.ecology.regenerate_biomass(elapsed_time)
