@@ -178,7 +178,7 @@ class Action:
             ship.action_progress += time * self.rate()
             if ship.action_progress >= 1.0:
                 self.action(ship)
-                ship.action_progress = 0
+                ship.set_action(0)
         else:
             ship.set_action(0)
 
