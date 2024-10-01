@@ -1,17 +1,14 @@
-import random
-
 import pygame
 import sys
 
-import colony
 import ecology
 import galaxy
 import player
 
 import font
-import ship
 import ship_tasks
 import uiframe
+import ui_technology
 
 import galaxy_display
 import planet_display
@@ -112,12 +109,12 @@ def main():
     panel_wide = uiframe.get_panel_surface(156, 26)
     panel_money = uiframe.get_panel_surface(108, 16)
 
-    icon_mineral_r = uiframe.create_button("assets/minerals-red.png")
-    icon_mineral_g = uiframe.create_button("assets/minerals-green.png")
-    icon_mineral_b = uiframe.create_button("assets/minerals-blue.png")
-    icon_mineral_c = uiframe.create_button("assets/minerals-cyan.png")
-    icon_mineral_m = uiframe.create_button("assets/minerals-magenta.png")
-    icon_mineral_y = uiframe.create_button("assets/minerals-yellow.png")
+    icon_mineral_r = uiframe.create_button_surface(pygame.image.load("assets/minerals-red.png"))
+    icon_mineral_g = uiframe.create_button_surface(pygame.image.load("assets/minerals-green.png"))
+    icon_mineral_b = uiframe.create_button_surface(pygame.image.load("assets/minerals-blue.png"))
+    icon_mineral_c = uiframe.create_button_surface(pygame.image.load("assets/minerals-cyan.png"))
+    icon_mineral_m = uiframe.create_button_surface(pygame.image.load("assets/minerals-magenta.png"))
+    icon_mineral_y = uiframe.create_button_surface(pygame.image.load("assets/minerals-yellow.png"))
 
     icon_diplomacy = pygame.image.load("assets/icon-diplomacy.png")
     icon_empire = pygame.image.load("assets/icon-colonial.png")
@@ -126,12 +123,16 @@ def main():
     icon_battle = pygame.image.load("assets/icon-battle.png")
     icon_ecology = pygame.image.load("assets/icon-ecology.png")
 
-    button_diplomacy = uiframe.create_button("assets/icon-diplomacy.png")
-    button_colonial = uiframe.create_button("assets/icon-colonial.png")
-    button_research = uiframe.create_button("assets/icon-research.png")
-    button_explore = uiframe.create_button("assets/icon-explore.png")
-    button_battle = uiframe.create_button("assets/icon-battle.png")
-    button_ecology = uiframe.create_button("assets/icon-ecology.png")
+    button_diplomacy = uiframe.create_button_surface(pygame.image.load("assets/icon-diplomacy.png"))
+    button_colonial = uiframe.create_button_surface(pygame.image.load("assets/icon-colonial.png"))
+    button_research = uiframe.create_button_surface(pygame.image.load("assets/icon-research.png"))
+    button_explore = uiframe.create_button_surface(pygame.image.load("assets/icon-explore.png"))
+    button_battle = uiframe.create_button_surface(pygame.image.load("assets/icon-battle.png"))
+    button_ecology = uiframe.create_button_surface(pygame.image.load("assets/icon-ecology.png"))
+
+    ui_container = uiframe.UIContainer(DISPLAY_DIMENSIONS)
+    #ui_container.elements.append(uiframe.Draggable(ui_container, milestone_frame, 500, 500, 177, 165))
+    ui_container.elements.append(ui_technology.TechPane(ui_container, 300, 300))
 
     timestamp = pygame.time.get_ticks()
 
@@ -144,6 +145,8 @@ def main():
         # Events
         for event in pygame.event.get():
             active_display.handle_event(event, pygame.mouse.get_pos())
+            for element in ui_container.elements:
+                element.handle_event(event, pygame.mouse.get_pos())
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
@@ -236,6 +239,9 @@ def main():
             display.blit(font.get_text_surface(str(int(1 / (elapsed_time / timescale * 60)))), (0, 0))
 
         # TEMP: manually drawing all UI elements
+
+        for element in ui_container.elements:
+            element.draw(display)
 
         for i in range(len(active_player.milestone_progress)):
             height = int(121 * player.get_milestone_from_progress(active_player.milestone_progress[i]) / 5)

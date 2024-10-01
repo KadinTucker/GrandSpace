@@ -1,6 +1,5 @@
 
 
-ROMAN_NUMERALS = "I II III IV V".split()
 CATEGORY_NAMES = "Empire Combat Discovery Trade Diplomacy Ecology"
 DOMAINS = [0, 0, 1, 1, 2, 2]
 MAIN_TREE_NAMES = [
@@ -13,7 +12,7 @@ MAIN_TREE_NAMES = [
 ]
 WILDCARD_NAMES = [
     "Orbital Defence,Singularity Storage,".split(","),
-    "The Forcefield,Dark Matter Weapons,".split(","),
+    "The Forcefield,Darkmatter Weapons,".split(","),
     "Quantum Computer,Faster Than Light,".split(","),
     "Nanotargeted Marketing,Hypercommerce".split(","),
     "Intergalactic Ambassadors,Galactic Harmony,".split(","),
