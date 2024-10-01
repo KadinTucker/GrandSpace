@@ -26,6 +26,8 @@ class Diplomacy:
         # ordered by: [i][j][x] True means player j has access x in player i systems
         self.access_matrix = [[[DEFAULT_ACCESS[i] for i in range(len(ACCESS_NAMES))]
                                for _ in range(len(game.players))] for _ in range(len(game.players))]
+        # For each player i, [i][j] is the total leverage they have gained over player j
+        self.total_leverage_matrix = [[0 for _ in range(len(game.players))] for _ in range(len(game.players))]
         self.set_reflexive_access()
 
     def set_reflexive_access(self):
@@ -92,11 +94,18 @@ class Diplomacy:
         """
         old_leverage = self.leverage_matrix[origin_id][dest_id]
         self.leverage_matrix[origin_id][dest_id] += amount
+        self.total_leverage_matrix[origin_id][dest_id] += amount
         if old_leverage < 0:
             self.update_access()
 
     def get_milestone_state(self, player_id):
+        """
+        Gets the milestone state of a player:
+        the amount of leverage gained more over each player than each player has gained over the player
+        (i.e., infinite cycling does not work)
+        Negative amounts do not count against one's milestone score
+        """
         total = 0
         for i in range(len(self.game.players)):
-            total += self.leverage_matrix[i][player_id]
-        return total / (len(self.game.players) - 1) / 100 * 2 * 1500
+            total += max(self.total_leverage_matrix[player_id][i] - self.total_leverage_matrix[i][player_id], 0)
+        return total / (len(self.game.players) - 1)

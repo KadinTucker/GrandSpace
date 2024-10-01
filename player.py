@@ -3,6 +3,7 @@ import random
 
 import diplomacy
 import ship
+import ship_tasks
 import technology
 
 STARTING_MONEY = 1000
@@ -37,6 +38,7 @@ class Player:
         self.reset_explored_stars()
         self.milestone_progress = [0, 0, 0, 0, 0, 0]
         self.technology = technology.TechnologyTree(self)
+        self.controller = PlayerController(self)
 
     def add_ship(self, planet):
         self.ships.append(ship.Ship(planet.star.location, self))
@@ -63,3 +65,13 @@ class Player:
 
     def reset_explored_stars(self):
         self.explored_stars = [False for _ in range(len(self.game.galaxy.stars))]
+
+class PlayerController:
+
+    def __init__(self, player):
+        self.player = player
+        self.actions = [ship_tasks.Action(item[0], item[1], item[2](self.player.technology), item[3])
+                        for item in ship_tasks.SHIP_ACTIONS]
+
+    def do_action(self, action_idx, ship_obj, time):
+        self.actions[action_idx].perform(ship_obj, time)

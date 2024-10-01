@@ -83,7 +83,7 @@ class Ship:
         elif self.action == 1:
             self.move(time)
         else:
-            ship_tasks.SHIP_ACTIONS[self.action].perform(self, time)
+            self.ruler.controller.do_action(self.action, self, time)
 
     def set_action(self, action_idx):
         self.action = action_idx
@@ -238,7 +238,7 @@ class Ship:
             self.ruler.explored_stars[self.star.id] = True
         if self.planet is not None:
             if self.planet.artifacts > 0:
-                self.ruler.milestone_progress[1] += 15
+                self.ruler.milestone_progress[1] += 5
                 self.cargo.artifacts += 1
                 self.planet.artifacts -= 1
 

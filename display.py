@@ -82,8 +82,11 @@ def main():
     active_player = game.players[0]
     active_player.selected_ship = active_player.ships[0]
 
+    timescale = 1.5
+
     if len(sys.argv) > 1 and sys.argv[1] == 'cheat':
         print("*** CHEAT MODE ACTIVATED ***")
+        timescale = 6.0
         for p in game.players:
             for t in range(len(p.technology.tech_level)):
                 p.technology.tech_level[t] = [5, 5, 2]
@@ -135,7 +138,7 @@ def main():
     while True:
 
         # Calculate Tick Time
-        elapsed_time = float(pygame.time.get_ticks() - timestamp) / 60000
+        elapsed_time = float(pygame.time.get_ticks() - timestamp) * timescale / 60000
         timestamp = pygame.time.get_ticks()
 
         # Events
@@ -152,13 +155,8 @@ def main():
                 if event.key == pygame.K_TAB:
                     active_player = game.players[(active_player.id + 1) % len(game.players)]
                     active_display = galaxy_displays[active_player.id]
-                # TEMP: conquer active ship's star
                 elif event.key == pygame.K_c:
                     active_player.selected_ship.set_action(4)
-                # TEMP: auto explore
-                elif event.key == pygame.K_e:
-                    active_player.selected_ship.task = 1
-                # TEMP: collect biomass
                 elif event.key == pygame.K_b:
                     active_player.selected_ship.set_action(5)
                 elif event.key == pygame.K_y:
@@ -171,12 +169,10 @@ def main():
                     active_player.selected_ship.set_action(6)
                 elif event.key == pygame.K_m:
                     if ship_tasks.rules_planet(active_player.selected_ship):
-                        active_player.selected_ship.cargo.minerals[active_player.selected_ship.planet.mineral] \
-                            += int(active_player.selected_ship.planet.colony.minerals)
-                        active_player.selected_ship.planet.colony.minerals \
-                            -= int(active_player.selected_ship.planet.colony.minerals)
+                        active_player.selected_ship.set_action(7)
 
             elif event.type == pygame.MOUSEBUTTONDOWN:
+                # TODO: Include in modular uiframe input handler
                 if event.button == pygame.BUTTON_LEFT:
                     mouse_pos = pygame.mouse.get_pos()
                     if DISPLAY_DIMENSIONS[1] - 49 < mouse_pos[1] < DISPLAY_DIMENSIONS[1] - 31:
@@ -194,27 +190,14 @@ def main():
                                         break
                     if DISPLAY_DIMENSIONS[1] - 52 < mouse_pos[1] < DISPLAY_DIMENSIONS[1] - 26:
                         if 175 < mouse_pos[0] < 201:
-                            if (ship_tasks.rules_planet(active_player.selected_ship)
-                                    and active_player.selected_ship.cargo.artifacts > 0):
-                                active_player.selected_ship.cargo.artifacts -= 1
-                                active_player.money += 500
-                                active_player.milestone_progress[4] += 2
+                            active_player.selected_ship.set_action(14)
                         elif 229 < mouse_pos[0] < 386:
                             if ship_tasks.is_at_colony(active_player.selected_ship):
                                 mineral_num = (mouse_pos[0] - 229) // 26
                                 assert 0 <= mineral_num < 6
-                                if active_player.selected_ship.cargo.minerals[mineral_num] > 0:
-                                    active_player.selected_ship.cargo.minerals[mineral_num] -= 1
-                                    price = (active_player.selected_ship.planet.colony
-                                             .demand.get_price(mineral_num, active_player))
-                                    active_player.money += price
-                                    active_player.milestone_progress[4] += 250 / price + 1
+                                active_player.selected_ship.set_action(8 + mineral_num)
                         elif 425 < mouse_pos[0] < 451:
-                            if (ship_tasks.rules_planet(active_player.selected_ship)
-                                    and ship_tasks.has_enough_money(active_player.selected_ship,
-                                                                    active_player.technology.get_building_cost())):
-                                active_player.money -= active_player.technology.get_building_cost()
-                                active_player.selected_ship.cargo.buildings += 1
+                            active_player.selected_ship.set_action(15)
 
         if active_display.next_pane_id != -1:
             next_id = active_display.next_pane_id
@@ -250,7 +233,7 @@ def main():
             active_display.refresh_layer(2)
         active_display.draw(display)
         if elapsed_time > 0:
-            display.blit(font.get_text_surface(str(int(1 / (elapsed_time * 60)))), (0, 0))
+            display.blit(font.get_text_surface(str(int(1 / (elapsed_time / timescale * 60)))), (0, 0))
 
         # TEMP: manually drawing all UI elements
 
