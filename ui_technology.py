@@ -56,6 +56,7 @@ def get_wildcard_label(category, level):
                                      (base_surface.get_height()) * (l + 1) // (len(lines) + 1) - 8))
     return uiframe.create_button_surface(base_surface)
 
+
 MAIN_TREE_IMGS = [
     [[get_tech_label(i, j, k) for k in range(5)] for j in range(2)] for i in range(6)
 ]
@@ -91,5 +92,5 @@ class TechPane(uiframe.Draggable):
                 self.category = (self.category + 1) % 6
                 self.update()
             elif event.key == pygame.K_e:
-                self.category = (self.category + 1) % 6
+                self.category = (self.category - 1) % 6
                 self.update()

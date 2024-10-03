@@ -83,7 +83,6 @@ def main():
 
     if len(sys.argv) > 1 and sys.argv[1] == 'cheat':
         print("*** CHEAT MODE ACTIVATED ***")
-        timescale = 6.0
         for p in game.players:
             for t in range(len(p.technology.tech_level)):
                 p.technology.tech_level[t] = [5, 5, 2]
@@ -233,6 +232,7 @@ def main():
         display.fill(active_player.color)
         active_display.refresh_layer(len(active_display.layers) - 1)  # refresh top layer every tick
         if isinstance(active_display, system_display.SystemDisplay):
+            active_display.refresh_layer(1)
             active_display.refresh_layer(2)
         active_display.draw(display)
         if elapsed_time > 0:

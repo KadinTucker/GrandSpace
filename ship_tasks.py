@@ -3,7 +3,7 @@ import math
 import colony
 import ecology
 
-FULL_HEAL_RATE = 3.0
+FULL_HEAL_RATE = 2.0
 SYSTEM_CHANGE_RATE = 120.0
 PLANET_CHANGE_RATE = 180.0
 COLONY_PLACEMENT_RATE = 60.0
@@ -164,6 +164,7 @@ def act_collect_biomass(ship):
         if ship.planet.ecology.species[i]:
             ship.cargo.biomass.change_quantity(i, 1)
     ship.planet.ecology.biomass_level = 0
+    ship.ruler.milestone_progress[2] += 2 * ship.planet.ecology.habitability
 
 def act_build_city(ship):
     ship.planet.colony.cities += 1

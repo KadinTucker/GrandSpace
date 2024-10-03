@@ -38,23 +38,35 @@ class UIElement:
     def __init__(self, container, surface, x, y, width, height):
         self.container = container
         self.surface = surface
-        self.x = x  # negative values mean position from the right
-        self.y = y  # negative values mean position from the bottom
+        self.x = x
+        self.y = y
         self.width = width
         self.height = height
 
     def is_point_in(self, point):
-        return (0 <= point[0] - self.x % self.container.dimensions[0] <= self.width
-                and 0 <= point[1] - self.y % self.container.dimensions[1] <= self.height)
+        return (0 <= point[0] - self.x <= self.width
+                and 0 <= point[1] - self.y <= self.height)
 
     def handle_event(self, event, mouse_pos):
         pass
 
     def draw(self, dest_surface):
-        dest_surface.blit(self.surface, (self.x % self.container.dimensions[0], self.y % self.container.dimensions[1]))
+        dest_surface.blit(self.surface, (self.x, self.y))
 
     def destroy(self):
         self.container.elements.remove(self)
+
+class EdgeElement(UIElement):
+
+    def __init__(self, container, surface, x, y, width, height):
+        super().__init__(container, surface, x, y, width, height)
+
+    def draw(self, dest_surface):
+        dest_surface.blit(self.surface, (self.x % self.container.dimensions[0], self.y % self.container.dimensions[1]))
+
+    def is_point_in(self, point):
+        return (0 <= point[0] - self.x % self.container.dimensions[0] <= self.width
+                and 0 <= point[1] - self.y % self.container.dimensions[1] <= self.height)
 
 class Draggable(UIElement):
 
