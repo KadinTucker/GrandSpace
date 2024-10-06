@@ -71,6 +71,30 @@ Diplomacy: interact with rivals, earn their trust, and cooperate toward a greate
 
 Warfare: raid, fight, and conquer your rivals and prove your worth in great battle
 
+### A Guide to the Game
+
+At the start of the game, you will have only one ship and one colony, and a small sum of money. The money you have available is enough to found one new colony, but you will need more.
+
+Before a proper intergalactic economy can get off the group to fund your spacefaring empire, you will need to fund your expansion by other means. The best way to get this started is by exploring the galaxy and looking for artifacts. Artifacts appear on planets as golden halos around them. Simply direct your ship to one of these planets to collect the artifact.
+
+Artifacts are worth 500 money each, and also grant some science points. 
+
+After collecting a handful of artifacts, you will have explored some surrounding stars. Now you can buy some buildings from your homeworld by clicking on the building icon in your ship's cargo. With these buildings, you can go and colonise a new planet in the galaxy, preferably one with at least one lifeform on it, shown by a green capital letter above the planet and some tree icons on the planet. 
+
+Your new colony won't produce any minerals until you develop it, but it will also have a demand rating. For example, it might be interested in buying minerals produced by your homeworld. If you get so lucky, collect the minerals from your homeworld and sell them to your new colony for some extra funds to get started. 
+
+As you explore you might encounter other spacefaring civilisations. They will have their own colonies to which you can sell your minerals, but they are also competitors for nearby star systems, lifeforms, and artifacts. You can interact with these civilisations, do research with them, and give them gifts of money to show that you are friendly. Your cooperation will facilitate trading and helping each other out in times of need.
+
+With some money collected, you can now start terraforming your worlds. It can also be helpful to research some Ecology technologies to make your terraforming easier. To terraform, start by collecting biomass on planets with lifeforms. Your homeworld has the maximum of three lifeforms, so it is an excellent place to start. Once you have collected enough biomass such that you have a value of 10, you can start to terraform new worlds. This will help your future colonies there, as well as allowing you to harvest biomass from them. 
+
+Having terraformed your worlds, increasing their development is the natural next step. Before long, your mineral production will have increased to impressive levels. If there are people willing to buy your minerals, whether from your own colonies or from those of other players, you will gain immense amounts of wealth that you can use to unlock Prosperity technologies, develop more and new colonies, and more.
+
+But beware: your newfound prosperity may not be all it is cut out to be and may attract the attention of rivals. These rivals might ask for favours from you that they rightfully deserve. Accept them and you agree to share your wealth with them; refuse, and it may end in violence.
+
+If you refuse to give a favour to another player, they will likely gain the right to attack you. They might start by stealing minerals from your bountiful colonies to sell as their own. You can ignore them, but if you choose to fight back, they might be bold enough to fight as well. They may close their markets to you, firing the next shot, and eventually they might come to besiege your massive empire, one colony at a time. You can meet them in battle, but by then it may be too late.
+
+By the time you reach the top of 3 out of 6 milestones, however, you will have won! 
+
 ### Possible Actions
 
 There are two kinds of actions that you, the player, can take: those that are player-specific, and those that are done by your ships in-game. Most actions are ship actions.
