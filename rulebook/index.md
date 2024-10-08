@@ -15,28 +15,28 @@ starships (ships for short) to carry out actions and complete milestones.
 ## Setup
 
 In the following section, a brief summary of the game's visual components is provided. To find out what each component
-is, follow the links to the relevant rulebook entries. Alternatively, read the remainder of the rulebook to gain an 
+is, follow the links to the relevant rulebook entries. Alternatively, read the remainder of the rulebook (in particular, the articles linked under "Paths Summary") to gain an 
 understanding of the process of the game and how the components fit in.
 
-The initial setup of the game consists of a board filled with stars in different locations. This board is referred to as
-the *galaxy*. 
+The initial setup of the game consists of a board filled with [stars](../rulebook/glossary/star_system.md) in different locations. This board is referred to as
+the [galaxy](../rulebook/glossary/galaxy.md). 
 
-Each star has between 1 and 5 planets orbiting around it. Planets have a color, which determines what kind of *minerals*
+Each star has between 1 and 5 [planets](../rulebook/glossary/planet.md) orbiting around it. Planets have a colour, which determines what kind of [minerals](../rulebook/glossary/mineral.md)
 can be produced at that planet. 
 
-There are also two other things randomly distributed among planets. *Lifeforms* can be found at planets randomly, and 
-are represented by green capital letters. *Artifacts* are also found randomly distributed, and appear as golden rings
+There are also two other things randomly distributed among planets. [Lifeforms](../rulebook/glossary/lifeform.md) can be found at planets randomly, and 
+are represented by green capital letters. [Artifacts](../rulebook/glossary/artifact.md) are also found randomly distributed, and appear as golden rings
 around planets. 
 
-Each player gets a *homeworld*. A homeworld consists of a *colony* on a planet. Players will always have their homeworlds
-in stars with 5 planets orbiting them. A homeworld starts with seven *cities* and three *development*. The homeworld
+Each player gets a homeworld. A homeworld consists of a [colony](../rulebook/glossary/colony.md) on a planet. Players will always have their homeworlds
+in stars with 5 planets orbiting them. A homeworld starts with seven [cities](../rulebook/glossary/city.md) and three [development](../rulebook/glossary/development.md). The homeworld
 also starts with three distinct lifeforms.
 
-At each player's homeworld, that player gets a *ship*. The ship starts with an empty *cargo*.
+At each player's homeworld, that player gets a ship. Ships are the fundamental action-doers in the game. 
 
-A ship's cargo consists of all of the items held by that ship, which can include *artifacts*, collected from the galaxy; *minerals*, produced by colonies, which come in 6 different colours; *buildings*, purchased in friendly colonies to carry about colonisation projects; and *biomass*, consisting of samples of *lifeforms* collected from planets.
+The ship starts with an empty [cargo](../rulebook/glossary/cargo.md). A ship's cargo consists of all items held by that ship, which can include artifacts collected from the galaxy; minerals produced by colonies, which come in 6 different colours; [buildings](../rulebook/glossary/building.md), purchased in friendly colonies to carry about colonisation projects; and [biomass](../rulebook/glossary/biomass.md), consisting of samples of lifeforms collected from planets.
 
-Each player starts with 1000 money.
+Each player starts with 1000 [money](../rulebook/glossary/money.md).
 
 ## Gameplay
 
@@ -59,17 +59,21 @@ To achieve all five milestones, a player needs a total of 1500 milestone points 
 
 ### Paths Summary
 
-Discovery: explore the galaxy, collect artifacts, and research new technologies
+The following are short summaries of each of the six paths in the game. Follow the linked articles to read about how the corresponding mechanics work. 
 
-Imperialism: spread your empire wide across the galaxy, and build and maintain mighty and powerful colonies
+Reading the six linked articles in order provides a rather comprehensive explanation of the game's mechanics. The order provided is recommended, as the different paths also build on each other.
 
-Commerce: produce, buy, and sell minerals and generate crazy amounts of money
+[Discovery](../rulebook/discovery.md): explore the galaxy, collect artifacts, and research new technologies
 
-Ecology: collect samples of lifeforms from across the galaxy and spread them to create habitable worlds
+[Imperialism](../rulebook/imperialism.md): spread your empire wide across the galaxy, and build and maintain mighty and powerful colonies
 
-Diplomacy: interact with rivals, earn their trust, and cooperate toward a greater goal
+[Commerce](../rulebook/commerce.md): produce, buy, and sell minerals and generate crazy amounts of money
 
-Warfare: raid, fight, and conquer your rivals and prove your worth in great battle
+[Ecology](../rulebook/ecology.md): collect samples of lifeforms from across the galaxy and spread them to create habitable worlds
+
+[Diplomacy](../rulebook/diplomacy.md): interact with rivals, earn their trust, and cooperate toward a greater goal
+
+[Warfare](../rulebook/imperialism.md): raid, fight, and conquer your rivals and prove your worth in great battle
 
 ### A Guide to the Game
 
@@ -89,7 +93,7 @@ With some money collected, you can now start terraforming your worlds. It can al
 
 Having terraformed your worlds, increasing their development is the natural next step. Before long, your mineral production will have increased to impressive levels. If there are people willing to buy your minerals, whether from your own colonies or from those of other players, you will gain immense amounts of wealth that you can use to unlock Prosperity technologies, develop more and new colonies, and more.
 
-But beware: your newfound prosperity may not be all it is cut out to be and may attract the attention of rivals. These rivals might ask for favours from you that they rightfully deserve. Accept them and you agree to share your wealth with them; refuse, and it may end in violence.
+But beware: your newfound prosperity may not be all it is cut out to be and may attract the attention of rivals. These rivals might ask for favours from you that they rightfully deserve. Accept them, and you agree to share your wealth with them; refuse, and it may end in violence.
 
 If you refuse to give a favour to another player, they will likely gain the right to attack you. They might start by stealing minerals from your bountiful colonies to sell as their own. You can ignore them, but if you choose to fight back, they might be bold enough to fight as well. They may close their markets to you, firing the next shot, and eventually they might come to besiege your massive empire, one colony at a time. You can meet them in battle, but by then it may be too late.
 
@@ -117,7 +121,7 @@ Sell Artifact: if the ship has collected an artifact from a planet, sell that ar
 
 Research: at a player-ruled planet, earn science points over time for self and planet owner, and leverage, if not ruling the planet
 
-Purchase Science: spend 100 money to earn 1 Prosperty science
+Purchase Science: spend 100 money to earn 1 Prosperity science
 
 ##### Imperial
 
