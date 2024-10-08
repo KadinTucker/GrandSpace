@@ -65,6 +65,6 @@ class Demand:
 
     def get_price(self, mineral, buyer):
         if self.mineral_demanded != -1 and mineral == self.mineral_demanded:
-            return (max(buyer.technology.get_minimum_price(), TRADE_PRICE_PER_DEMAND * self.demand_quantity)
-                    + buyer.technology.get_trade_bonus())
+            return (buyer.technology.get_minimum_price() + (TRADE_PRICE_PER_DEMAND + buyer.technology.get_trade_bonus())
+                    * self.demand_quantity)
         return buyer.technology.get_minimum_price() + buyer.technology.get_trade_bonus()

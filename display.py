@@ -3,6 +3,7 @@ import sys
 
 import ecology
 import galaxy
+import macros
 import player
 
 import font
@@ -157,21 +158,11 @@ def main():
                 if event.key == pygame.K_TAB:
                     active_player = game.players[(active_player.id + 1) % len(game.players)]
                     active_display = galaxy_displays[active_player.id]
-                elif event.key == pygame.K_c:
-                    active_player.selected_ship.set_action(4)
-                elif event.key == pygame.K_b:
-                    active_player.selected_ship.set_action(5)
-                elif event.key == pygame.K_y:
-                    active_player.selected_ship.set_action(2)
-                elif event.key == pygame.K_d:
-                    active_player.selected_ship.set_action(3)
+                # TEMP: spawn ship
                 elif event.key == pygame.K_s:
                     active_player.add_ship(active_player.homeworld)
-                elif event.key == pygame.K_t:
-                    active_player.selected_ship.set_action(6)
-                elif event.key == pygame.K_m:
-                    if ship_tasks.rules_planet(active_player.selected_ship):
-                        active_player.selected_ship.set_action(7)
+                if event.key in macros.ACTION_KEYCONTROL_DICT.keys():
+                    active_player.selected_ship.set_action(macros.ACTION_KEYCONTROL_DICT[event.key])
 
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 # TODO: Include in modular uiframe input handler

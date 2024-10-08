@@ -30,9 +30,14 @@ SHIP_BONUS_FIRERATE = 10.0
 SHIP_BASE_HEALTH = 10
 SHIP_BONUS_HEALTH = 5
 
+SHIP_BONUS_SPEED_SHIPBUILDING = 300
+SHIP_BASE_STAR_CHANGE = 60.0
+SHIP_BONUS_STAR_CHANGE = 30.0
+SHIP_BASE_PLANET_CHANGE = 120.0
+SHIP_BONUS_PLANET_CHANGE = 60.0
+
 SHIP_BASE_SPEED = 800
 SHIP_BONUS_SPEED_SPACEFARING = 300
-SHIP_BONUS_SPEED_SHIPBUILDING = 300
 
 SHIP_BASE_RANGE = 90
 SHIP_BONUS_RANGE = 30
@@ -90,6 +95,12 @@ class TechnologyTree:
 
     def get_ship_max_health(self):
         return SHIP_BASE_HEALTH + SHIP_BONUS_HEALTH * self.tech_level[1][1]
+
+    def get_ship_star_change_rate(self):
+        return SHIP_BASE_STAR_CHANGE + SHIP_BONUS_STAR_CHANGE * self.tech_level[1][1]
+
+    def get_ship_planet_change_rate(self):
+        return SHIP_BASE_PLANET_CHANGE + SHIP_BONUS_PLANET_CHANGE * self.tech_level[1][1]
 
     def get_ship_speed(self):
         return (SHIP_BASE_SPEED + SHIP_BONUS_SPEED_SPACEFARING * self.tech_level[2][0] + SHIP_BONUS_SPEED_SHIPBUILDING

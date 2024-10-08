@@ -115,7 +115,7 @@ class Ship:
         Then, the ship moves between a system and the galaxy, if applicable (`move_between_system`)
         Lastly, the ship moves in the galaxy (`move_in_galaxy`)
         """
-        self.action_progress += time * ship_tasks.SYSTEM_CHANGE_RATE
+        self.action_progress += time * self.ruler.technology.get_ship_star_change_rate()
         self.move_in_system()
         self.move_between_system()
         self.move_in_galaxy(time)
