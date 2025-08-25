@@ -7,31 +7,35 @@ COLOR_FILL = (198, 198, 198)
 
 PATH = "assets/uiframe/"
 
-corners = [pygame.image.load(PATH + "highleft.png"), pygame.image.load(PATH + "highright.png"),
-           pygame.image.load(PATH + "lowleft.png"), pygame.image.load(PATH + "lowright.png")]
-close = pygame.image.load(PATH + "close.png")
+FRAME_WIDTH = 3
 
-def get_panel_surface(width, height):
-    surface = pygame.Surface((6 + width, 6 + height))
+CORNERS = [pygame.image.load(PATH + "highleft.png"), pygame.image.load(PATH + "highright.png"),
+           pygame.image.load(PATH + "lowleft.png"), pygame.image.load(PATH + "lowright.png")]
+ICON_CLOSE = pygame.image.load(PATH + "close.png")
+
+def get_blank_panel_surface(width, height):
+    surface = pygame.Surface((2 * FRAME_WIDTH + width, 2 * FRAME_WIDTH + height))
     surface.fill(COLOR_FILL)
     # Top Left
-    surface.blit(corners[0], (0, 0))
-    pygame.draw.rect(surface, COLOR_TOP, pygame.Rect(3, 0, width, 3))
+    surface.blit(CORNERS[0], (0, 0))
+    pygame.draw.rect(surface, COLOR_TOP, pygame.Rect(FRAME_WIDTH, 0, width, FRAME_WIDTH))
     # Top Right
-    surface.blit(corners[1], (3 + width, 0))
-    pygame.draw.rect(surface, COLOR_MIDDLE, pygame.Rect(0, 3, 3, height))
+    surface.blit(CORNERS[1], (FRAME_WIDTH + width, 0))
+    pygame.draw.rect(surface, COLOR_MIDDLE, pygame.Rect(0, FRAME_WIDTH, FRAME_WIDTH, height))
     # Bottom Left
-    surface.blit(corners[2], (0, 3 + height))
-    pygame.draw.rect(surface, COLOR_BOTTOM, pygame.Rect(3, 3 + height, width, 3))
+    surface.blit(CORNERS[2], (0, FRAME_WIDTH + height))
+    pygame.draw.rect(surface, COLOR_BOTTOM, pygame.Rect(FRAME_WIDTH, FRAME_WIDTH + height, width, FRAME_WIDTH))
     # Bottom Right
-    surface.blit(corners[3], (3 + width, 3 + height))
-    pygame.draw.rect(surface, COLOR_MIDDLE, pygame.Rect(3 + width, 3, 3, height))
+    surface.blit(CORNERS[3], (FRAME_WIDTH + width, FRAME_WIDTH + height))
+    pygame.draw.rect(surface, COLOR_MIDDLE, pygame.Rect(FRAME_WIDTH + width, FRAME_WIDTH, FRAME_WIDTH, height))
     return surface
 
-def create_button_surface(button_surface):
-    base_surface = get_panel_surface(button_surface.get_width(), button_surface.get_height())
-    base_surface.blit(button_surface, (3, 3))
-    return base_surface
+def get_panel_from_image(surface, depth=1):
+    for _ in range(depth):
+        base_surface = get_blank_panel_surface(surface.get_width(), surface.get_height())
+        base_surface.blit(surface, (FRAME_WIDTH, FRAME_WIDTH))
+        surface = base_surface
+    return surface
 
 class UIElement:
 
@@ -53,6 +57,9 @@ class UIElement:
     def draw(self, dest_surface):
         dest_surface.blit(self.surface, (self.x, self.y))
 
+    def update(self):
+        pass
+
     def destroy(self):
         self.container.elements.remove(self)
 
@@ -72,10 +79,10 @@ class Draggable(UIElement):
 
     def __init__(self, container, surface, x, y, width, height):
         super().__init__(container, surface, x, y, width, height)
-        bar_surface = pygame.Surface((width, 6))
-        bar_surface.blit(get_panel_surface(width - 6, 0), (0, 0))
-        bar_surface.blit(close, (width - 6, 0))
-        self.drag_bar = UIElement(container, bar_surface, x, y - 6, width, 6)
+        bar_surface = pygame.Surface((width, 2 * FRAME_WIDTH))
+        bar_surface.blit(get_blank_panel_surface(width - 2 * FRAME_WIDTH, 0), (0, 0))
+        bar_surface.blit(ICON_CLOSE, (width - 2 * FRAME_WIDTH, 0))
+        self.drag_bar = UIElement(container, bar_surface, x, y - 2 * FRAME_WIDTH, width, 2 * FRAME_WIDTH)
         self.is_held = False
         self.held_at = (0, 0)
 
@@ -83,7 +90,7 @@ class Draggable(UIElement):
         if event.type == pygame.MOUSEBUTTONDOWN:
             if event.button == pygame.BUTTON_LEFT:
                 if self.drag_bar.is_point_in(mouse_pos):
-                    if mouse_pos[0] - self.x % self.container.dimensions[0] - self.width + 6 > 0:
+                    if mouse_pos[0] - self.x % self.container.dimensions[0] - self.width + 2 * FRAME_WIDTH > 0:
                         self.destroy()
                     else:
                         self.is_held = True
@@ -103,7 +110,7 @@ class Draggable(UIElement):
         self.x = x
         self.y = y
         self.drag_bar.x = x
-        self.drag_bar.y = y - 6
+        self.drag_bar.y = y - 2 * FRAME_WIDTH
 
 class UIContainer:
 
@@ -112,4 +119,9 @@ class UIContainer:
         self.elements = []
 
     def handle_event(self, event, mouse_pos):
-        pass
+        for elt in self.elements:
+            elt.handle_event(event, mouse_pos)
+
+    def draw(self, dest_surface):
+        for elt in self.elements:
+            elt.draw(dest_surface)

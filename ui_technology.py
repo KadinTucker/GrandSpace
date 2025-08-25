@@ -44,7 +44,7 @@ def get_tech_label(category, branch, level):
                                      + " " + ROMAN_NUMERALS[level], MAIN_TREE_COLORS[category][branch])
     base_surface.blit(text_img, ((base_surface.get_width() - text_img.get_width()) // 2,
                                  (base_surface.get_height() - text_img.get_height()) // 2))
-    return uiframe.create_button_surface(base_surface)
+    return uiframe.get_panel_from_image(base_surface)
 
 def get_wildcard_label(category, level):
     base_surface = pygame.Surface((TECH_WIDTH - 6, WILDCARD_HEIGHT - 6))
@@ -54,7 +54,7 @@ def get_wildcard_label(category, level):
         text_img = font.get_text_surface(lines[l].lower(), WILDCARD_COLORS[category])
         base_surface.blit(text_img, ((base_surface.get_width() - text_img.get_width()) // 2,
                                      (base_surface.get_height()) * (l + 1) // (len(lines) + 1) - 8))
-    return uiframe.create_button_surface(base_surface)
+    return uiframe.get_panel_from_image(base_surface)
 
 
 MAIN_TREE_IMGS = [

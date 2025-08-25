@@ -50,8 +50,8 @@ COLONY_SUMMARY_SPACING = 8
 COLONY_VERTICAL_SPACING = 8
 COLONY_DEMAND_PROGRESS_WIDTH = 3
 COLONY_DEMAND_PROGRESS_HEIGHT = 16
-COLONY_CITY_ICON_IMG = uiframe.create_button_surface(pygame.image.load("assets/icon-city.png"))
-COLONY_DEVELOPMENT_ICON_IMG = uiframe.create_button_surface(pygame.image.load("assets/icon-development.png"))
+COLONY_CITY_ICON_IMG = uiframe.get_panel_from_image(pygame.image.load("assets/icon-city.png"))
+COLONY_DEVELOPMENT_ICON_IMG = uiframe.get_panel_from_image(pygame.image.load("assets/icon-development.png"))
 COLOR_DEMAND_PROGRESS = (180, 180, 180)
 
 PRODUCTION_SPACING = 8

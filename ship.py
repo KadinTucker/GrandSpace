@@ -146,7 +146,7 @@ class Ship:
         The ship attempts to move between the galaxy and a star system, if it wishes
         Three cases are distinguished:
          - The ship has no star, and is thus in the galaxy. The ship then checks if it has a destination, and then if it
-           is close enough to enter its destination star. It enters the star if so
+           is ICON_CLOSE enough to enter its destination star. It enters the star if so
          - The ship has a star, but it is different from its destination (possibly none).
            The ship then exits its current star.
            The ship will orient itself to get to its destination star accordingly via the `orient` method

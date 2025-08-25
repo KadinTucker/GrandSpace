@@ -37,3 +37,22 @@ ACTION_KEYCONTROL_DICT = {
     pygame.K_5: ACTION_SELL_MAGENTA,
     pygame.K_6: ACTION_SELL_YELLOW
 }
+
+# Game icons
+
+ICONS = {
+    "milestone_frame": pygame.image.load("assets/milestone-frame.png"),
+    "mineral_r": pygame.image.load("assets/minerals-red.png"),
+    "mineral_g": pygame.image.load("assets/minerals-green.png"),
+    "mineral_b": pygame.image.load("assets/minerals-red.png"),
+    "mineral_c" : pygame.image.load("assets/minerals-cyan.png"),
+    "mineral_m": pygame.image.load("assets/minerals-magenta.png"),
+    "mineral_y" : pygame.image.load("assets/minerals-yellow.png"),
+    "diplomacy": pygame.image.load("assets/icon-diplomacy.png"),
+    "empire": pygame.image.load("assets/icon-colonial.png"),
+    "discovery": pygame.image.load("assets/icon-explore.png"),
+    "trade": pygame.image.load("assets/icon-trade.png"),
+    "battle": pygame.image.load("assets/icon-battle.png"),
+    "ecology": pygame.image.load("assets/icon-ecology.png")
+}
+
