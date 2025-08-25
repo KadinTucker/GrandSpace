@@ -3,6 +3,7 @@ import math
 
 import galaxy
 import pane
+import drag_pane
 import ship_display
 import ship_tasks
 import system_display
@@ -12,7 +13,6 @@ GALAXY_PLANET_RADIUS = 2
 GALAXY_SHIP_RADIUS = 10  # At view scale 1.0
 
 SCROLL_SPEED = 0.125  # As a fraction of pane size
-ZOOM_FACTOR = 1.5
 
 EMPIRE_CONTROL_LINE_WIDTH = 5
 
@@ -41,7 +41,7 @@ def draw_five_point_star(surface, color, center, minor_radius, major_radius):
                                           int(center[1] + (minor_radius + major_radius * (a % 2))
                                               * math.sin(CAPITAL_STAR_ANGLES[a]))) for a in range(10)])
 
-class GalaxyDisplay(pane.Pane):
+class GalaxyDisplay(drag_pane.DragPane):
 
     def __init__(self, game, player, galaxy_dimensions, pane_dimensions, pane_position):
         super().__init__(game, player, pane_dimensions, pane_position, 3, COLOR_BACKGROUND)
@@ -149,19 +149,19 @@ class GalaxyDisplay(pane.Pane):
                     self.num_clicks = 0
         elif event.type == pygame.KEYDOWN:
             if event.key == pygame.K_PLUS:
-                self.set_scale(self.view_scale * ZOOM_FACTOR, self.get_relative_pane_pos(mouse_pos))
+                self.set_scale(min(drag_pane.ZOOM_MAX, self.view_scale + drag_pane.ZOOM_RATE), mouse_pos)
             elif event.key == pygame.K_MINUS:
-                self.set_scale(self.view_scale / ZOOM_FACTOR, self.get_relative_pane_pos(mouse_pos))
-            elif event.key == pygame.K_LEFT:
-                self.view_corner = (self.view_corner[0] - SCROLL_SPEED * self.dimensions[0] / self.view_scale,
+                self.set_scale(max(drag_pane.ZOOM_MIN, self.view_scale - drag_pane.ZOOM_RATE), mouse_pos)
+            if event.key == pygame.K_LEFT:
+                self.view_corner = (self.view_corner[0] + SCROLL_SPEED * self.dimensions[0] / self.view_scale,
                                     self.view_corner[1])
             elif event.key == pygame.K_RIGHT:
-                self.view_corner = (self.view_corner[0] + SCROLL_SPEED * self.dimensions[0] / self.view_scale,
+                self.view_corner = (self.view_corner[0] - SCROLL_SPEED * self.dimensions[0] / self.view_scale,
                                     self.view_corner[1])
             elif event.key == pygame.K_UP:
                 self.view_corner = (self.view_corner[0],
-                                    self.view_corner[1] - SCROLL_SPEED * self.dimensions[1] / self.view_scale)
+                                    self.view_corner[1] + SCROLL_SPEED * self.dimensions[1] / self.view_scale)
             elif event.key == pygame.K_DOWN:
                 self.view_corner = (self.view_corner[0],
-                                    self.view_corner[1] + SCROLL_SPEED * self.dimensions[1] / self.view_scale)
+                                    self.view_corner[1] - SCROLL_SPEED * self.dimensions[1] / self.view_scale)
 

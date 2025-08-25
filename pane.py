@@ -46,25 +46,25 @@ class Pane(drawable.Drawable):
             dest_surface.blit(layer, self.position)
 
     def set_scale(self, new_scale, center):
-        scale_change_coefficient = 1 / self.view_scale - 1 / new_scale
-        self.view_corner = (self.view_corner[0] + center[0] * scale_change_coefficient,
-                            self.view_corner[1] + center[1] * scale_change_coefficient)
+        scale_change = new_scale / self.view_scale
         self.view_scale = new_scale
+        self.view_corner = (self.view_corner[0] * scale_change - center[0] * (scale_change - 1),
+                            self.view_corner[1] * scale_change - center[1] * (scale_change - 1))
         self.update()
 
     def project_coordinate(self, coordinate):
         """
         Turns a zoomed coordinate into a pane display coordinate
         """
-        return (self.view_scale * (coordinate[0] - self.view_corner[0]),
-                self.view_scale * (coordinate[1] - self.view_corner[1]))
+        return (self.view_scale * coordinate[0] + self.view_corner[0],
+                self.view_scale * coordinate[1] + self.view_corner[1])
 
     def deproject_coordinate(self, coordinate):
         """
         Turns a pane display coordinate into a zoomed coordinate
         """
-        return (int(coordinate[0] / self.view_scale + self.view_corner[0]),
-                int(coordinate[1] / self.view_scale + self.view_corner[1]))
+        return (int(coordinate[0] - self.view_corner[0]) / self.view_scale,
+                int(coordinate[1] - self.view_corner[1]) / self.view_scale)
 
     def handle_event(self, event, mouse_pos):
         """

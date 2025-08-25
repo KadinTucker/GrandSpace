@@ -14,6 +14,7 @@ import ui_technology
 import galaxy_display
 import planet_display
 import system_display
+import drag_pane
 
 MAX_FPS = 90
 
@@ -51,7 +52,7 @@ def generate_galaxy_displays(game):
     for p in game.players:
         new_display = galaxy_display.GalaxyDisplay(game, p, GALAXY_PANE_DIMENSIONS, GALAXY_PANE_DIMENSIONS,
                                                    GALAXY_PANE_POSITION)
-        new_display.set_scale(3.0, p.homeworld.star.location)
+        new_display.set_scale(drag_pane.ZOOM_MAX, p.homeworld.star.location)
         galaxy_displays.append(new_display)
     return galaxy_displays
             
@@ -100,7 +101,7 @@ def main():
     system_displays = generate_all_system_displays(game)
     galaxy_displays = generate_galaxy_displays(game)
 
-    active_display = galaxy_displays[active_player.id]
+    active_display = system_displays[active_player.id][active_player.homeworld.star.id]
     active_display.update()
 
     milestone_frame = pygame.image.load("assets/milestone-frame.png")
