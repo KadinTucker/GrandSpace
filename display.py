@@ -105,8 +105,8 @@ def main():
     active_display = system_displays[active_player.id][active_player.homeworld.star.id]
     active_display.update()
 
-    window_container = uiframe.UIContainer(DISPLAY_DIMENSIONS)
-    window_container.elements.append(ui_technology.TechPane(window_container, 300, 300))
+    window_container = uiframe.UIContainer(None, 0, 0, DISPLAY_DIMENSIONS[0], DISPLAY_DIMENSIONS[1])
+    # window_container.elements.append(ui_technology.TechPane(window_container, 300, 300))
 
     main_ui = ui_main.get_main_ui_container(active_player, 0, DISPLAY_DIMENSIONS[1] - 60,
                                             DISPLAY_DIMENSIONS[0], 60)
@@ -123,6 +123,7 @@ def main():
         for event in pygame.event.get():
             active_display.handle_event(event, pygame.mouse.get_pos())
             window_container.handle_event(event, pygame.mouse.get_pos())
+            main_ui.handle_event(event, pygame.mouse.get_pos())
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
@@ -139,34 +140,6 @@ def main():
                     active_player.add_ship(active_player.homeworld)
                 if event.key in macros.ACTION_KEYCONTROL_DICT.keys():
                     active_player.selected_ship.set_action(macros.ACTION_KEYCONTROL_DICT[event.key])
-
-            elif event.type == pygame.MOUSEBUTTONDOWN:
-                # TODO: Include in modular uiframe input handler
-                if event.button == pygame.BUTTON_LEFT:
-                    mouse_pos = pygame.mouse.get_pos()
-                    if DISPLAY_DIMENSIONS[1] - 49 < mouse_pos[1] < DISPLAY_DIMENSIONS[1] - 31:
-                        biomass_index = (mouse_pos[0] - 504) // 14 + 1
-                        if 0 <= biomass_index < 26:
-                            biomasses = 0
-                            for i in range(len(active_player.selected_ship.cargo.biomass.quantities)):
-                                if active_player.selected_ship.cargo.biomass.quantities[i] > 0:
-                                    biomasses += 1
-                                    if biomasses == biomass_index:
-                                        if i == active_player.selected_ship.cargo.biomass.selected:
-                                            active_player.selected_ship.cargo.biomass.select(-1)
-                                        else:
-                                            active_player.selected_ship.cargo.biomass.select(i)
-                                        break
-                    if DISPLAY_DIMENSIONS[1] - 52 < mouse_pos[1] < DISPLAY_DIMENSIONS[1] - 26:
-                        if 175 < mouse_pos[0] < 201:
-                            active_player.selected_ship.set_action(14)
-                        elif 229 < mouse_pos[0] < 386:
-                            if ship_tasks.is_at_colony(active_player.selected_ship):
-                                mineral_num = (mouse_pos[0] - 229) // 26
-                                assert 0 <= mineral_num < 6
-                                active_player.selected_ship.set_action(8 + mineral_num)
-                        elif 425 < mouse_pos[0] < 451:
-                            active_player.selected_ship.set_action(15)
 
         if active_display.next_pane_id != -1:
             next_id = active_display.next_pane_id

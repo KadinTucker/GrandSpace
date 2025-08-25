@@ -55,7 +55,7 @@ class UIElement:
         pass
 
     def draw(self, dest_surface):
-        dest_surface.blit(self.surface, (self.x, self.y))
+        dest_surface.blit(self.surface, (self.container.x + self.x, self.container.y + self.y))
 
     def update(self):
         pass
@@ -63,17 +63,6 @@ class UIElement:
     def destroy(self):
         self.container.elements.remove(self)
 
-class EdgeElement(UIElement):
-
-    def __init__(self, container, surface, x, y, width, height):
-        super().__init__(container, surface, x, y, width, height)
-
-    def draw(self, dest_surface):
-        dest_surface.blit(self.surface, (self.x % self.container.dimensions[0], self.y % self.container.dimensions[1]))
-
-    def is_point_in(self, point):
-        return (0 <= point[0] - self.x % self.container.dimensions[0] <= self.width
-                and 0 <= point[1] - self.y % self.container.dimensions[1] <= self.height)
 
 class Draggable(UIElement):
 
@@ -112,16 +101,36 @@ class Draggable(UIElement):
         self.drag_bar.x = x
         self.drag_bar.y = y - 2 * FRAME_WIDTH
 
-class UIContainer:
+class UIContainer(UIElement):
 
-    def __init__(self, dimensions):
-        self.dimensions = dimensions
+    def __init__(self, container, x, y, width, height):
         self.elements = []
+        surface = pygame.Surface((width, height))
+        surface.set_colorkey((0, 0, 0))
+        surface.fill((0, 0, 0))
+        super().__init__(container, surface, x, y, width, height)
+        self.stagger_left = 0
+        self.stagger_right = 0
 
     def handle_event(self, event, mouse_pos):
         for elt in self.elements:
             elt.handle_event(event, mouse_pos)
 
     def draw(self, dest_surface):
+        dest_surface.blit(self.surface, (self.x, self.y))
         for elt in self.elements:
             elt.draw(dest_surface)
+
+    def add_element_left(self, element):
+        self.elements.append(element)
+        element.x = self.stagger_left
+        element.y = 0
+        self.stagger_left += element.width
+
+    def add_element_right(self, element):
+        self.elements.append(element)
+        element.x = self.width - self.stagger_right - element.width
+        element.y = 0
+        self.stagger_right += element.width
+
+

@@ -86,8 +86,10 @@ class Ship:
             self.ruler.controller.do_action(self.action, self, time)
 
     def set_action(self, action_idx):
-        self.action = action_idx
-        self.action_progress = 0.0
+        if self.action != action_idx:
+            self.action = action_idx
+            self.action_progress = 0.0
+        print("action: " + str(self.action))
 
     def attack(self, time):
         if self.star is not None:

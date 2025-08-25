@@ -13,19 +13,12 @@ def get_background_pane(container, x, y, width, height):
     return uiframe.UIElement(container, panel_large, x, y, width, height)
 
 def get_main_ui_container(player, x, y, width, height):
-    main_container = uiframe.UIContainer((width, height))
-    background = get_background_pane(main_container, x, y, width, height)
-    stagger = 0
-    money_pane = MoneyPane(main_container, x + uiframe.FRAME_WIDTH + stagger,
-                           y + uiframe.FRAME_WIDTH, 8, player)
-    stagger += money_pane.width
-    cargo_pane = CargoPane(main_container, x + uiframe.FRAME_WIDTH + stagger,
-                           y + uiframe.FRAME_WIDTH, player)
-    stagger += cargo_pane.width
-    biomass_pane = BiomassPane(main_container, x + uiframe.FRAME_WIDTH + stagger,
-                               y + uiframe.FRAME_WIDTH, player)
-    stagger += biomass_pane.width
-    main_container.elements = [background, money_pane, cargo_pane, biomass_pane]
+    main_container = uiframe.UIContainer(None, x, y, width, height)
+    background = get_background_pane(main_container, 0, 0, width, height)
+    main_container.elements.append(background)
+    main_container.add_element_left(MoneyPane(main_container, 0, 0, 8, player))
+    main_container.add_element_left(CargoPane(main_container, 0, 0, player))
+    main_container.add_element_left(BiomassPane(main_container, 0, 0, player))
     return main_container
 
 class MoneyPane(uiframe.UIElement):
@@ -47,6 +40,7 @@ class MoneyPane(uiframe.UIElement):
     def draw(self, dest_surface):
         self.update()
         super().draw(dest_surface)
+
 class BiomassPane(uiframe.UIElement):
 
     def __init__(self, container, x, y, player):
@@ -59,6 +53,9 @@ class BiomassPane(uiframe.UIElement):
 
     def get_biomass_letter_x(self, offset):
         return 2 * uiframe.FRAME_WIDTH + self.ecology_icon.get_width() + offset * (font.LETTER_WIDTH + 2)
+
+    def get_biomass_letter_from_x(self, x):
+        return int((x - 2 * uiframe.FRAME_WIDTH - self.ecology_icon.get_width()) / (font.LETTER_WIDTH + 2))
 
     def draw(self, dest_surface):
         self.update()
@@ -97,6 +94,23 @@ class BiomassPane(uiframe.UIElement):
                                   (self.get_biomass_letter_x(biomasses), uiframe.FRAME_WIDTH + 2))
                 biomasses += 1
 
+    def handle_event(self, event, mouse_pos):
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            if event.button == pygame.BUTTON_LEFT:
+                letter = self.get_biomass_letter_from_x(mouse_pos[0] - self.container.x - self.x) + 1
+                if 0 <= letter < 26:
+                    biomasses = 0
+                    for i in range(len(self.player.selected_ship.cargo.biomass.quantities)):
+                        if self.player.selected_ship.cargo.biomass.quantities[i] > 0:
+                            biomasses += 1
+                            if biomasses == letter:
+                                if i == self.player.selected_ship.cargo.biomass.selected:
+                                    self.player.selected_ship.cargo.biomass.select(-1)
+                                else:
+                                    self.player.selected_ship.cargo.biomass.select(i)
+                                self.update()
+                                break
+
 class CargoPane(uiframe.UIElement):
 
     def __init__(self, container, x, y, player):
@@ -107,8 +121,13 @@ class CargoPane(uiframe.UIElement):
         super().__init__(container, None, x, y, width, height)
         self.player = player
         self.artifact_icon = uiframe.get_panel_from_image(macros.ICONS["discovery"])
+        self.sell_artifact_icon = uiframe.get_panel_from_image(macros.ICONS["sell_artifact"])
         self.building_icon = uiframe.get_panel_from_image(macros.ICONS["empire"])
         self.mineral_icons = [uiframe.get_panel_from_image(macros.ICONS["mineral_" + x]) for x in "rgbcmy"]
+        self.sell_mineral_icons = [uiframe.get_panel_from_image(macros.ICONS["sell_mineral_" + x]) for x in "rgbcmy"]
+        self.artifact_pos = 0
+        self.building_pos = 0
+        self.mineral_pos = [0 for _ in range(6)]
         self.update()
 
     def draw_amount_with_icon(self, icon, amount, x):
@@ -117,17 +136,48 @@ class CargoPane(uiframe.UIElement):
         self.surface.blit(amount_surface, (uiframe.FRAME_WIDTH + x + (icon.get_width() - amount_surface.get_width()) / 2,
                                            uiframe.FRAME_WIDTH + icon.get_height()))
 
+    def handle_event(self, event, mouse_pos):
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            if event.button == pygame.BUTTON_LEFT:
+                rel_mouse = (mouse_pos[0] - self.container.x - self.x, mouse_pos[1] - self.container.y - self.y)
+                if 0 <= rel_mouse[1] <= self.artifact_icon.get_height():
+                    if 0 <= rel_mouse[0] - self.artifact_pos <= self.artifact_icon.get_width():
+                        self.player.selected_ship.set_action(macros.ACTION_SELL_ARTIFACT)
+                    elif 0 <= rel_mouse[0] - self.building_pos <= self.building_icon.get_width():
+                        self.player.selected_ship.set_action(macros.ACTION_BUY_BUILDING)
+                    else:
+                        for i in range(len(self.mineral_pos)):
+                            if 0 <= rel_mouse[0] - self.mineral_pos[i] <= self.mineral_icons[i].get_width():
+                                print(macros.ACTION_SELL_RED + i)
+                                self.player.selected_ship.set_action(macros.ACTION_SELL_RED + i)
+                                break
+                        print("loop done")
+
     def update(self):
         self.surface = uiframe.get_blank_panel_surface(self.width - 2 * uiframe.FRAME_WIDTH,
                                                        self.height - 2 * uiframe.FRAME_WIDTH)
         stagger = 0
-        self.draw_amount_with_icon(self.artifact_icon, self.player.selected_ship.cargo.artifacts, stagger)
-        stagger += self.artifact_icon.get_width() * 1.5
+        self.artifact_pos = stagger
+        artifact_icon = self.artifact_icon
+        if (self.player.selected_ship.cargo.artifacts > 0 and self.player.selected_ship.planet is not None
+                and self.player.selected_ship.planet.colony is not None
+                and self.player.selected_ship.planet.colony.ruler is self.player):
+            artifact_icon = self.sell_artifact_icon
+        self.draw_amount_with_icon(artifact_icon, self.player.selected_ship.cargo.artifacts, stagger)
+        stagger += artifact_icon.get_width() * 1.5
+        self.building_pos = stagger
         self.draw_amount_with_icon(self.building_icon, self.player.selected_ship.cargo.buildings, stagger)
         stagger += self.artifact_icon.get_width() * 1.5
         for i in range(6):
-            self.draw_amount_with_icon(self.mineral_icons[i], self.player.selected_ship.cargo.minerals[i], stagger)
-            stagger += self.mineral_icons[i].get_width()
+            self.mineral_pos[i] = stagger
+            mineral_icon = self.mineral_icons[i]
+            if (self.player.selected_ship.cargo.minerals[i] > 0 and self.player.selected_ship.planet is not None
+                    and self.player.selected_ship.planet.colony is not None
+                    and self.player.game.diplomacy.access_matrix[self.player.selected_ship.planet.star.ruler.id]
+                                                                [self.player.id][2]):
+                mineral_icon = self.sell_mineral_icons[i]
+            self.draw_amount_with_icon(mineral_icon, self.player.selected_ship.cargo.minerals[i], stagger)
+            stagger += mineral_icon.get_width()
 
     def draw(self, dest_surface):
         self.update()
