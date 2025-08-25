@@ -176,10 +176,12 @@ def act_develop_colony(ship):
 
 def act_terraform(ship):
     ship.planet.ecology.species[ship.cargo.biomass.selected] = True
+    cost = ship.planet.ecology.get_terraform_cost()
     ship.planet.ecology.habitability += 1
     spent = ship.cargo.biomass.empty()
     ship.ruler.money -= ship.ruler.technology.get_terraform_monetary_cost()
     ship.ruler.milestone_progress[2] += spent + 25
+    ship.ruler.technology.science[2] += (spent - cost) / 5
 
 def task_null(ship, game):
     pass

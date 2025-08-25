@@ -89,7 +89,6 @@ class Ship:
         if self.action != action_idx:
             self.action = action_idx
             self.action_progress = 0.0
-        print("action: " + str(self.action))
 
     def attack(self, time):
         if self.star is not None:

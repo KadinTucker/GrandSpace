@@ -60,6 +60,10 @@ ICONS = {
     "trade": pygame.image.load("assets/icon-trade.png"),
     "battle": pygame.image.load("assets/icon-battle.png"),
     "ecology": pygame.image.load("assets/icon-ecology.png"),
+    "science": pygame.image.load("assets/icon-research-gold.png"),
+    "science_red": pygame.image.load("assets/icon-research-red.png"),
+    "science_green": pygame.image.load("assets/icon-research-green.png"),
+    "science_blue": pygame.image.load("assets/icon-research-blue.png"),
     "sell_artifact": pygame.image.load("assets/icon-sell-artifact.png"),
 }
 

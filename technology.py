@@ -83,6 +83,8 @@ class TechnologyTree:
         self.player = player
         # tech level, indexed first by category, next by tech type
         self.tech_level = [[0, 0, 0] for _ in range(6)]
+        # science available: power, prosperity, harmony, neutral
+        self.science = [0, 0, 0, 0]
 
     def get_building_cost(self):
         return BASE_BUILDING_COST - CONSTRUCTION_EFFECT * self.tech_level[0][0]

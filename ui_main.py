@@ -1,4 +1,5 @@
 import pygame
+from matplotlib.backend_bases import MouseButton
 
 import planet_display
 import technology
@@ -7,19 +8,102 @@ import uiframe
 import font
 import macros
 
-def get_background_pane(container, x, y, width, height):
-    panel_large = uiframe.get_blank_panel_surface(width - 2 * uiframe.FRAME_WIDTH,
-                                                  height - 2 * uiframe.FRAME_WIDTH)
-    return uiframe.UIElement(container, panel_large, x, y, width, height)
-
 def get_main_ui_container(player, x, y, width, height):
     main_container = uiframe.UIContainer(None, x, y, width, height)
-    background = get_background_pane(main_container, 0, 0, width, height)
+    background = uiframe.get_background_pane(main_container, 0, 0, width, height)
     main_container.elements.append(background)
-    main_container.add_element_left(MoneyPane(main_container, 0, 0, 8, player))
+    # main_container.add_element_left(MoneyPane(main_container, 0, 0, 8, player))
     main_container.add_element_left(CargoPane(main_container, 0, 0, player))
     main_container.add_element_left(BiomassPane(main_container, 0, 0, player))
     return main_container
+
+def make_top_bar_button(icon, ratio):
+    surface = uiframe.get_blank_panel_surface(icon.get_width() * ratio, icon.get_height())
+    surface.blit(icon, ((surface.get_width() - icon.get_width()) // 2, (surface.get_height() - icon.get_height()) // 2))
+    return surface
+
+def get_top_bar_container(window_container, player, x, y, width, height):
+    top_bar_container = uiframe.UIContainer(None, x, y, width, height)
+    top_bar_container.stagger_left = uiframe.FRAME_WIDTH
+    background = uiframe.get_background_pane(top_bar_container, 0, 0, width, height)
+    top_bar_container.elements.append(background)
+    top_bar_container.add_element_left(MoneyPane(top_bar_container, 0, uiframe.FRAME_WIDTH, 8, player))
+    # tech_surface = make_top_bar_button(macros.ICONS["science"], 4)
+    # tech_button = MenuOpener(top_bar_container, tech_surface, 0, uiframe.FRAME_WIDTH, tech_surface.get_width(),
+    #                          tech_surface.get_height(), window_container.elements[0])
+    # top_bar_container.add_element_left(tech_button)
+    science_indicator = ScienceIndicator(player, top_bar_container, 0, 0, window_container.elements[0])
+    top_bar_container.add_element_left(science_indicator)
+    return top_bar_container
+
+class MenuOpener(uiframe.UIElement):
+
+    def __init__(self, container, surface, x, y, width, height, menu_element):
+        super().__init__(container, surface, x, y, width, height)
+        self.menu_element = menu_element
+
+    def handle_event(self, event, mouse_pos):
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            if event.button == pygame.BUTTON_LEFT:
+                if self.is_point_in(mouse_pos):
+                    print("got it")
+                    self.menu_element.visible = not self.menu_element.visible
+
+class ScienceIndicator(MenuOpener):
+    def __init__(self, player, container, x, y, menu_element):
+        width = 2 * uiframe.FRAME_WIDTH + 4 * 3 * font.LETTER_WIDTH
+        height = container.height
+        super().__init__(container, None, x, y, width, height, menu_element)
+        self.player = player
+        self.red_indicator = IndicatorIcon(container, macros.ICONS["science_red"], player,
+                                           lambda p: int(p.technology.science[0]), uiframe.FRAME_WIDTH,
+                                           uiframe.FRAME_WIDTH, 3)
+        self.blue_indicator = IndicatorIcon(container, macros.ICONS["science_blue"], player,
+                                            lambda p: int(p.technology.science[1]),
+                                            uiframe.FRAME_WIDTH + 3 * font.LETTER_WIDTH, uiframe.FRAME_WIDTH, 3)
+        self.green_indicator = IndicatorIcon(container, macros.ICONS["science_green"], player,
+                                             lambda p: int(p.technology.science[2]),
+                                             uiframe.FRAME_WIDTH + 6 * font.LETTER_WIDTH, uiframe.FRAME_WIDTH, 3)
+        self.gold_indicator = IndicatorIcon(container, macros.ICONS["science"], player,
+                                            lambda p: int(p.technology.science[3]),
+                                            uiframe.FRAME_WIDTH + 9 * font.LETTER_WIDTH, uiframe.FRAME_WIDTH, 3)
+        self.update()
+
+    def update(self):
+        self.surface = uiframe.get_blank_panel_surface(self.width - 2 * uiframe.FRAME_WIDTH,
+                                                       self.height - 2 * uiframe.FRAME_WIDTH)
+        self.red_indicator.update()
+        self.blue_indicator.update()
+        self.green_indicator.update()
+        self.gold_indicator.update()
+        self.surface.blit(self.red_indicator.surface, (self.red_indicator.x, self.red_indicator.y))
+        self.surface.blit(self.blue_indicator.surface, (self.blue_indicator.x, self.blue_indicator.y))
+        self.surface.blit(self.green_indicator.surface, (self.green_indicator.x, self.green_indicator.y))
+        self.surface.blit(self.gold_indicator.surface, (self.gold_indicator.x, self.gold_indicator.y))
+
+    def draw(self, dest_surface):
+        self.update()
+        super().draw(dest_surface)
+
+class IndicatorIcon(uiframe.UIElement):
+
+    def __init__(self, container, icon, player, indicator, x, y, max_text_width):
+        width = max(icon.get_width(), max_text_width * font.LETTER_WIDTH)
+        height = icon.get_height() + font.LETTER_HEIGHT
+        surface = pygame.Surface((width, height))
+        surface.set_colorkey((0, 0, 0))
+        super().__init__(container, surface, x, y, width, height)
+        self.icon = icon
+        self.indicator = indicator
+        self.player = player
+        self.update()
+
+    def update(self):
+        self.surface.fill((0, 0, 0))
+        self.surface.blit(self.icon, (0, 0))
+        amount_surface = font.get_text_surface(str(self.indicator(self.player)))
+        self.surface.blit(amount_surface, ((self.icon.get_width() - amount_surface.get_width()) / 2,
+                                           self.icon.get_height()))
 
 class MoneyPane(uiframe.UIElement):
 
@@ -44,18 +128,20 @@ class MoneyPane(uiframe.UIElement):
 class BiomassPane(uiframe.UIElement):
 
     def __init__(self, container, x, y, player):
-        width = 4 * uiframe.FRAME_WIDTH + macros.ICONS["ecology"].get_width() + 5 + 26 * (font.LETTER_WIDTH + 2)
-        height = 4 * uiframe.FRAME_WIDTH + macros.ICONS["ecology"].get_height() + font.LETTER_HEIGHT
+        self.value_indicator = IndicatorIcon(container, uiframe.get_panel_from_image(macros.ICONS["ecology"]),
+                                             player, lambda p: p.selected_ship.cargo.biomass.value,
+                                             uiframe.FRAME_WIDTH, uiframe.FRAME_WIDTH, 3)
+        width = self.value_indicator.width + 5 + 26 * (font.LETTER_WIDTH + 2) + 2 * uiframe.FRAME_WIDTH
+        height = self.value_indicator.height + 2 * uiframe.FRAME_WIDTH
         super().__init__(container, None, x, y, width, height)
         self.player = player
-        self.ecology_icon = uiframe.get_panel_from_image(macros.ICONS["ecology"])
         self.update()
 
     def get_biomass_letter_x(self, offset):
-        return 2 * uiframe.FRAME_WIDTH + self.ecology_icon.get_width() + offset * (font.LETTER_WIDTH + 2)
+        return self.value_indicator.width + uiframe.FRAME_WIDTH + offset * (font.LETTER_WIDTH + 2)
 
     def get_biomass_letter_from_x(self, x):
-        return int((x - 2 * uiframe.FRAME_WIDTH - self.ecology_icon.get_width()) / (font.LETTER_WIDTH + 2))
+        return int((x - self.value_indicator.width - uiframe.FRAME_WIDTH) / (font.LETTER_WIDTH + 2))
 
     def draw(self, dest_surface):
         self.update()
@@ -64,17 +150,16 @@ class BiomassPane(uiframe.UIElement):
     def update(self):
         self.surface = uiframe.get_blank_panel_surface(self.width - 2 * uiframe.FRAME_WIDTH,
                                                        self.height - 2 * uiframe.FRAME_WIDTH)
-        value_biomass = font.get_text_surface(str(self.player.selected_ship.cargo.biomass.value))
-        self.surface.blit(self.ecology_icon, (uiframe.FRAME_WIDTH, uiframe.FRAME_WIDTH))
-        self.surface.blit(value_biomass,
-                          (uiframe.FRAME_WIDTH + (self.ecology_icon.get_width() - value_biomass.get_width()) / 2,
-                           uiframe.FRAME_WIDTH + self.ecology_icon.get_height()))
+        self.value_indicator.update()
+        self.surface.blit(self.value_indicator.surface, (self.value_indicator.x, self.value_indicator.y))
+
         biomasses = 0
         for i in range(len(self.player.selected_ship.cargo.biomass.quantities)):
             if self.player.selected_ship.cargo.biomass.quantities[i] > 0:
                 biomass_amount = font.get_text_surface(str(self.player.selected_ship.cargo.biomass.quantities[i]))
                 self.surface.blit(biomass_amount, (self.get_biomass_letter_x(biomasses),
-                                                   uiframe.FRAME_WIDTH + self.ecology_icon.get_height()))
+                                                   uiframe.FRAME_WIDTH + self.value_indicator.height
+                                                   - font.LETTER_HEIGHT))
                 if self.player.selected_ship.cargo.biomass.selected == i:
                     pygame.draw.rect(self.surface, (160, 200, 120),
                                      pygame.Rect(self.get_biomass_letter_x(biomasses) - 2, uiframe.FRAME_WIDTH,
@@ -84,7 +169,8 @@ class BiomassPane(uiframe.UIElement):
                                                  font.LETTER_WIDTH + 2 * 4, font.LETTER_HEIGHT + 2 * 4), 2)
                     pygame.draw.rect(self.surface, (200, 10, 10),
                                      pygame.Rect(self.get_biomass_letter_x(biomasses),
-                                                 uiframe.FRAME_WIDTH + self.ecology_icon.get_height(),
+                                                 uiframe.FRAME_WIDTH + self.value_indicator.height
+                                                 - font.LETTER_HEIGHT,
                                                  font.LETTER_WIDTH, font.LETTER_HEIGHT), 1)
                 else:
                     pygame.draw.rect(self.surface, (50, 15, 15),

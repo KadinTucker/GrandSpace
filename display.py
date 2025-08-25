@@ -41,6 +41,9 @@ GALAXY_PANE_DIMENSIONS = (DISPLAY_DIMENSIONS[0] - GALAXY_PANE_MARGIN * 2, DISPLA
 GALAXY_PANE_POSITION = ((DISPLAY_DIMENSIONS[0] - GALAXY_PANE_DIMENSIONS[0]) // 2,
                         (DISPLAY_DIMENSIONS[1] - GALAXY_PANE_DIMENSIONS[1] - 58) // 2)
 
+TOP_BAR_HEIGHT = 44
+MAIN_PANE_HEIGHT = 60
+
 COLOR_BACKGROUND = (50, 50, 50)
 COLOR_UNEXPLORED_STAR = (135, 135, 135)
 COLOR_STAR = (200, 170, 25)
@@ -105,11 +108,18 @@ def main():
     active_display = system_displays[active_player.id][active_player.homeworld.star.id]
     active_display.update()
 
-    window_container = uiframe.UIContainer(None, 0, 0, DISPLAY_DIMENSIONS[0], DISPLAY_DIMENSIONS[1])
-    # window_container.elements.append(ui_technology.TechPane(window_container, 300, 300))
+    window_container = uiframe.UIContainer(None, 0, TOP_BAR_HEIGHT, DISPLAY_DIMENSIONS[0],
+                                           DISPLAY_DIMENSIONS[1] - TOP_BAR_HEIGHT - MAIN_PANE_HEIGHT)
+    window_container.elements.append(ui_technology.TechPane(window_container, 0, 2 * uiframe.FRAME_WIDTH))
 
-    main_ui = ui_main.get_main_ui_container(active_player, 0, DISPLAY_DIMENSIONS[1] - 60,
-                                            DISPLAY_DIMENSIONS[0], 60)
+    for element in window_container.elements:
+        element.visible = False
+
+    main_ui = ui_main.get_main_ui_container(active_player, 0, DISPLAY_DIMENSIONS[1] - MAIN_PANE_HEIGHT,
+                                            DISPLAY_DIMENSIONS[0], MAIN_PANE_HEIGHT)
+
+    top_bar = ui_main.get_top_bar_container(window_container, active_player, 0, 0,
+                                            DISPLAY_DIMENSIONS[0], TOP_BAR_HEIGHT)
 
     timestamp = pygame.time.get_ticks()
 
@@ -124,6 +134,7 @@ def main():
             active_display.handle_event(event, pygame.mouse.get_pos())
             window_container.handle_event(event, pygame.mouse.get_pos())
             main_ui.handle_event(event, pygame.mouse.get_pos())
+            top_bar.handle_event(event, pygame.mouse.get_pos())
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
@@ -178,8 +189,9 @@ def main():
         if elapsed_time > 0:
             display.blit(font.get_text_surface(str(int(1 / (elapsed_time / timescale * 60)))), (0, 0))
 
-        window_container.draw(display)
         main_ui.draw(display)
+        top_bar.draw(display)
+        window_container.draw(display)
 
         # Update; end tick
         pygame.display.update()

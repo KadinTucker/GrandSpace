@@ -1,5 +1,7 @@
 import pygame
 
+import uiframe
+
 COLOR_BOTTOM = (48, 48, 48)
 COLOR_MIDDLE = (94, 94, 94)
 COLOR_TOP = (145, 145, 145)
@@ -46,22 +48,29 @@ class UIElement:
         self.y = y
         self.width = width
         self.height = height
+        self.visible = True
 
     def is_point_in(self, point):
-        return (0 <= point[0] - self.x <= self.width
-                and 0 <= point[1] - self.y <= self.height)
+        return (0 <= point[0] - self.x - self.container.x <= self.width
+                and 0 <= point[1] - self.y - self.container.y <= self.height)
 
     def handle_event(self, event, mouse_pos):
         pass
 
     def draw(self, dest_surface):
-        dest_surface.blit(self.surface, (self.container.x + self.x, self.container.y + self.y))
+        if self.visible:
+            dest_surface.blit(self.surface, (self.container.x + self.x, self.container.y + self.y))
 
     def update(self):
         pass
 
     def destroy(self):
         self.container.elements.remove(self)
+
+def get_background_pane(container, x, y, width, height):
+    panel_large = get_blank_panel_surface(width - 2 * FRAME_WIDTH,
+                                                  height - 2 * FRAME_WIDTH)
+    return UIElement(container, panel_large, x, y, width, height)
 
 
 class Draggable(UIElement):
@@ -79,8 +88,8 @@ class Draggable(UIElement):
         if event.type == pygame.MOUSEBUTTONDOWN:
             if event.button == pygame.BUTTON_LEFT:
                 if self.drag_bar.is_point_in(mouse_pos):
-                    if mouse_pos[0] - self.x % self.container.dimensions[0] - self.width + 2 * FRAME_WIDTH > 0:
-                        self.destroy()
+                    if mouse_pos[0] - self.x % self.container.width - self.width + 2 * FRAME_WIDTH > 0:
+                        self.visible = False
                     else:
                         self.is_held = True
                         self.held_at = (self.x - mouse_pos[0], self.y - mouse_pos[1])
@@ -89,11 +98,14 @@ class Draggable(UIElement):
                 self.is_held = False
         elif event.type == pygame.MOUSEMOTION:
             if self.is_held:
-                self.move_to(mouse_pos[0] + self.held_at[0], mouse_pos[1] + self.held_at[1])
+                self.move_to(max(min(mouse_pos[0] + self.held_at[0], self.container.width - self.width), 0),
+                             max(min(mouse_pos[1] + self.held_at[1],
+                                     self.container.height - self.height), 2 * uiframe.FRAME_WIDTH))
 
     def draw(self, dest_surface):
         super().draw(dest_surface)
-        self.drag_bar.draw(dest_surface)
+        if self.visible:
+            self.drag_bar.draw(dest_surface)
 
     def move_to(self, x, y):
         self.x = x
@@ -117,20 +129,19 @@ class UIContainer(UIElement):
             elt.handle_event(event, mouse_pos)
 
     def draw(self, dest_surface):
-        dest_surface.blit(self.surface, (self.x, self.y))
-        for elt in self.elements:
-            elt.draw(dest_surface)
+        if self.visible:
+            dest_surface.blit(self.surface, (self.x, self.y))
+            for elt in self.elements:
+                elt.draw(dest_surface)
 
     def add_element_left(self, element):
         self.elements.append(element)
         element.x = self.stagger_left
-        element.y = 0
         self.stagger_left += element.width
 
     def add_element_right(self, element):
         self.elements.append(element)
         element.x = self.width - self.stagger_right - element.width
-        element.y = 0
         self.stagger_right += element.width
 
 

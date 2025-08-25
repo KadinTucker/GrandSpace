@@ -16,7 +16,7 @@ images = {}
 for i in range(len(alphabet)):
     images[alphabet[i]] = pygame.image.load(filenames[i])
 
-def get_text_surface(text, bg_color=(0, 0, 0)):
+def get_text_surface(text, bg_color=(1, 1, 1)):
     surface = pygame.Surface((LETTER_WIDTH * len(text), LETTER_HEIGHT))
     surface.fill(bg_color)
     for i in range(len(text)):
