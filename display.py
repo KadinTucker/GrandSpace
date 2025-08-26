@@ -78,6 +78,7 @@ def main():
     galaxy_obj.generate_star_distance_hierarchy()
     galaxy_obj.populate_homeworlds(game)
     galaxy_obj.populate_life(game)
+    galaxy_obj.populate_artifacts()
 
     # artifact_spawner = galaxy.ArtifactSpawner(galaxy_obj)
 

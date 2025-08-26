@@ -129,9 +129,10 @@ class Galaxy:
 
     def populate_artifacts(self):
         for s in self.stars:
-            for p in s.planets:
-                if random.random() < float(ARTIFACT_TOTAL_PER_STAR) / AVERAGE_PLANETS:
-                    p.artifacts = 1
+            if s.ruler is None:
+                for p in s.planets:
+                    if random.random() < float(ARTIFACT_TOTAL_PER_STAR) / AVERAGE_PLANETS:
+                        p.artifacts = 1
 
     def populate_life(self, game):
         """

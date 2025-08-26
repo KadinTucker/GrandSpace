@@ -22,7 +22,7 @@ WILDCARD_NAMES = [
 BASE_BUILDING_COST = 500
 CONSTRUCTION_EFFECT = 50
 
-TURRET_FIRERATE_PER_TIER = 12.0
+TURRET_FIRERATE_PER_TIER = 10.0
 
 SHIP_BASE_FIRERATE = 20.0
 SHIP_BONUS_FIRERATE = 10.0
@@ -67,6 +67,7 @@ SHIELD_BONUS = 1
 
 MINERAL_STORAGE_BASE = 5
 MINERAL_STORAGE_BONUS = 5
+MAX_DEVELOPMENT_PER_CITY_BONUS = 1
 
 BASE_SCIENCE_RATE = 4
 IMPROVED_SCIENCE_RATE = 2
@@ -144,6 +145,11 @@ class TechnologyTree:
         if self.tech_level[0][2] >= 2:
             return MINERAL_STORAGE_BASE + MINERAL_STORAGE_BONUS
         return MINERAL_STORAGE_BASE
+
+    def get_bonus_development_per_city(self):
+        if self.tech_level[0][2] >= 2:
+            return MAX_DEVELOPMENT_PER_CITY_BONUS
+        return 0
 
     def has_forcefields(self):
         return self.tech_level[1][2] >= 1

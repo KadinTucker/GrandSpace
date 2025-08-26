@@ -24,7 +24,8 @@ class Colony(object):
         return self.cities * self.ruler.technology.get_mineral_storage()
     
     def get_maximum_development(self):
-        return self.planet.get_habitability() * self.cities * MAX_DEVELOPMENT_PER_CITY_PER_HABITABILITY
+        return (self.planet.get_habitability() * self.cities * MAX_DEVELOPMENT_PER_CITY_PER_HABITABILITY
+                + self.cities * self.ruler.technology.get_bonus_development_per_city())
     
     def produce(self, time):
         self.minerals = min(self.get_mineral_capacity(), self.minerals + self.get_production(time))
@@ -43,7 +44,7 @@ class HomeworldColony(Colony):
         return 1 + 2 * self.planet.get_habitability()
 
     def get_maximum_development(self):
-        return self.cities
+        return self.cities * (1 + self.ruler.technology.get_bonus_development_per_city())
     
     def get_production(self, time):
         return super(HomeworldColony, self).get_production(time) / HOMEWORLD_PRODUCTION_FACTOR

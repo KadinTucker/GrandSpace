@@ -174,6 +174,7 @@ def act_sell_minerals(ship, mineral_index):
 def act_sell_artifact(ship):
     ship.cargo.artifacts -= 1
     ship.ruler.money += 500
+    ship.ruler.technology.science[3] += 5
     ship.ruler.milestone_progress[4] += 2
 
 def act_buy_building(ship):

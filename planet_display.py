@@ -170,7 +170,7 @@ class ColonySnapshot(snapshot.Snapshot):
         self.planet = planet
         self.colony = planet.colony
         self.player = player
-        super().__init__(game, (COLONY_MARGIN + max(MINERAL_WIDTH + 6 * TEXT_WIDTH
+        super().__init__(game, (COLONY_MARGIN + max(MINERAL_WIDTH + 7 * TEXT_WIDTH
                                                     + COLONY_DEMAND_PROGRESS_WIDTH, 2 * COLONY_ICON_WIDTH
                                                     + COLONY_SUMMARY_SPACING + TEXT_WIDTH),
                                 COLONY_ICON_HEIGHT + TEXT_HEIGHT + COLONY_VERTICAL_SPACING

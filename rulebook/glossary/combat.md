@@ -1,10 +1,10 @@
 # Combat
 
-Combat refers to *ships* fighting each other.
+Combat refers to ships fighting each other.
 
-During combat, each ship not performing another action with at least one valid target in its star system will fire upon a valid target, dealing 1 damage periodically.
+During combat, each ship not performing another action with at least one [valid target](hostile_action.md) in its star system will fire upon a valid target, dealing 1 damage periodically.
 
-The rate at which a ship fires increases with technology:
+The rate at which a ship fires increases with the [Weapons](../technology/weapons.md) technology:
 
 
 | Technology  | Ship Fire Rate per Minute | 
@@ -16,19 +16,19 @@ The rate at which a ship fires increases with technology:
 | Weapons IV  | 60                        |
 | Weapons V   | 70                        |
 
-A ship's valid targets depends on the leverage relationship between players. See also *hostile actions*. 
+A ship's valid targets depends on the [leverage](leverage.md) relationship between players. See also [hostile actions](hostile_action.md). 
 
 | Situation                            | Opponent Leverage at Most | 
 |--------------------------------------|---------------------------|
-| System you rule                      | 0                         |
+| System you [rule](rule.md)           | 0                         |
 | System neither you nor opponent rule | -15                       |
 | System opponent rules                | -30                       |
 
-A ship is destroyed if its health reaches 0. When a ship is destroyed, it loses all of its cargo and reappears at its owner's homeworld with 1 health. 
+A ship is destroyed if its health reaches 0. When a ship is destroyed, it loses all of its [cargo](cargo.md) and reappears at its owner's [homeworld](homeworld_colony.md) with 1 health. 
 
-When you destroy an enemy ship, you earn 100 money, 5 Power science, and 25 Warfare milestone progress. When one of your ships is destroyed in combat, you earn 10 Power science and 50 Warfare milestone progress.
+When you destroy an enemy ship, you earn 100 [money](money.md), 5 Power [science](science.md), and 25 Warfare [milestone](milestone.md) progress. When one of your ships is destroyed in combat, you earn 10 Power science and 50 Warfare milestone progress.
 
-Ship health and healing rate also improves with technology:
+Ship health and healing rate also improves with the [Shipbuilding](../technology/shipbuilding.md) technology:
 
 | Technology       | Maximum Health | Idle Heal Rate         |
 |------------------|----------------|------------------------|
