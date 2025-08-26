@@ -2,7 +2,7 @@ import pygame
 from matplotlib.backend_bases import MouseButton
 
 import planet_display
-import player
+import player as ply
 import technology
 
 import uiframe
@@ -10,10 +10,13 @@ import font
 import macros
 
 COLOR_MILESTONES = [(200, 50, 50), (150, 150, 0), (50, 200, 50), (0, 150, 150), (50, 50, 200), (150, 0, 150)]
+
 MILESTONE_OFFSET = 29
 MILESTONE_MAX = 121 / 5
 MILESTONE_TOP = 156
 MILESTONE_WIDTH = 20
+
+DIPLOMACY_TEXT_OFFSET = 34
 
 ACTION_ICONS = [
     (macros.ACTION_BUILD_CITY, uiframe.get_panel_from_image(macros.ICONS["build_city"])),
@@ -79,7 +82,7 @@ class MilestoneFrame(uiframe.UIElement):
         self.surface = pygame.Surface((self.width, self.height))
         for i in range(6):
             milestone_height = int(MILESTONE_MAX
-                                   * player.get_milestone_from_progress(self.player.milestone_progress[i]))
+                                   * ply.get_milestone_from_progress(self.player.milestone_progress[i]))
             pygame.draw.rect(self.surface, COLOR_MILESTONES[i],
                              pygame.Rect(2 * uiframe.FRAME_WIDTH + MILESTONE_OFFSET * i,
                                          MILESTONE_TOP - milestone_height, MILESTONE_WIDTH, milestone_height))
@@ -89,6 +92,40 @@ class MilestoneFrame(uiframe.UIElement):
         self.update()
         super().draw(dest_surface)
 
+class DiplomacyFrame(uiframe.UIElement):
+
+    def __init__(self, player, container, x, y):
+        self.frame = pygame.image.load("assets/leverage-frame.png")
+        self.player = player
+        width = self.frame.get_width()
+        height = self.frame.get_height() * (len(player.game.players) - 1)
+        surface = pygame.Surface((width, height))
+        surface.set_colorkey((0, 0, 0))
+        super().__init__(container, surface, x, y, width, height)
+        self.update()
+
+    def update(self):
+        self.surface.fill((1, 1, 1))
+        index = 0
+        for p in self.player.game.players:
+            if p is not self.player:
+                y_value = self.frame.get_height() * index
+                pygame.draw.rect(self.surface, self.player.color,
+                                 pygame.Rect(0, y_value, self.frame.get_height(), self.frame.get_height()))
+                pygame.draw.rect(self.surface, p.color, pygame.Rect(self.width - self.frame.get_height(), y_value,
+                                                                    self.frame.get_height(), self.frame.get_height()))
+                self.surface.blit(self.frame, (0, self.frame.get_height() * index))
+
+                left_leverage = font.get_text_surface(
+                    str(self.player.game.diplomacy.leverage_matrix[self.player.id][p.id]))
+                right_leverage = font.get_text_surface(
+                    str(self.player.game.diplomacy.leverage_matrix[p.id][self.player.id]))
+                self.surface.blit(left_leverage, (DIPLOMACY_TEXT_OFFSET,
+                                                  y_value + (self.frame.get_height() - left_leverage.get_height()) / 2))
+                self.surface.blit(right_leverage, (self.width - DIPLOMACY_TEXT_OFFSET - right_leverage.get_width(),
+                                                   y_value + (self.frame.get_height()
+                                                              - right_leverage.get_height()) / 2))
+                index += 1
 
 class MenuOpener(uiframe.UIElement):
 

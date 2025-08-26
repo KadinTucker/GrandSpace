@@ -107,5 +107,5 @@ class Diplomacy:
         """
         total = 0
         for i in range(len(self.game.players)):
-            total += max(self.total_leverage_matrix[player_id][i] - self.total_leverage_matrix[i][player_id], 0)
+            total += 15 * max(self.total_leverage_matrix[player_id][i] - self.total_leverage_matrix[i][player_id], 0)
         return total / (len(self.game.players) - 1)

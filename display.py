@@ -93,6 +93,9 @@ def main():
             for t in range(len(p.technology.tech_level)):
                 p.technology.tech_level[t] = [5, 5, 2]
         ecology.BIOMASS_REGENERATION_PER_MINUTE = 15.0
+        for i in range(1, len(game.players)):
+            #game.diplomacy.gain_leverage(0, i, 100)
+            game.diplomacy.lose_leverage(0, i, 100)
 
     pygame.init()
 
@@ -121,6 +124,7 @@ def main():
     top_bar = ui_main.get_top_bar_container(window_container, active_player, 0, 0,
                                             DISPLAY_DIMENSIONS[0], TOP_BAR_HEIGHT)
     milestones = ui_main.MilestoneFrame(active_player, None, 0, TOP_BAR_HEIGHT)
+    diplomacy_pane = ui_main.DiplomacyFrame(active_player, None, 0, TOP_BAR_HEIGHT + milestones.height)
 
     timestamp = pygame.time.get_ticks()
 
@@ -193,6 +197,7 @@ def main():
         main_ui.draw(display)
         top_bar.draw(display)
         milestones.draw(display)
+        diplomacy_pane.draw(display)
         window_container.draw(display)
 
         # Update; end tick
