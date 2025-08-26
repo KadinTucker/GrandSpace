@@ -19,6 +19,8 @@ ACTION_SELL_MAGENTA = 12
 ACTION_SELL_YELLOW = 13
 ACTION_SELL_ARTIFACT = 14
 ACTION_BUY_BUILDING = 15
+ACTION_BIOLOGY = 16
+ACTION_FUND_SCIENCE = 17
 
 # Key Controls
 ACTION_KEYCONTROL_DICT = {
@@ -65,5 +67,14 @@ ICONS = {
     "science_green": pygame.image.load("assets/icon-research-green.png"),
     "science_blue": pygame.image.load("assets/icon-research-blue.png"),
     "sell_artifact": pygame.image.load("assets/icon-sell-artifact.png"),
+    "build_city": pygame.image.load("assets/icon-build-city.png"),
+    "develop": pygame.image.load("assets/icon-build-development.png"),
+    "colonise": pygame.image.load("assets/icon-colonial.png"),
+    "collect_biomass": pygame.image.load("assets/icon-collect-biomass.png"),
+    "terraform": pygame.image.load("assets/icon-terraform.png"),
+    "collect_minerals": pygame.image.load("assets/icon-collect.png"),
+    "buy_building": pygame.image.load("assets/icon-buy-building.png"),
+    "biology": pygame.image.load("assets/icon-biology.png"),
+    "fund_science": pygame.image.load("assets/icon-fund-science.png"),
 }
 

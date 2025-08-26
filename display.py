@@ -49,7 +49,6 @@ COLOR_UNEXPLORED_STAR = (135, 135, 135)
 COLOR_STAR = (200, 170, 25)
 COLOR_ARTIFACT_RING = (150, 125, 35)
 COLOR_SHIP_SELECTION = (225, 225, 225)
-COLOR_MILESTONES = [(200, 50, 50), (150, 150, 0), (50, 200, 50), (0, 150, 150), (50, 50, 200), (150, 0, 150)]
 
 def generate_galaxy_displays(game):
     galaxy_displays = []
@@ -80,7 +79,7 @@ def main():
     galaxy_obj.populate_homeworlds(game)
     galaxy_obj.populate_life(game)
 
-    artifact_spawner = galaxy.ArtifactSpawner(galaxy_obj)
+    # artifact_spawner = galaxy.ArtifactSpawner(galaxy_obj)
 
     active_player = game.players[0]
     active_player.selected_ship = active_player.ships[0]
@@ -120,6 +119,7 @@ def main():
 
     top_bar = ui_main.get_top_bar_container(window_container, active_player, 0, 0,
                                             DISPLAY_DIMENSIONS[0], TOP_BAR_HEIGHT)
+    milestones = ui_main.MilestoneFrame(active_player, None, 0, TOP_BAR_HEIGHT)
 
     timestamp = pygame.time.get_ticks()
 
@@ -170,7 +170,7 @@ def main():
                     galaxy_displays[active_player.id].refresh_layer(1)
             p.milestone_progress[3] = game.diplomacy.get_milestone_state(p.id)
         # Galaxy loop
-        artifact_spawner.try_place_artifact(elapsed_time)
+        # artifact_spawner.try_place_artifact(elapsed_time)
         for s in galaxy_obj.stars:
             for p in s.planets:
                 p.ecology.regenerate_biomass(elapsed_time)
@@ -191,6 +191,7 @@ def main():
 
         main_ui.draw(display)
         top_bar.draw(display)
+        milestones.draw(display)
         window_container.draw(display)
 
         # Update; end tick

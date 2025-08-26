@@ -39,6 +39,7 @@ class Player:
         self.milestone_progress = [0, 0, 0, 0, 0, 0]
         self.technology = technology.TechnologyTree(self)
         self.controller = PlayerController(self)
+        self.log = []
 
     def add_ship(self, planet):
         self.ships.append(ship.Ship(planet.star.location, self))
@@ -65,6 +66,10 @@ class Player:
 
     def reset_explored_stars(self):
         self.explored_stars = [False for _ in range(len(self.game.galaxy.stars))]
+
+    def log_message(self, message):
+        self.log.append(f"[Player{self.id}] {message}")
+        print(self.log[-1])
 
 class PlayerController:
 

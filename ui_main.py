@@ -2,11 +2,29 @@ import pygame
 from matplotlib.backend_bases import MouseButton
 
 import planet_display
+import player
 import technology
 
 import uiframe
 import font
 import macros
+
+COLOR_MILESTONES = [(200, 50, 50), (150, 150, 0), (50, 200, 50), (0, 150, 150), (50, 50, 200), (150, 0, 150)]
+MILESTONE_OFFSET = 29
+MILESTONE_MAX = 121 / 5
+MILESTONE_TOP = 156
+MILESTONE_WIDTH = 20
+
+ACTION_ICONS = [
+    (macros.ACTION_BUILD_CITY, uiframe.get_panel_from_image(macros.ICONS["build_city"])),
+    (macros.ACTION_DEVELOP, uiframe.get_panel_from_image(macros.ICONS["develop"])),
+    (macros.ACTION_COLONISE, uiframe.get_panel_from_image(macros.ICONS["colonise"])),
+    (macros.ACTION_COLLECT_BIOMASS, uiframe.get_panel_from_image(macros.ICONS["collect_biomass"])),
+    (macros.ACTION_TERRAFORM, uiframe.get_panel_from_image(macros.ICONS["terraform"])),
+    (macros.ACTION_COLLECT, uiframe.get_panel_from_image(macros.ICONS["collect_minerals"])),
+    (macros.ACTION_BIOLOGY, uiframe.get_panel_from_image(macros.ICONS["biology"])),
+    (macros.ACTION_FUND_SCIENCE, uiframe.get_panel_from_image(macros.ICONS["fund_science"])),
+]
 
 def get_main_ui_container(player, x, y, width, height):
     main_container = uiframe.UIContainer(None, x, y, width, height)
@@ -15,6 +33,8 @@ def get_main_ui_container(player, x, y, width, height):
     # main_container.add_element_left(MoneyPane(main_container, 0, 0, 8, player))
     main_container.add_element_left(CargoPane(main_container, 0, 0, player))
     main_container.add_element_left(BiomassPane(main_container, 0, 0, player))
+    for action in ACTION_ICONS:
+        main_container.add_element_left(ActionButton(main_container, action[1], 0, 0, player, action[0]))
     return main_container
 
 def make_top_bar_button(icon, ratio):
@@ -36,6 +56,40 @@ def get_top_bar_container(window_container, player, x, y, width, height):
     top_bar_container.add_element_left(science_indicator)
     return top_bar_container
 
+class MilestoneFrame(uiframe.UIElement):
+
+    def __init__(self, player, container, x, y):
+        self.frame = pygame.image.load("assets/milestone-frame.png")
+        self.frame.blit(macros.ICONS["battle"], (2 * uiframe.FRAME_WIDTH, 2 * uiframe.FRAME_WIDTH))
+        self.frame.blit(macros.ICONS["discovery"], (2 * uiframe.FRAME_WIDTH + MILESTONE_OFFSET,
+                                                    2 * uiframe.FRAME_WIDTH))
+        self.frame.blit(macros.ICONS["ecology"], (2 * uiframe.FRAME_WIDTH + 2 * MILESTONE_OFFSET,
+                                                  2 * uiframe.FRAME_WIDTH))
+        self.frame.blit(macros.ICONS["diplomacy"], (2 * uiframe.FRAME_WIDTH + 3 * MILESTONE_OFFSET,
+                                                    2 * uiframe.FRAME_WIDTH))
+        self.frame.blit(macros.ICONS["trade"], (2 * uiframe.FRAME_WIDTH + 4 * MILESTONE_OFFSET,
+                                                2 * uiframe.FRAME_WIDTH))
+        self.frame.blit(macros.ICONS["empire"], (2 * uiframe.FRAME_WIDTH + 5 * MILESTONE_OFFSET,
+                                                 2 * uiframe.FRAME_WIDTH))
+        self.player = player
+        super().__init__(container, None, x, y, self.frame.get_width(), self.frame.get_height())
+        self.update()
+
+    def update(self):
+        self.surface = pygame.Surface((self.width, self.height))
+        for i in range(6):
+            milestone_height = int(MILESTONE_MAX
+                                   * player.get_milestone_from_progress(self.player.milestone_progress[i]))
+            pygame.draw.rect(self.surface, COLOR_MILESTONES[i],
+                             pygame.Rect(2 * uiframe.FRAME_WIDTH + MILESTONE_OFFSET * i,
+                                         MILESTONE_TOP - milestone_height, MILESTONE_WIDTH, milestone_height))
+        self.surface.blit(self.frame, (0, 0))
+
+    def draw(self, dest_surface):
+        self.update()
+        super().draw(dest_surface)
+
+
 class MenuOpener(uiframe.UIElement):
 
     def __init__(self, container, surface, x, y, width, height, menu_element):
@@ -46,7 +100,6 @@ class MenuOpener(uiframe.UIElement):
         if event.type == pygame.MOUSEBUTTONDOWN:
             if event.button == pygame.BUTTON_LEFT:
                 if self.is_point_in(mouse_pos):
-                    print("got it")
                     self.menu_element.visible = not self.menu_element.visible
 
 class ScienceIndicator(MenuOpener):
@@ -104,6 +157,20 @@ class IndicatorIcon(uiframe.UIElement):
         amount_surface = font.get_text_surface(str(self.indicator(self.player)))
         self.surface.blit(amount_surface, ((self.icon.get_width() - amount_surface.get_width()) / 2,
                                            self.icon.get_height()))
+
+class ActionButton(uiframe.UIElement):
+
+    def __init__(self, container, icon, x, y, player, action):
+        super().__init__(container, icon, x, y, icon.get_width(), icon.get_height())
+        self.player = player
+        self.action = action
+
+    # TODO: add a way to indicate if the ship can currently do the action or not
+    def handle_event(self, event, mouse_pos):
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            if event.button == pygame.BUTTON_LEFT:
+                if self.is_point_in(mouse_pos):
+                    self.player.selected_ship.set_action(self.action)
 
 class MoneyPane(uiframe.UIElement):
 
@@ -234,10 +301,8 @@ class CargoPane(uiframe.UIElement):
                     else:
                         for i in range(len(self.mineral_pos)):
                             if 0 <= rel_mouse[0] - self.mineral_pos[i] <= self.mineral_icons[i].get_width():
-                                print(macros.ACTION_SELL_RED + i)
                                 self.player.selected_ship.set_action(macros.ACTION_SELL_RED + i)
                                 break
-                        print("loop done")
 
     def update(self):
         self.surface = uiframe.get_blank_panel_surface(self.width - 2 * uiframe.FRAME_WIDTH,

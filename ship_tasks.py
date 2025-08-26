@@ -100,11 +100,34 @@ def is_enemy_ship(ship, other):
     return ship.star is other.star and (ship.ruler.game.diplomacy.access_matrix[other.ruler.id][ship.ruler.id][5]
                                         or (rules_system(ship) and not has_access(other, 3)))
 
+def exists_enemy_ship(ship, star):
+    for s in star.ships:
+        if is_enemy_ship(ship, s):
+            return True
+    return False
+
 def cond_collect_minerals(ship):
-    return rules_planet(ship) and ship.planet.colony.minerals >= 1
+    if rules_planet(ship):
+        if ship.planet.colony.minerals >= 1:
+            return True
+        else:
+            ship.ruler.log_message("Cannot collect minerals: no minerals to collect")
+    else:
+        ship.ruler.log_message("Cannot collect minerals: not at planet/planet not ruled by player")
+    return False
 
 def cond_sell_minerals(ship, mineral_index):
-    return has_access(ship, 2) and ship.cargo.minerals[mineral_index] > 0
+    if is_at_colony(ship):
+        if has_access(ship, 2):
+            if ship.cargo.minerals[mineral_index] > 0:
+                return True
+            else:
+                ship.ruler.log_message("Cannot sell minerals: no such minerals in cargo")
+        else:
+            ship.ruler.log_message("Cannot sell minerals: no trade access in this system")
+    else:
+        ship.ruler.log_message("Cannot sell minerals: not at colony")
+    return False
 
 def cond_sell_artifact(ship):
     return rules_planet(ship) and ship.cargo.artifacts > 0
@@ -127,6 +150,16 @@ def cond_develop_colony(ship):
 
 def cond_terraform(ship):
     return can_terraform(ship) and has_enough_money(ship, ship.ruler.technology.get_terraform_monetary_cost())
+
+def cond_biology(ship):
+    if has_enough_biomass(ship, 5):
+        return True
+    else:
+        ship.ruler.log_message("Cannot do biology: minimum 5 biomass in cargo required")
+    return False
+
+def cond_fund_science(ship):
+    return has_enough_money(ship, 100)
 
 def act_collect_minerals(ship):
     ship.cargo.minerals[ship.planet.mineral] += 1
@@ -182,6 +215,15 @@ def act_terraform(ship):
     ship.ruler.money -= ship.ruler.technology.get_terraform_monetary_cost()
     ship.ruler.milestone_progress[2] += spent + 25
     ship.ruler.technology.science[2] += (spent - cost) / 5
+
+def act_biology(ship):
+    spent = ship.cargo.biomass.empty()
+    ship.ruler.milestone_progress[2] += spent
+    ship.ruler.technology.science[2] += spent / 5
+
+def act_fund_science(ship):
+    ship.ruler.money -= 100
+    ship.ruler.technology.science[1] += 1
 
 def task_null(ship, game):
     pass
@@ -251,5 +293,7 @@ SHIP_ACTIONS = [
     (lambda ship: cond_sell_minerals(ship, 5), lambda ship: act_sell_minerals(ship, 5),
      lambda t: lambda: CARGO_TRANSFER_RATE, False),
     (cond_sell_artifact, act_sell_artifact, lambda t: lambda: CARGO_TRANSFER_RATE, False),
-    (cond_buy_building, act_buy_building, lambda t: lambda: CARGO_TRANSFER_RATE, False)
+    (cond_buy_building, act_buy_building, lambda t: lambda: CARGO_TRANSFER_RATE, False),
+    (cond_biology, act_biology, lambda t: lambda: CARGO_TRANSFER_RATE, False),
+    (cond_fund_science, act_fund_science, lambda t: lambda: CARGO_TRANSFER_RATE, False),
 ]

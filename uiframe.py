@@ -59,7 +59,10 @@ class UIElement:
 
     def draw(self, dest_surface):
         if self.visible:
-            dest_surface.blit(self.surface, (self.container.x + self.x, self.container.y + self.y))
+            if self.container is None:
+                dest_surface.blit(self.surface, (self.x, self.y))
+            else:
+                dest_surface.blit(self.surface, (self.container.x + self.x, self.container.y + self.y))
 
     def update(self):
         pass

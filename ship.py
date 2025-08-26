@@ -73,7 +73,19 @@ class Ship:
 
     def act(self, time):
         if self.action == 0:
-            if (self.health < self.ruler.technology.get_ship_max_health()
+            if self.star is not None and ship_tasks.exists_enemy_ship(self, self.star):
+                if self.action_progress < 1.0:
+                    self.action_progress = max(0.0, self.action_progress +
+                                               self.ruler.technology.get_ship_firerate() * time)
+                else:
+                    for s in self.star.ships:
+                        if ship_tasks.is_enemy_ship(self, s):
+                            s.receive_damage(1, self.ruler)
+                            self.ruler.milestone_progress[0] += 25 / s.ruler.technology.get_ship_max_health()
+                            self.ruler.technology.science[0] += 10 / s.ruler.technology.get_ship_max_health()
+                            self.action_progress = 0.0
+                            break
+            elif (self.health < self.ruler.technology.get_ship_max_health()
                     and self.planet is not None and self.planet.colony is not None
                     and self.planet.colony.ruler == self.ruler):
                 self.action_progress += ship_tasks.FULL_HEAL_RATE * self.ruler.technology.get_ship_max_health() * time
@@ -90,24 +102,13 @@ class Ship:
             self.action = action_idx
             self.action_progress = 0.0
 
-    def attack(self, time):
-        if self.star is not None:
-            if self.action_progress < 1.0:
-                self.action_progress = max(0.0, self.action_progress + self.ruler.technology.get_ship_firerate() * time)
-            else:
-                for s in self.star.ships:
-                    if ship_tasks.is_enemy_ship(self, s):
-                        s.health -= 1
-                        self.ruler.milestone_progress[0] += (25 * 1) // s.ruler.technology.get_ship_max_health()
-                        self.action_progress = 0.0
-                        break
-
-    def resolve_combat(self, time):
+    def receive_damage(self, damage, dealing_player):
+        self.health -= damage
         if self.health <= 0:
-            # TODO: make respawn time after ship destruction
             self.get_destroyed()
-        else:
-            self.attack(time)
+            dealing_player.money += 100
+            self.ruler.milestone_progress[0] += 50
+            self.ruler.technology.science[0] += 20
 
     def move(self, time):
         """
