@@ -56,9 +56,12 @@ def has_enough_biomass(ship, requirement):
 def has_enough_biomass_to_terraform(ship):
     return ship.planet is not None and has_enough_biomass(ship, ship.planet.ecology.get_terraform_cost())
 
-def has_access(ship, access_index):
+def has_active_access(ship, access_index):
     return (ship.star is not None and (ship.star.ruler is None
-            or ship.ruler.game.diplomacy.access_matrix[ship.ruler.id][ship.star.ruler.id][access_index]))
+            or ship.ruler.game.diplomacy.get_active_access(ship.star.ruler.id, ship.ruler.id, access_index)))
+
+def has_hostile_access_versus(ship, other, access_index):
+    return ship.ruler.game.diplomacy.get_hostile_access(other.ruler.id, ship.ruler.id, access_index)
 
 def is_system_neutral(ship):
     return ship.star.ruler is None
@@ -95,10 +98,10 @@ def has_space_for_development(ship):
 
 def is_enemy_ship(ship, other):
     # Both ships have to be in the same star
-    # Either: this ship has access to battle the other, or the other ship does not have passage and we are in a
-    # system ruled by this ship
-    return ship.star is other.star and (ship.ruler.game.diplomacy.access_matrix[other.ruler.id][ship.ruler.id][5]
-                                        or (rules_system(ship) and not has_access(other, 3)))
+    # Either: this ship has access to battle the other everywhere, or this ship is at a home system
+    # and the ship's ruler has right to trespass (other's access is "blocked")
+    return ship.star is other.star and (has_hostile_access_versus(ship, other, 2)
+                                        or (rules_system(ship) and has_hostile_access_versus(ship, other, 0)))
 
 def exists_enemy_ship(ship, star):
     for s in star.ships:
@@ -118,7 +121,7 @@ def cond_collect_minerals(ship):
 
 def cond_sell_minerals(ship, mineral_index):
     if is_at_colony(ship):
-        if has_access(ship, 2):
+        if has_active_access(ship, 2):
             if ship.cargo.minerals[mineral_index] > 0:
                 return True
             else:
@@ -140,7 +143,7 @@ def cond_establish_colony(ship):
             and has_buildings(ship, 2) and ship.planet is not None)
 
 def cond_collect_biomass(ship):
-    return has_access(ship, 0) and ship.planet is not None and ship.planet.ecology.biomass_level >= 1
+    return has_active_access(ship, 0) and ship.planet is not None and ship.planet.ecology.biomass_level >= 1
 
 def cond_build_city(ship):
     return has_space_for_city(ship) and has_buildings(ship, 2)

@@ -51,6 +51,8 @@ class UIElement:
         self.visible = True
 
     def is_point_in(self, point):
+        if self.container is None:
+            return 0 <= point[0] - self.x <= self.width and 0 <= point[1] - self.y <= self.height
         return (0 <= point[0] - self.x - self.container.x <= self.width
                 and 0 <= point[1] - self.y - self.container.y <= self.height)
 

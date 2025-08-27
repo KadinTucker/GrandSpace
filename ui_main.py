@@ -92,16 +92,28 @@ class MilestoneFrame(uiframe.UIElement):
         self.update()
         super().draw(dest_surface)
 
-class DiplomacyFrame(uiframe.UIElement):
+class MenuOpener(uiframe.UIElement):
 
-    def __init__(self, player, container, x, y):
+    def __init__(self, container, surface, x, y, width, height, menu_element):
+        super().__init__(container, surface, x, y, width, height)
+        self.menu_element = menu_element
+
+    def handle_event(self, event, mouse_pos):
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            if event.button == pygame.BUTTON_LEFT:
+                if self.is_point_in(mouse_pos):
+                    self.menu_element.visible = not self.menu_element.visible
+
+class DiplomacyFrame(MenuOpener):
+
+    def __init__(self, player, container, x, y, menu_element):
         self.frame = pygame.image.load("assets/leverage-frame.png")
         self.player = player
         width = self.frame.get_width()
         height = self.frame.get_height() * (len(player.game.players) - 1)
         surface = pygame.Surface((width, height))
         surface.set_colorkey((0, 0, 0))
-        super().__init__(container, surface, x, y, width, height)
+        super().__init__(container, surface, x, y, width, height, menu_element)
         self.update()
 
     def update(self):
@@ -126,18 +138,6 @@ class DiplomacyFrame(uiframe.UIElement):
                                                    y_value + (self.frame.get_height()
                                                               - right_leverage.get_height()) / 2))
                 index += 1
-
-class MenuOpener(uiframe.UIElement):
-
-    def __init__(self, container, surface, x, y, width, height, menu_element):
-        super().__init__(container, surface, x, y, width, height)
-        self.menu_element = menu_element
-
-    def handle_event(self, event, mouse_pos):
-        if event.type == pygame.MOUSEBUTTONDOWN:
-            if event.button == pygame.BUTTON_LEFT:
-                if self.is_point_in(mouse_pos):
-                    self.menu_element.visible = not self.menu_element.visible
 
 class ScienceIndicator(MenuOpener):
     def __init__(self, player, container, x, y, menu_element):

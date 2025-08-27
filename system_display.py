@@ -22,14 +22,18 @@ SYSTEM_SHIP_RADIUS = 10
 
 ACCESS_PANE_HEIGHT = 46
 ACCESS_PANE_WIDTH = 96
-ACCESS_ELEMENT_POSITIONS = [(0, 0), (24, 0), (48, 0), (72, 13), (48, 26), (24, 26), (0, 26)]
+ACCESS_ACTIVE_ELEMENT_POSITIONS = [(0, 0), (24, 0), (48, 0), (72, 0)]
+ACCESS_PASSIVE_ELEMENT_POSITIONS = [(72, 26), (48, 26), (24, 26), (0, 26)]
 
-ACCESS_IMAGE_FILENAMES = ["assets/icon-ecology.png", "assets/icon-diplomacy.png", "assets/icon-trade.png",
-                          "assets/icon-access-passage.png", "assets/icon-access-piracy.png", "assets/icon-battle.png",
-                          "assets/icon-access-siege.png"]
+ACCESS_ACTIVE_IMAGE_FILENAMES = ["assets/icon-ecology.png", "assets/icon-diplomacy.png", "assets/icon-trade.png",
+                                 "assets/icon-access-passage.png"]
+ACCESS_PASSIVE_IMAGE_FILENAMES = ["assets/icon-access-trespass.png", "assets/icon-access-piracy.png",
+                                  "assets/icon-battle.png", "assets/icon-access-siege.png"]
 
-ACCESS_IMAGES = [pygame.image.load(fn) for fn in ACCESS_IMAGE_FILENAMES]
-ACCESS_NONE_IMG = pygame.image.load("assets/no-access.png")
+ACCESS_ACTIVE_IMAGES = [pygame.image.load(fn) for fn in ACCESS_ACTIVE_IMAGE_FILENAMES]
+ACCESS_PASSIVE_IMAGES = [pygame.image.load(fn) for fn in ACCESS_PASSIVE_IMAGE_FILENAMES]
+ACCESS_BLOCKED_IMG = pygame.image.load("assets/no-access.png")
+ACCESS_MISSING_IMG = pygame.image.load("assets/no-access-diplo.png")
 
 COLOR_BACKGROUND = (10, 10, 10)
 COLOR_STAR = (200, 130, 25)
@@ -84,12 +88,22 @@ class SystemDisplay(pane.Pane):
             pane_up = (self.dimensions[1] - ACCESS_PANE_HEIGHT) // 2
             pygame.draw.rect(self.layers[1], self.star.ruler.color,
                              pygame.Rect(pane_left, pane_up, ACCESS_PANE_WIDTH, ACCESS_PANE_HEIGHT))
-            for i in range(len(ACCESS_ELEMENT_POSITIONS)):
-                self.layers[1].blit(ACCESS_IMAGES[i], (pane_left + ACCESS_ELEMENT_POSITIONS[i][0],
-                                                       pane_up + ACCESS_ELEMENT_POSITIONS[i][1]))
-                if not self.game.diplomacy.access_matrix[self.star.ruler.id][self.player.id][i]:
-                    self.layers[1].blit(ACCESS_NONE_IMG, (pane_left + ACCESS_ELEMENT_POSITIONS[i][0],
-                                                          pane_up + ACCESS_ELEMENT_POSITIONS[i][1]))
+            for i in range(len(ACCESS_ACTIVE_ELEMENT_POSITIONS)):
+                self.layers[1].blit(ACCESS_ACTIVE_IMAGES[i], (pane_left + ACCESS_ACTIVE_ELEMENT_POSITIONS[i][0],
+                                                              pane_up + ACCESS_ACTIVE_ELEMENT_POSITIONS[i][1]))
+                if not self.game.diplomacy.get_active_access(self.star.ruler.id, self.player.id, i):
+                    if self.game.diplomacy.leverage_matrix[self.player.id][self.star.ruler.id] >= 0:
+                        self.layers[1].blit(ACCESS_MISSING_IMG, (pane_left + ACCESS_ACTIVE_ELEMENT_POSITIONS[i][0],
+                                                                 pane_up + ACCESS_ACTIVE_ELEMENT_POSITIONS[i][1]))
+                    else:
+                        self.layers[1].blit(ACCESS_BLOCKED_IMG, (pane_left + ACCESS_ACTIVE_ELEMENT_POSITIONS[i][0],
+                                                                 pane_up + ACCESS_ACTIVE_ELEMENT_POSITIONS[i][1]))
+            for i in range(len(ACCESS_PASSIVE_ELEMENT_POSITIONS)):
+                self.layers[1].blit(ACCESS_PASSIVE_IMAGES[i], (pane_left + ACCESS_PASSIVE_ELEMENT_POSITIONS[i][0],
+                                                               pane_up + ACCESS_PASSIVE_ELEMENT_POSITIONS[i][1]))
+                if not self.game.diplomacy.get_hostile_access(self.star.ruler.id, self.player.id, i):
+                    self.layers[1].blit(ACCESS_BLOCKED_IMG, (pane_left + ACCESS_PASSIVE_ELEMENT_POSITIONS[i][0],
+                                                             pane_up + ACCESS_PASSIVE_ELEMENT_POSITIONS[i][1]))
 
     def sketch_ship_surface(self):
         self.layers[3].fill(COLOR_BACKGROUND)

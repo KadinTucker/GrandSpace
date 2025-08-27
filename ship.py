@@ -92,6 +92,8 @@ class Ship:
                 if self.action_progress >= 1.0:
                     self.health += 1
                     self.action_progress -= 1.0
+            else:
+                self.action_progress = 0.0
         elif self.action == 1:
             self.move(time)
         else:

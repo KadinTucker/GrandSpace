@@ -8,6 +8,7 @@ import player
 
 import font
 import ship_tasks
+import ui_diplomacy
 import ui_main
 import uiframe
 import ui_technology
@@ -94,8 +95,13 @@ def main():
                 p.technology.tech_level[t] = [5, 5, 2]
         ecology.BIOMASS_REGENERATION_PER_MINUTE = 15.0
         for i in range(1, len(game.players)):
-            #game.diplomacy.gain_leverage(0, i, 100)
-            game.diplomacy.lose_leverage(0, i, 100)
+            import random
+            game.diplomacy.lose_leverage(0, i, random.randint(0, 100))
+            game.diplomacy.gain_leverage(0, i, random.randint(0, 100))
+            game.diplomacy.lose_leverage(i, 0, random.randint(0, 100))
+            game.diplomacy.gain_leverage(i, 0, random.randint(0, 100))
+        #   game.diplomacy.gain_leverage(0, i, 100)
+
 
     pygame.init()
 
@@ -114,6 +120,8 @@ def main():
     window_container = uiframe.UIContainer(None, 0, TOP_BAR_HEIGHT, DISPLAY_DIMENSIONS[0],
                                            DISPLAY_DIMENSIONS[1] - TOP_BAR_HEIGHT - MAIN_PANE_HEIGHT)
     window_container.elements.append(ui_technology.TechPane(window_container, 0, 2 * uiframe.FRAME_WIDTH))
+    window_container.elements.append(ui_diplomacy.DiplomacyPane(window_container, active_player,
+                                                                0, 2 * uiframe.FRAME_WIDTH))
 
     for element in window_container.elements:
         element.visible = False
@@ -124,7 +132,8 @@ def main():
     top_bar = ui_main.get_top_bar_container(window_container, active_player, 0, 0,
                                             DISPLAY_DIMENSIONS[0], TOP_BAR_HEIGHT)
     milestones = ui_main.MilestoneFrame(active_player, None, 0, TOP_BAR_HEIGHT)
-    diplomacy_pane = ui_main.DiplomacyFrame(active_player, None, 0, TOP_BAR_HEIGHT + milestones.height)
+    diplomacy_pane = ui_main.DiplomacyFrame(active_player, None, 0, TOP_BAR_HEIGHT + milestones.height,
+                                            window_container.elements[1])
 
     timestamp = pygame.time.get_ticks()
 
@@ -140,6 +149,7 @@ def main():
             window_container.handle_event(event, pygame.mouse.get_pos())
             main_ui.handle_event(event, pygame.mouse.get_pos())
             top_bar.handle_event(event, pygame.mouse.get_pos())
+            diplomacy_pane.handle_event(event, pygame.mouse.get_pos())
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
