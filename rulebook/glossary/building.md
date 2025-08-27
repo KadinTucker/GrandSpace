@@ -11,4 +11,4 @@ Buildings are used to [found colonies](../actions/found_colony.md), build [citie
 
 ### Cloning
 
-With the Ecology bonus technology [Mass Cloning](../technology/mass_cloning.md), buildings can be purchased using 30 [biomass](biomass.md). 
+With the Ecology bonus technology [Mass Cloning](../technology/mass_cloning.md), buildings can be purchased using 10 [biomass](biomass.md). 

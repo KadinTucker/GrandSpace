@@ -4,11 +4,13 @@ import colony
 import ecology
 
 FULL_HEAL_RATE = 2.0
-COLONY_PLACEMENT_RATE = 60.0
-CITY_PLACEMENT_RATE = 120.0
-DEVELOPMENT_PLACEMENT_RATE = 120.0
+COLONY_PLACEMENT_RATE = 30.0
+CITY_PLACEMENT_RATE = 60.0
+DEVELOPMENT_PLACEMENT_RATE = 60.0
 TERRAFORM_RATE = 3.0
 CARGO_TRANSFER_RATE = 240.0
+RESEARCH_RATE = 1.0
+MINERAL_RAID_RATE = 20.0
 
 def find_nearest_star(position, galaxy, blacklist=()):
     """
@@ -60,8 +62,8 @@ def has_active_access(ship, access_index):
     return (ship.star is not None and (ship.star.ruler is None
             or ship.ruler.game.diplomacy.get_active_access(ship.star.ruler.id, ship.ruler.id, access_index)))
 
-def has_hostile_access_versus(ship, other, access_index):
-    return ship.ruler.game.diplomacy.get_hostile_access(other.ruler.id, ship.ruler.id, access_index)
+def has_hostile_access_versus(ship, other_player, access_index):
+    return ship.ruler.game.diplomacy.get_hostile_access(other_player.id, ship.ruler.id, access_index)
 
 def is_system_neutral(ship):
     return ship.star.ruler is None
@@ -100,8 +102,8 @@ def is_enemy_ship(ship, other):
     # Both ships have to be in the same star
     # Either: this ship has access to battle the other everywhere, or this ship is at a home system
     # and the ship's ruler has right to trespass (other's access is "blocked")
-    return ship.star is other.star and (has_hostile_access_versus(ship, other, 2)
-                                        or (rules_system(ship) and has_hostile_access_versus(ship, other, 0)))
+    return ship.star is other.star and (has_hostile_access_versus(ship, other.ruler, 2)
+                                        or (rules_system(ship) and has_hostile_access_versus(ship, other.ruler, 0)))
 
 def exists_enemy_ship(ship, star):
     for s in star.ships:
@@ -163,6 +165,65 @@ def cond_biology(ship):
 
 def cond_fund_science(ship):
     return has_enough_money(ship, 100)
+
+def cond_schmooze(ship):
+    if ship.planet is not None and ship.planet.colony is not None:
+        if ship.ruler is not ship.planet.colony.ruler:
+            if has_active_access(ship, 1):
+                return True
+            else:
+                ship.ruler.log_message("Cannot schmooze: need diplomatic access")
+        else:
+            ship.ruler.log_message("Cannot schmooze: cannot schmooze at own colonies")
+    else:
+        ship.ruler.log_message("Cannot schmooze: ship not at colony")
+    return False
+
+def cond_research(ship):
+    if ship.planet is not None and ship.planet.colony is not None:
+        if has_active_access(ship, 1):
+            return True
+        else:
+            ship.ruler.log_message("Cannot research: need diplomatic access")
+    else:
+        ship.ruler.log_message("Cannot research: ship not at colony")
+    return False
+
+def cond_raid_minerals(ship):
+    if ship.planet is not None and ship.planet.colony is not None:
+        if has_hostile_access_versus(ship, ship.planet.colony.ruler, 1):
+            if ship.planet.colony.minerals >= 1:
+                return True
+            else:
+                ship.ruler.log_message("Cannot raid minerals: no minerals to take")
+        else:
+            ship.ruler.log_message("Cannot raid minerals: need piracy access")
+    else:
+        ship.ruler.log_message("Cannot raid minerals: ship not at colony")
+    return False
+
+def cond_raid_biomass(ship):
+    if ship.planet is not None:
+        if has_hostile_access_versus(ship, ship.planet.colony.ruler, 1):
+            if ship.planet.ecology.biomass_level >= 1:
+                return True
+            else:
+                ship.ruler.log_message("Cannot steal biomass: no biomass to take")
+        else:
+            ship.ruler.log_message("Cannot steal biomass: need piracy access")
+    else:
+        ship.ruler.log_message("Cannot steal biomass: ship not at planet")
+    return False
+
+def cond_besiege(ship):
+    if ship.planet is not None and ship.planet.colony is not None:
+        if has_hostile_access_versus(ship, ship.planet.colony.ruler, 3):
+            return True
+        else:
+            ship.ruler.log_message("Cannot besiege: need siege access")
+    else:
+        ship.ruler.log_message("Cannot besiege: ship not at planet")
+    return False
 
 def act_collect_minerals(ship):
     ship.cargo.minerals[ship.planet.mineral] += 1
@@ -229,6 +290,33 @@ def act_fund_science(ship):
     ship.ruler.money -= 100
     ship.ruler.technology.science[1] += 1
 
+def act_schmooze(ship):
+    ship.ruler.game.diplomacy.gain_leverage(ship.ruler.id, ship.star.ruler.id, 1)
+    ship.ruler.milestone_progress[3] += 1
+
+def act_research(ship):
+    if ship.star.ruler is not ship.ruler:
+        ship.ruler.game.diplomacy.gain_leverage(ship.ruler.id, ship.star.ruler.id, 5)
+        ship.ruler.milestone_progress[3] += 5
+    ship.ruler.money += 200
+    ship.ruler.milestone_progress[4] += 4
+    ship.ruler.technology.science[3] += 3
+    ship.star.ruler.technology.science[3] += 3
+
+def act_raid_minerals(ship):
+    act_collect_minerals(ship)
+    ship.ruler.milestone_progress[0] += 1
+    ship.ruler.game.diplomacy.lose_leverage(ship.ruler.id, ship.star.ruler.id, 2)
+
+def act_raid_biomass(ship):
+    act_collect_biomass(ship)
+    ship.ruler.milestone_progress[0] += ship.planet.ecology.habitability
+    ship.ruler.game.diplomacy.lose_leverage(ship.ruler.id, ship.star.ruler.id, 2)
+
+def act_besiege(ship):
+    # TODO
+    pass
+
 def task_null(ship, game):
     pass
 
@@ -285,19 +373,24 @@ SHIP_ACTIONS = [
     (cond_terraform, act_terraform, lambda t: lambda: TERRAFORM_RATE, False),
     (cond_collect_minerals, act_collect_minerals, lambda t: lambda: CARGO_TRANSFER_RATE, True),
     (lambda ship: cond_sell_minerals(ship, 0), lambda ship: act_sell_minerals(ship, 0),
-     lambda t: lambda: CARGO_TRANSFER_RATE, False),
+     lambda t: lambda: CARGO_TRANSFER_RATE, True),
     (lambda ship: cond_sell_minerals(ship, 1), lambda ship: act_sell_minerals(ship, 1),
-     lambda t: lambda: CARGO_TRANSFER_RATE, False),
+     lambda t: lambda: CARGO_TRANSFER_RATE, True),
     (lambda ship: cond_sell_minerals(ship, 2), lambda ship: act_sell_minerals(ship, 2),
-     lambda t: lambda: CARGO_TRANSFER_RATE, False),
+     lambda t: lambda: CARGO_TRANSFER_RATE, True),
     (lambda ship: cond_sell_minerals(ship, 3), lambda ship: act_sell_minerals(ship, 3),
-     lambda t: lambda: CARGO_TRANSFER_RATE, False),
+     lambda t: lambda: CARGO_TRANSFER_RATE, True),
     (lambda ship: cond_sell_minerals(ship, 4), lambda ship: act_sell_minerals(ship, 4),
-     lambda t: lambda: CARGO_TRANSFER_RATE, False),
+     lambda t: lambda: CARGO_TRANSFER_RATE, True),
     (lambda ship: cond_sell_minerals(ship, 5), lambda ship: act_sell_minerals(ship, 5),
-     lambda t: lambda: CARGO_TRANSFER_RATE, False),
+     lambda t: lambda: CARGO_TRANSFER_RATE, True),
     (cond_sell_artifact, act_sell_artifact, lambda t: lambda: CARGO_TRANSFER_RATE, False),
     (cond_buy_building, act_buy_building, lambda t: lambda: CARGO_TRANSFER_RATE, False),
     (cond_biology, act_biology, lambda t: lambda: CARGO_TRANSFER_RATE, False),
     (cond_fund_science, act_fund_science, lambda t: lambda: CARGO_TRANSFER_RATE, False),
+    (cond_schmooze, act_schmooze, lambda t: t.get_schmooze_power, True),
+    (cond_research, act_research, lambda t: lambda: RESEARCH_RATE, True),
+    (cond_raid_minerals, act_raid_minerals, lambda t: lambda: MINERAL_RAID_RATE, True),
+    (cond_raid_biomass, act_raid_biomass, lambda t: t.get_biomass_collection_rate, False),
+    (cond_besiege, act_besiege, lambda t: t.get_ship_firerate, True)
 ]

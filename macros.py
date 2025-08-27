@@ -21,6 +21,10 @@ ACTION_SELL_ARTIFACT = 14
 ACTION_BUY_BUILDING = 15
 ACTION_BIOLOGY = 16
 ACTION_FUND_SCIENCE = 17
+ACTION_SCHMOOZE = 18
+ACTION_RESEARCH = 19
+ACTION_RAID_MINERALS = 20
+ACTION_RAID_BIOMASS = 21
 
 # Key Controls
 ACTION_KEYCONTROL_DICT = {
@@ -76,5 +80,8 @@ ICONS = {
     "buy_building": pygame.image.load("assets/icon-buy-building.png"),
     "biology": pygame.image.load("assets/icon-biology.png"),
     "fund_science": pygame.image.load("assets/icon-fund-science.png"),
+    "schmooze": pygame.image.load("assets/icon-schmooze.png"),
+    "raid_minerals": pygame.image.load("assets/icon-raid-minerals.png"),
+    "raid_biomass": pygame.image.load("assets/icon-raid-biomass.png"),
 }
 

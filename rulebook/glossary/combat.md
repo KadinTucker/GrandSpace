@@ -6,7 +6,6 @@ During combat, each ship not performing another action with at least one [valid 
 
 The rate at which a ship fires increases with the [Weapons](../technology/weapons.md) technology:
 
-
 | Technology  | Ship Fire Rate per Minute | 
 |-------------|---------------------------|
 | None        | 20                        |
@@ -38,3 +37,13 @@ Ship health and healing rate also improves with the [Shipbuilding](../technology
 | Shipbuilding III | 25             | 5 per 6 seconds        |
 | Shipbuilding IV  | 30             | 1 per second           |
 | Shipbuilding V   | 35             | more than 1 per second |
+
+### Stance
+
+Ships can be set to a "stance", which determines how they will automatically act when faced with enemies.
+
+On Aggressive Stance, ships will attack any valid ships they can.
+
+On Defensive Stance, ships will only attack ships in your own systems.
+
+On Passive Stance, ships will not attack at all. 

@@ -27,8 +27,12 @@ ACTION_ICONS = [
     (macros.ACTION_COLLECT_BIOMASS, uiframe.get_panel_from_image(macros.ICONS["collect_biomass"])),
     (macros.ACTION_TERRAFORM, uiframe.get_panel_from_image(macros.ICONS["terraform"])),
     (macros.ACTION_COLLECT, uiframe.get_panel_from_image(macros.ICONS["collect_minerals"])),
+    (macros.ACTION_RESEARCH, uiframe.get_panel_from_image(macros.ICONS["science"])),
     (macros.ACTION_BIOLOGY, uiframe.get_panel_from_image(macros.ICONS["biology"])),
     (macros.ACTION_FUND_SCIENCE, uiframe.get_panel_from_image(macros.ICONS["fund_science"])),
+    (macros.ACTION_SCHMOOZE, uiframe.get_panel_from_image(macros.ICONS["schmooze"])),
+    (macros.ACTION_RAID_MINERALS, uiframe.get_panel_from_image(macros.ICONS["raid_minerals"])),
+    (macros.ACTION_RAID_BIOMASS, uiframe.get_panel_from_image(macros.ICONS["raid_biomass"])),
 ]
 
 def get_main_ui_container(player, x, y, width, height):
