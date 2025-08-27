@@ -25,6 +25,7 @@ ACTION_SCHMOOZE = 18
 ACTION_RESEARCH = 19
 ACTION_RAID_MINERALS = 20
 ACTION_RAID_BIOMASS = 21
+ACTION_BESIEGE = 22
 
 # Key Controls
 ACTION_KEYCONTROL_DICT = {
@@ -83,5 +84,6 @@ ICONS = {
     "schmooze": pygame.image.load("assets/icon-schmooze.png"),
     "raid_minerals": pygame.image.load("assets/icon-raid-minerals.png"),
     "raid_biomass": pygame.image.load("assets/icon-raid-biomass.png"),
+    "besiege": pygame.image.load("assets/icon-besiege.png"),
 }
 

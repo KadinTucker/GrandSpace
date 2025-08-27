@@ -4,6 +4,9 @@ MINERAL_PER_DEVELOPMENT_PER_MINUTE = 1
 HOMEWORLD_PRODUCTION_FACTOR = 1  # amount by which production is divided for homeworld
 MAX_DEVELOPMENT_PER_CITY_PER_HABITABILITY = 1
 
+SHIELD_HEALTH = 20
+HEALING_PER_MINUTE = 3
+
 class Colony(object):
 
     def __init__(self, player, planet):
@@ -13,6 +16,9 @@ class Colony(object):
         self.development = 0
         self.minerals = 0
         self.demand = trade.Demand(self)
+        self.conqueror = None
+        self.conquered_shields = 0
+        self.damage = 0
 
     def get_maximum_cities(self):
         return max(1, self.planet.get_habitability())
@@ -28,10 +34,51 @@ class Colony(object):
                 + self.cities * self.ruler.technology.get_bonus_development_per_city())
     
     def produce(self, time):
-        self.minerals = min(self.get_mineral_capacity(), self.minerals + self.get_production(time))
+        if self.damage > 0:
+            self.damage -= HEALING_PER_MINUTE * time
+        else:
+            self.minerals = min(self.get_mineral_capacity(), self.minerals + self.get_production(time))
+        if self.damage <= 0:
+            self.conqueror = None
+            self.damage = 0
 
     def get_defense(self):
         return self.cities + self.ruler.technology.get_bonus_shields()
+
+    def is_conquered(self):
+        return self.conquered_shields >= self.get_defense()
+
+    def receive_damage(self, dealer):
+        # Start by determining the conqueror. If a different player from the original, they have to undo the progress
+        # of the original conqueror first.
+        if self.conqueror is None:
+            self.conqueror = dealer
+        if self.conqueror is dealer:
+            self.damage += 1
+        else:
+            self.damage -= 1
+        # Determine if a new shield becomes conquered
+        if self.damage >= SHIELD_HEALTH * (1 + self.conquered_shields):
+            self.conquered_shields += 1
+            if self.get_defense() - self.conquered_shields <= self.cities:
+                # Collateral damage
+                self.development = max(self.development - 1, 0)
+            if self.conquered_shields >= self.get_defense():
+                # Get conquered: check if all colonies in the system are also conquered.
+                unconquered = False
+                for p in self.planet.star.planets:
+                    if p.colony is not None and not p.colony.is_conquered():
+                        unconquered = True
+                        break
+                if not unconquered:
+                    for p in self.planet.star.planets:
+                        if p.colony is not None:
+                            p.colony.ruler = self.conqueror
+                    self.planet.star.ruler = self.conqueror
+                    self.conqueror = None
+                    self.conquered_shields = 0
+                    self.damage = 0
+
 
 class HomeworldColony(Colony):
 

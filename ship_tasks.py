@@ -314,7 +314,7 @@ def act_raid_biomass(ship):
     ship.ruler.game.diplomacy.lose_leverage(ship.ruler.id, ship.star.ruler.id, 2)
 
 def act_besiege(ship):
-    # TODO
+    ship.planet.colony.receive_damage(ship.ruler)
     pass
 
 def task_null(ship, game):

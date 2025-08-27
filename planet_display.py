@@ -2,6 +2,7 @@ import math
 import pygame
 
 import drawable
+import colony
 import ecology
 
 import font
@@ -246,6 +247,10 @@ class DefenseSnapshot(snapshot.Snapshot):
         if self.colony is None:
             return
         defense = self.colony.get_defense()
+        conquest_color = system_display.COLOR_BACKGROUND
+        if self.colony.conqueror is not None:
+            conquest_color = self.colony.conqueror.color
+        count = 0
         for i in range(defense // DEFENSE_STACK_WIDTH + 1):
             locations = get_linear_stack_positions(-DEFENSE_ICON_WIDTH, self.dimensions[0],
                                                    min(DEFENSE_STACK_WIDTH, defense - i * DEFENSE_STACK_WIDTH))
@@ -253,7 +258,18 @@ class DefenseSnapshot(snapshot.Snapshot):
                 pygame.draw.rect(self.surface, self.colony.ruler.color,
                                  pygame.Rect(location, i * (DEFENSE_ICON_HEIGHT - 1),
                                              DEFENSE_ICON_WIDTH, DEFENSE_ICON_HEIGHT))
+                if count < self.colony.conquered_shields:
+                    pygame.draw.rect(self.surface, conquest_color,
+                                     pygame.Rect(location, i * (DEFENSE_ICON_HEIGHT - 1),
+                                                 DEFENSE_ICON_WIDTH, DEFENSE_ICON_HEIGHT))
+                elif count == self.colony.conquered_shields:
+                    pygame.draw.rect(self.surface, conquest_color,
+                                     pygame.Rect(location, i * (DEFENSE_ICON_HEIGHT - 1),
+                                                 DEFENSE_ICON_WIDTH * (self.colony.damage / colony.SHIELD_HEALTH
+                                                                       - self.colony.conquered_shields),
+                                                 DEFENSE_ICON_HEIGHT))
                 self.surface.blit(DEFENSE_ICON_IMG, (location, i * (DEFENSE_ICON_HEIGHT - 1)))
+                count += 1
 
 
 class PlanetDisplay(drawable.Drawable):

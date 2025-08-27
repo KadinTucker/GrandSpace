@@ -1,12 +1,12 @@
 # Siege
 
-Siege refers to a ship attacking an enemy *shield*. 
+Siege refers to a ship attacking an enemy [shield](../glossary/shield.md). 
 
-A ship may only siege in a *system* ruled by a player with at most -50 leverage over the ship's ruler.
+A ship may only siege in a [system](../glossary/star_system.md) [ruled](../glossary/rule.md) by a player with at most -50 [leverage](../glossary/leverage.md) over the ship's ruler.
 
 While carrying out a siege, a ship cannot perform any other actions, including fighting enemy ships. 
 
-During a siege, a ship attacks the shield with its normal attack rate. Once the shield has taken 15 damage, it becomes conquered. The planet suffers "collateral damage," losing 1 development score (if it has any). 
+During a siege, a ship attacks the shield with its normal [attack rate](../glossary/combat.md). Once the shield has taken 15 damage, it becomes conquered. The planet suffers "collateral damage," losing 1 development score (if it has any). 
 
 Once all shields in a system are conquered, the system's colonies change ownership to the conquering player.
 

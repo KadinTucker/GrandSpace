@@ -33,6 +33,7 @@ ACTION_ICONS = [
     (macros.ACTION_SCHMOOZE, uiframe.get_panel_from_image(macros.ICONS["schmooze"])),
     (macros.ACTION_RAID_MINERALS, uiframe.get_panel_from_image(macros.ICONS["raid_minerals"])),
     (macros.ACTION_RAID_BIOMASS, uiframe.get_panel_from_image(macros.ICONS["raid_biomass"])),
+    (macros.ACTION_BESIEGE, uiframe.get_panel_from_image(macros.ICONS["besiege"])),
 ]
 
 def get_main_ui_container(player, x, y, width, height):
