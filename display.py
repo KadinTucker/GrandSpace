@@ -71,6 +71,26 @@ def get_pane_mouse_pos(pane_location):
     mouse = pygame.mouse.get_pos()
     return mouse[0] - pane_location[0], mouse[1] - pane_location[1]
 
+def generate_ui_elements(player_obj):
+    window_container = uiframe.UIContainer(None, 177, TOP_BAR_HEIGHT, DISPLAY_DIMENSIONS[0] - 177,
+                                           DISPLAY_DIMENSIONS[1] - TOP_BAR_HEIGHT - MAIN_PANE_HEIGHT)
+    window_container.elements.append(ui_technology.TechPane(window_container, 0, 2 * uiframe.FRAME_WIDTH))
+    window_container.elements.append(ui_diplomacy.DiplomacyPane(window_container, player_obj,
+                                                                0, 2 * uiframe.FRAME_WIDTH))
+
+    for element in window_container.elements:
+        element.visible = False
+
+    main_ui = ui_main.get_main_ui_container(player_obj, 0, DISPLAY_DIMENSIONS[1] - MAIN_PANE_HEIGHT,
+                                            DISPLAY_DIMENSIONS[0], MAIN_PANE_HEIGHT)
+
+    top_bar = ui_main.get_top_bar_container(window_container, player_obj, 0, 0,
+                                            DISPLAY_DIMENSIONS[0], TOP_BAR_HEIGHT)
+    milestones = ui_main.MilestoneFrame(player_obj, None, 0, TOP_BAR_HEIGHT)
+    diplomacy_pane = ui_main.DiplomacyFrame(player_obj, None, 0, TOP_BAR_HEIGHT + milestones.height,
+                                            window_container.elements[1])
+    return [main_ui, top_bar, milestones, diplomacy_pane, window_container]
+
 def main():
 
     galaxy_obj = galaxy.Galaxy(galaxy.generate_galaxy_boxes(GALAXY_WIDTH, GALAXY_HEIGHT, GALAXY_ZONE_RADIUS))
@@ -112,27 +132,10 @@ def main():
 
     system_displays = generate_all_system_displays(game)
     galaxy_displays = generate_galaxy_displays(game)
+    player_uis = [generate_ui_elements(p) for p in game.players]
 
     active_display = system_displays[active_player.id][active_player.homeworld.star.id]
     active_display.update()
-
-    window_container = uiframe.UIContainer(None, 177, TOP_BAR_HEIGHT, DISPLAY_DIMENSIONS[0] - 177,
-                                           DISPLAY_DIMENSIONS[1] - TOP_BAR_HEIGHT - MAIN_PANE_HEIGHT)
-    window_container.elements.append(ui_technology.TechPane(window_container, 0, 2 * uiframe.FRAME_WIDTH))
-    window_container.elements.append(ui_diplomacy.DiplomacyPane(window_container, active_player,
-                                                                0, 2 * uiframe.FRAME_WIDTH))
-
-    for element in window_container.elements:
-        element.visible = False
-
-    main_ui = ui_main.get_main_ui_container(active_player, 0, DISPLAY_DIMENSIONS[1] - MAIN_PANE_HEIGHT,
-                                            DISPLAY_DIMENSIONS[0], MAIN_PANE_HEIGHT)
-
-    top_bar = ui_main.get_top_bar_container(window_container, active_player, 0, 0,
-                                            DISPLAY_DIMENSIONS[0], TOP_BAR_HEIGHT)
-    milestones = ui_main.MilestoneFrame(active_player, None, 0, TOP_BAR_HEIGHT)
-    diplomacy_pane = ui_main.DiplomacyFrame(active_player, None, 0, TOP_BAR_HEIGHT + milestones.height,
-                                            window_container.elements[1])
 
     timestamp = pygame.time.get_ticks()
 
@@ -145,10 +148,8 @@ def main():
         # Events
         for event in pygame.event.get():
             active_display.handle_event(event, pygame.mouse.get_pos())
-            window_container.handle_event(event, pygame.mouse.get_pos())
-            main_ui.handle_event(event, pygame.mouse.get_pos())
-            top_bar.handle_event(event, pygame.mouse.get_pos())
-            diplomacy_pane.handle_event(event, pygame.mouse.get_pos())
+            for uie in player_uis[active_player.id]:
+                uie.handle_event(event, pygame.mouse.get_pos())
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
@@ -203,11 +204,8 @@ def main():
         if elapsed_time > 0:
             display.blit(font.get_text_surface(str(int(1 / (elapsed_time / timescale * 60)))), (0, 0))
 
-        main_ui.draw(display)
-        top_bar.draw(display)
-        milestones.draw(display)
-        diplomacy_pane.draw(display)
-        window_container.draw(display)
+        for uie in player_uis[active_player.id]:
+            uie.draw(display)
 
         # Update; end tick
         pygame.display.update()

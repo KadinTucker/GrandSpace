@@ -36,15 +36,15 @@ ACTION_ICONS = [
     (macros.ACTION_BESIEGE, uiframe.get_panel_from_image(macros.ICONS["besiege"])),
 ]
 
-def get_main_ui_container(player, x, y, width, height):
+def get_main_ui_container(player_obj, x, y, width, height):
     main_container = uiframe.UIContainer(None, x, y, width, height)
     background = uiframe.get_background_pane(main_container, 0, 0, width, height)
     main_container.elements.append(background)
     # main_container.add_element_left(MoneyPane(main_container, 0, 0, 8, player))
-    main_container.add_element_left(CargoPane(main_container, 0, 0, player))
-    main_container.add_element_left(BiomassPane(main_container, 0, 0, player))
+    main_container.add_element_left(CargoPane(main_container, 0, 0, player_obj))
+    main_container.add_element_left(BiomassPane(main_container, 0, 0, player_obj))
     for action in ACTION_ICONS:
-        main_container.add_element_left(ActionButton(main_container, action[1], 0, 0, player, action[0]))
+        main_container.add_element_left(ActionButton(main_container, action[1], 0, 0, player_obj, action[0]))
     return main_container
 
 def make_top_bar_button(icon, ratio):
@@ -314,13 +314,13 @@ class BiomassPane(uiframe.UIElement):
 
 class CargoPane(uiframe.UIElement):
 
-    def __init__(self, container, x, y, player):
+    def __init__(self, container, x, y, player_obj):
         width = (2 * uiframe.FRAME_WIDTH + 1.5 * (2 * uiframe.FRAME_WIDTH + macros.ICONS["discovery"].get_width())
                  + 1.5 * (2 * uiframe.FRAME_WIDTH + macros.ICONS["empire"].get_width())
                  + 6 * (2 * uiframe.FRAME_WIDTH + macros.ICONS["mineral_r"].get_width()))
         height = 4 * uiframe.FRAME_WIDTH + macros.ICONS["discovery"].get_height() + font.LETTER_HEIGHT
         super().__init__(container, None, x, y, width, height)
-        self.player = player
+        self.player = player_obj
         self.artifact_icon = uiframe.get_panel_from_image(macros.ICONS["discovery"])
         self.sell_artifact_icon = uiframe.get_panel_from_image(macros.ICONS["sell_artifact"])
         self.building_icon = uiframe.get_panel_from_image(macros.ICONS["empire"])
