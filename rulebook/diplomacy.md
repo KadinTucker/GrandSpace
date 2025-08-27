@@ -63,6 +63,8 @@ Access can be requested as a favour, at the cost of its value, but, as with all 
 
 ## [Milestones](../rulebook/glossary/milestone.md)
 
-Diplomacy milestones work differently from all other paths. Due to the potential to exploit a milestone that would grant points for earning leverage, a player's Diplomatic milestone progress is a measure of how much more leverage a player has earned over their rivals than their rivals have earned over them.
+Gain +1 diplomacy milestone point per 5 leverage earned from research with other players and schmoozing.
+
+Diplomacy milestones work a little bit differently from all other paths. Due to the potential to exploit a milestone that would grant points for earning leverage, a player's Diplomatic milestone progress is a measure of how much more leverage a player has earned over their rivals than their rivals have earned over them.
 
 See a more detailed description of how this is calculated [here](../rulebook/reference/diplomacy_milestones.md).

@@ -20,7 +20,7 @@ Upon achieving the fifth milestone in three different paths, a player wins the g
 
 [Commerce](../../rulebook/commerce.md):
 - +1 for each *mineral* sold
-- +1 for each 250 *money* earned, except through gifts
+- +1 for each 50 *money* earned, except through gifts
 
 [Ecology](../../rulebook/ecology.md):
 - +2 per sample of *biomass* collected
@@ -33,7 +33,9 @@ Upon achieving the fifth milestone in three different paths, a player wins the g
 
 [Warfare](../../rulebook/warfare.md):
 - +1 per mineral or biomass sample stolen
-- +2 for damaging an enemy ship
-- +50 for having a ship destroyed
+- +1 per damage dealt to an enemy ship
+- +2 for receiving damage to a ship
+- +5 for destroying an enemy ship
+- +5 for having a ship destroyed in combat
 - +25 for conquering an enemy *shield*
 - +50 for having an enemy conquer one of your shields

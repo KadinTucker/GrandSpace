@@ -1,3 +1,5 @@
+import math
+
 import pygame
 from matplotlib.backend_bases import MouseButton
 
@@ -129,15 +131,19 @@ class DiplomacyFrame(MenuOpener):
                 self.surface.blit(self.frame, (0, self.frame.get_height() * index))
 
                 left_leverage = font.get_text_surface(
-                    str(self.player.game.diplomacy.leverage_matrix[self.player.id][p.id]))
+                    str(math.floor(self.player.game.diplomacy.leverage_matrix[self.player.id][p.id])))
                 right_leverage = font.get_text_surface(
-                    str(self.player.game.diplomacy.leverage_matrix[p.id][self.player.id]))
+                    str(math.floor(self.player.game.diplomacy.leverage_matrix[p.id][self.player.id])))
                 self.surface.blit(left_leverage, (DIPLOMACY_TEXT_OFFSET,
                                                   y_value + (self.frame.get_height() - left_leverage.get_height()) / 2))
                 self.surface.blit(right_leverage, (self.width - DIPLOMACY_TEXT_OFFSET - right_leverage.get_width(),
                                                    y_value + (self.frame.get_height()
                                                               - right_leverage.get_height()) / 2))
                 index += 1
+
+    def draw(self, dest_surface):
+        self.update()
+        super().draw(dest_surface)
 
 class ScienceIndicator(MenuOpener):
     def __init__(self, player, container, x, y, menu_element):
@@ -361,8 +367,8 @@ class CargoPane(uiframe.UIElement):
             mineral_icon = self.mineral_icons[i]
             if (self.player.selected_ship.cargo.minerals[i] > 0 and self.player.selected_ship.planet is not None
                     and self.player.selected_ship.planet.colony is not None
-                    and self.player.game.diplomacy.access_matrix[self.player.selected_ship.planet.star.ruler.id]
-                                                                [self.player.id][2]):
+                    and self.player.game.diplomacy.get_active_access(self.player.selected_ship.planet.star.ruler.id,
+                                                                     self.player.id, 2)):
                 mineral_icon = self.sell_mineral_icons[i]
             self.draw_amount_with_icon(mineral_icon, self.player.selected_ship.cargo.minerals[i], stagger)
             stagger += mineral_icon.get_width()

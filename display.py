@@ -32,8 +32,8 @@ GALAXY_MARGIN = 20
 GALAXY_SPACE_WIDTH = GALAXY_ZONE_RADIUS * GALAXY_WIDTH + GALAXY_MARGIN
 GALAXY_SPACE_HEIGHT = int(GALAXY_ZONE_RADIUS * GALAXY_HEIGHT * 0.86 + GALAXY_MARGIN)
 
-GALAXY_PANE_MARGIN = 75
-SYSTEM_PANE_MARGIN = 75
+GALAXY_PANE_MARGIN = 177
+SYSTEM_PANE_MARGIN = 177
 
 SYSTEM_PANE_DIMENSIONS = (DISPLAY_DIMENSIONS[0] - SYSTEM_PANE_MARGIN * 2, DISPLAY_DIMENSIONS[1] - 58)
 SYSTEM_PANE_POSITION = ((DISPLAY_DIMENSIONS[0] - SYSTEM_PANE_DIMENSIONS[0]) // 2,
@@ -102,7 +102,6 @@ def main():
             game.diplomacy.gain_leverage(i, 0, random.randint(0, 100))
         #   game.diplomacy.gain_leverage(0, i, 100)
 
-
     pygame.init()
 
     display = pygame.display.set_mode(DISPLAY_DIMENSIONS)
@@ -117,7 +116,7 @@ def main():
     active_display = system_displays[active_player.id][active_player.homeworld.star.id]
     active_display.update()
 
-    window_container = uiframe.UIContainer(None, 0, TOP_BAR_HEIGHT, DISPLAY_DIMENSIONS[0],
+    window_container = uiframe.UIContainer(None, 177, TOP_BAR_HEIGHT, DISPLAY_DIMENSIONS[0] - 177,
                                            DISPLAY_DIMENSIONS[1] - TOP_BAR_HEIGHT - MAIN_PANE_HEIGHT)
     window_container.elements.append(ui_technology.TechPane(window_container, 0, 2 * uiframe.FRAME_WIDTH))
     window_container.elements.append(ui_diplomacy.DiplomacyPane(window_container, active_player,

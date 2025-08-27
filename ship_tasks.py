@@ -172,13 +172,13 @@ def act_sell_minerals(ship, mineral_index):
     ship.cargo.minerals[mineral_index] -= 1
     price = (ship.planet.colony.demand.get_price(mineral_index, ship.ruler))
     ship.ruler.money += price
-    ship.ruler.milestone_progress[4] += 250 / price + 1
+    ship.ruler.milestone_progress[4] += 50 / price + 1
 
 def act_sell_artifact(ship):
     ship.cargo.artifacts -= 1
     ship.ruler.money += 500
     ship.ruler.technology.science[3] += 5
-    ship.ruler.milestone_progress[4] += 2
+    ship.ruler.milestone_progress[4] += 10
 
 def act_buy_building(ship):
     ship.ruler.money -= ship.ruler.technology.get_building_cost()

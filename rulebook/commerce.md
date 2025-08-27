@@ -27,5 +27,5 @@ In the case that the price would decrease to 50 or increase above 500, the deman
 
 ## [Milestones](../rulebook/glossary/milestone.md)
 
-Each mineral sold grants +1 Commerce milestone progress. Each 250 money earned (including by other means than trade, 
+Each mineral sold grants +1 Commerce milestone progress. Each 50 money earned (including by other means than trade, 
 but except gifts) grants +1 Commerce milestone progress.

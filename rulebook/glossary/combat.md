@@ -24,7 +24,7 @@ A ship's valid targets depends on the [leverage](leverage.md) relationship betwe
 | System neither you nor opponent rule | -15                       |
 | System opponent rules                | -30                       |
 
-A ship is destroyed if its health reaches 0. When a ship is destroyed, it loses all of its [cargo](cargo.md) and reappears at its owner's [homeworld](homeworld_colony.md) with 1 health. 
+A ship is destroyed if its health reaches 0. When a ship is destroyed, it loses all of its [cargo](cargo.md) and reappears at its owner's [homeworld](homeworld_colony.md) with 1 health. If the ship is already located at the homeworld, it cannot be destroyed and instead returns to 1 health automatically.
 
 When you destroy an enemy ship, you earn 100 [money](money.md), 5 Power [science](science.md), and 25 Warfare [milestone](milestone.md) progress. When one of your ships is destroyed in combat, you earn 10 Power science and 50 Warfare milestone progress.
 

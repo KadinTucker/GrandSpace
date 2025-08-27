@@ -17,7 +17,7 @@ The effective logic of the warfare system is the logic of "they started it". As 
 
 ## Mechanics of Combat
 
-When a ship and an enemy ship that is a valid target (as in the above list of hostile actions) are in the same system, the ship may [attack](../rulebook/actions/battle.md) the other ship. The ship will attack the other so long as it is not preoccupied with another task. 
+When a ship and an enemy ship that is a valid target (as in the above list of hostile actions) are in the same system, the ships may engage in [combat](glossary/combat.md) with the other ship. The ship will attack the other so long as it is not preoccupied with another task. 
 
 When a ship attacks, it deals 1 damage. Without any technological advances, ships have a maximum of 5 health, and fire 1 shot every three seconds. 
 
@@ -39,6 +39,8 @@ Shields slowly regenerate health over time. Shields become unconquered only when
 
 Stealing minerals or biomass grants +1 Warfare milestone progress per mineral and sample stolen.
 
-Destroying an enemy ship grants +25 Warfare milestone progress. Having one of your own ships destroyed in combat grants +50 Warfare milestone progress.
+Dealing a point of damage to an enemy ship grants +1 Warfare milestone progress. Having one of your ships take a point of damage grants +2 Warfare milestone progress.
+
+Gain a bonus +5 Warfare milestone points for destroying an enemy ship, or having one of your ships destroyed in combat.
 
 Conquering a *shield* grants +25 Warfare milestone progress. Having a shield conquered grants +50 Warfare milestone progress.

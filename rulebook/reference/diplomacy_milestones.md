@@ -1,5 +1,7 @@
 # Diplomatic Milestones
 
+In addition to earning a small number of milestone points from research missions and schmoozing, there is another way Diplomatic milestones are earned.
+
 Because Diplomatic milestones are more complicated than other paths' milestones, this entry details how these points are calculated.
 
 In short, players who earn more leverage and lose less leverage (not including spending it) will have the highest milestone progress.

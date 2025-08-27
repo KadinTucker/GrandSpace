@@ -39,6 +39,19 @@ class Diplomacy:
             for j in range(len(ACTIVE_ACCESS_NAMES)):
                 self.active_access_matrix[i][i][j] = REFLEXIVE_ACCESS[j]
 
+    def revoke_access(self, origin_id, dest_id, access_id):
+        """
+        If some active access is granted, revoke it.
+        """
+        if self.active_access_matrix[origin_id][dest_id][access_id]:
+            self.active_access_matrix[origin_id][dest_id][access_id] = False
+            self.lose_leverage(origin_id, dest_id, ACCESS_LEVERAGE_VALUE[access_id])
+
+    def offer_access(self, origin_id, dest_id, access_id):
+        if not self.active_access_matrix[origin_id][dest_id][access_id]:
+            self.active_access_matrix[origin_id][dest_id][access_id] = True
+            self.gain_leverage(origin_id, dest_id, ACCESS_LEVERAGE_VALUE[access_id])
+
     def get_negative_access(self, origin_id, dest_id):
         """
         Gets the 'negative access' amount for a player, the 'origin' player
@@ -93,19 +106,19 @@ class Diplomacy:
         If the origin player is in negative leverage, then access is updated as necessary
         """
         self.leverage_matrix[origin_id][dest_id] -= amount
-        if self.leverage_matrix[origin_id][dest_id] < 0:
-            self.update_hostile_access()
+        self.total_leverage_matrix[origin_id][dest_id] -= amount
+        self.leverage_matrix[origin_id][dest_id] = max(-100, self.leverage_matrix[origin_id][dest_id])
+        self.update_hostile_access()
 
     def gain_leverage(self, origin_id, dest_id, amount):
         """
         Causes the origin player to gain leverage over the destination player
         If the origin player has negative leverage to begin with, then access is updated as necessary
         """
-        old_leverage = self.leverage_matrix[origin_id][dest_id]
         self.leverage_matrix[origin_id][dest_id] += amount
         self.total_leverage_matrix[origin_id][dest_id] += amount
-        if old_leverage < 0:
-            self.update_hostile_access()
+        self.leverage_matrix[origin_id][dest_id] = min(100, self.leverage_matrix[origin_id][dest_id])
+        self.update_hostile_access()
 
     def get_milestone_state(self, player_id):
         """

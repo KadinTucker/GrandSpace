@@ -93,7 +93,7 @@ class Draggable(UIElement):
         if event.type == pygame.MOUSEBUTTONDOWN:
             if event.button == pygame.BUTTON_LEFT:
                 if self.drag_bar.is_point_in(mouse_pos):
-                    if mouse_pos[0] - self.x % self.container.width - self.width + 2 * FRAME_WIDTH > 0:
+                    if mouse_pos[0] - self.container.x - self.x % self.container.width - self.width + 2 * FRAME_WIDTH > 0:
                         self.visible = False
                     else:
                         self.is_held = True

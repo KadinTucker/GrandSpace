@@ -81,7 +81,9 @@ class Ship:
                     for s in self.star.ships:
                         if ship_tasks.is_enemy_ship(self, s):
                             s.receive_damage(1, self.ruler)
-                            self.ruler.milestone_progress[0] += 25 / s.ruler.technology.get_ship_max_health()
+                            self.ruler.game.diplomacy.lose_leverage(self.ruler.id, s.ruler.id,
+                                                                    10 / s.ruler.technology.get_ship_max_health())
+                            self.ruler.milestone_progress[0] += 1
                             self.ruler.technology.science[0] += 10 / s.ruler.technology.get_ship_max_health()
                             self.action_progress = 0.0
                             break
@@ -106,11 +108,18 @@ class Ship:
 
     def receive_damage(self, damage, dealing_player):
         self.health -= damage
+        self.ruler.technology.science[0] += 10 / self.ruler.technology.get_ship_max_health()
+        self.ruler.milestone_progress[0] += 2
         if self.health <= 0:
-            self.get_destroyed()
-            dealing_player.money += 100
-            self.ruler.milestone_progress[0] += 50
-            self.ruler.technology.science[0] += 20
+            if (self.planet is not None and self.planet.colony is not None
+                    and self.planet.colony is self.ruler.homeworld):
+                self.health = 1
+            else:
+                self.get_destroyed()
+                dealing_player.money += 100
+                self.ruler.milestone_progress[0] += 5
+                dealing_player.milestone_progress[0] += 5
+
 
     def move(self, time):
         """
@@ -311,7 +320,6 @@ class Ship:
         self.enter_planet()
         self.health = 1
         self.cargo.empty()
-        self.ruler.milestone_progress[0] += 50
 
 class Cargo:
 
