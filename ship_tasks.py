@@ -225,6 +225,23 @@ def cond_besiege(ship):
         ship.ruler.log_message("Cannot besiege: ship not at planet")
     return False
 
+def cond_plunder(ship):
+    if ship.planet is not None and ship.planet.colony is not None:
+        if has_hostile_access_versus(ship, ship.planet.colony.ruler, 3):
+            if ship.planet.colony.conqueror is ship.ruler:
+                # If number of unconquered shields is less than the number of cities
+                if ship.planet.colony.get_defense() - ship.planet.colony.conquered_shields < ship.planet.colony.cities:
+                    return True
+                else:
+                    ship.ruler.log_message("Cannot plunder: cities must exceed number of unconquered shields")
+            else:
+                ship.ruler.log_message("Cannot plunder: another player is conquering the system")
+        else:
+            ship.ruler.log_message("Cannot plunder: need siege access")
+    else:
+        ship.ruler.log_message("Cannot plunder: ship not at planet")
+    return False
+
 def act_collect_minerals(ship):
     ship.cargo.minerals[ship.planet.mineral] += 1
     ship.planet.colony.minerals -= 1
@@ -248,7 +265,7 @@ def act_buy_building(ship):
 def act_establish_colony(ship):
     new_colony = colony.Colony(ship.ruler, ship.planet)
     ship.planet.colony = new_colony
-    ship.ruler.colonies.append(new_colony)
+    # ship.ruler.colonies.append(new_colony)
     if ship.star.ruler is None:
         ship.ruler.milestone_progress[5] += 25
         ship.ruler.add_ruled_star(ship.star)
@@ -316,6 +333,13 @@ def act_raid_biomass(ship):
 def act_besiege(ship):
     ship.planet.colony.receive_damage(ship.ruler)
     pass
+
+def act_plunder(ship):
+    ship.planet.colony.lose_city()
+    ship.ruler.money += 500
+    ship.ruler.milestone_progress[4] += 10
+    ship.ruler.milestone_progress[0] += 10
+    ship.ruler.game.diplomacy.lose_leverage(ship.ruler.id, ship.star.ruler.id, 10)
 
 def task_null(ship, game):
     pass
@@ -392,5 +416,6 @@ SHIP_ACTIONS = [
     (cond_research, act_research, lambda t: lambda: RESEARCH_RATE, True),
     (cond_raid_minerals, act_raid_minerals, lambda t: lambda: MINERAL_RAID_RATE, True),
     (cond_raid_biomass, act_raid_biomass, lambda t: t.get_biomass_collection_rate, False),
-    (cond_besiege, act_besiege, lambda t: t.get_ship_firerate, True)
+    (cond_besiege, act_besiege, lambda t: t.get_ship_firerate, True),
+    (cond_plunder, act_plunder, lambda t: lambda: MINERAL_RAID_RATE, False)
 ]

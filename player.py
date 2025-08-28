@@ -32,7 +32,7 @@ class Player:
         self.ships = []
         self.selected_ship = None
         self.homeworld = None
-        self.colonies = []
+        # self.colonies = []
         self.ruled_stars = []
         self.explored_stars = []
         self.reset_explored_stars()

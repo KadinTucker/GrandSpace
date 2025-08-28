@@ -9,9 +9,8 @@ For example, If Player A has 10 leverage over Player B while Player B has -15 le
 The following hostile actions are possible, with their thresholds in parentheses, below which the other player's leverage needs to be:
  - (0) [Attack](../rulebook/actions/battle.md) a rival ship in one of [your systems](../rulebook/glossary/rule.md)
  - (-10) Raid systems, stealing [minerals](../rulebook/glossary/mineral.md) or [biomass](../rulebook/glossary/biomass.md)
- - (-15) [Attack](../rulebook/actions/battle.md) a rival ship in a third-party system
- - (-30) [Attack](../rulebook/actions/battle.md) a rival ship in one of their systems
- - (-40) [Besiege](../rulebook/actions/siege.md) cities, either conquering them or looting them
+ - (-30) [Attack](../rulebook/actions/battle.md) a rival ship in one of their systems or a third party system
+ - (-50) [Besiege](../rulebook/actions/siege.md) cities, either conquering them or plundering them
 
 The effective logic of the warfare system is the logic of "they started it". As soon as another player does something to drop their leverage, you can then take hostile actions against them. If you do, you will lose leverage over them, until they get the right to take similarly hostile actions against you.
 
@@ -45,4 +44,4 @@ Gain a bonus +5 Warfare milestone points for destroying an enemy ship, or having
 
 Damaging a [shield](glossary/shield.md) grants +1 Warfare milestone progress. Having one of your own shields damaged also grants +2 Warfare milestone progress.
 
-Successfully conquering a system grants +10 Warfare milestone progress per city in the system.
+Successfully conquering a system grants +10 Warfare milestone progress per city in the system. Plundering a city also grants +10 Warfare milestone progress.

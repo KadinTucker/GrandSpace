@@ -34,6 +34,7 @@ ACTION_ICONS = [
     (macros.ACTION_RAID_MINERALS, uiframe.get_panel_from_image(macros.ICONS["raid_minerals"])),
     (macros.ACTION_RAID_BIOMASS, uiframe.get_panel_from_image(macros.ICONS["raid_biomass"])),
     (macros.ACTION_BESIEGE, uiframe.get_panel_from_image(macros.ICONS["besiege"])),
+    (macros.ACTION_PLUNDER, uiframe.get_panel_from_image(macros.ICONS["plunder"])),
 ]
 
 def get_main_ui_container(player_obj, x, y, width, height):

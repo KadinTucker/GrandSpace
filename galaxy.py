@@ -113,7 +113,7 @@ class Galaxy:
             planet = random.choice(star.planets)
             # Instantiate the colony object, and add it to the player's list of colonies
             new_colony = colony.HomeworldColony(game.players[p], planet)
-            game.players[p].colonies.append(new_colony)
+            # game.players[p].colonies.append(new_colony)
             # Set the player's unique homeworld field to be the planet chosen
             game.players[p].homeworld = planet
             # Add the colony to the planet

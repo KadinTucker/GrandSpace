@@ -43,12 +43,20 @@ class Colony(object):
             self.conqueror = None
             self.damage = 0
 
+    def lose_city(self):
+        self.cities -= 1
+        self.development = min(self.get_maximum_development(), self.development)
+        self.minerals = min(self.get_mineral_capacity(), self.minerals)
+        self.damage -= SHIELD_HEALTH
+        self.repair(0)
+        if self.cities <= 0:
+            self.planet.colony = None
+
     def repair(self, time):
         if self.damage > 0:
             self.damage -= HEALING_PER_MINUTE * time
             if self.damage < self.conquered_shields * SHIELD_HEALTH:
                 self.conquered_shields -= 1
-            print(self.damage, self.conquered_shields)
 
     def get_defense(self):
         return self.cities + self.ruler.technology.get_bonus_shields()

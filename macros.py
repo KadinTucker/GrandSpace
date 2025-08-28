@@ -26,6 +26,7 @@ ACTION_RESEARCH = 19
 ACTION_RAID_MINERALS = 20
 ACTION_RAID_BIOMASS = 21
 ACTION_BESIEGE = 22
+ACTION_PLUNDER = 23
 
 # Key Controls
 ACTION_KEYCONTROL_DICT = {
@@ -85,5 +86,6 @@ ICONS = {
     "raid_minerals": pygame.image.load("assets/icon-raid-minerals.png"),
     "raid_biomass": pygame.image.load("assets/icon-raid-biomass.png"),
     "besiege": pygame.image.load("assets/icon-besiege.png"),
+    "plunder": pygame.image.load("assets/icon-loot.png"),
 }
 
