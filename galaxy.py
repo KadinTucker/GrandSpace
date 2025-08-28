@@ -20,7 +20,7 @@ ARTIFACT_TOTAL_PER_STAR = 0.5
 AVERAGE_PLANETS = 3
 LIFE_DENSITY = 0.5  # approximate fraction of stars one expects to have life (in reality, less if higher)
 
-GALAXY_ARTIFACTS_PER_MINUTE = 5.0  # how many artifacts (try to) spawn per minute in an empty galaxy
+GALAXY_ARTIFACTS_PER_MINUTE = 1.0  # how many artifacts (try to) spawn per minute in an empty galaxy
 
 def generate_galaxy_boxes(width, height, radius):
     stars = []

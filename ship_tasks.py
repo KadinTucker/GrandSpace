@@ -66,7 +66,7 @@ def has_hostile_access_versus(ship, other_player, access_index):
     return ship.ruler.game.diplomacy.get_hostile_access(other_player.id, ship.ruler.id, access_index)
 
 def is_system_neutral(ship):
-    return ship.star.ruler is None
+    return ship.star is not None and ship.star.ruler is None
 
 def is_at_colony(ship):
     return ship.planet is not None and ship.planet.colony is not None
@@ -255,7 +255,7 @@ def act_sell_minerals(ship, mineral_index):
 def act_sell_artifact(ship):
     ship.cargo.artifacts -= 1
     ship.ruler.money += 500
-    ship.ruler.technology.science[3] += 5
+    ship.ruler.technology.science[3] += ship.ruler.technology.get_artifact_science()
     ship.ruler.milestone_progress[4] += 10
 
 def act_buy_building(ship):
@@ -317,8 +317,8 @@ def act_research(ship):
         ship.ruler.milestone_progress[3] += 5
     ship.ruler.money += 200
     ship.ruler.milestone_progress[4] += 4
-    ship.ruler.technology.science[3] += 3
-    ship.star.ruler.technology.science[3] += 3
+    ship.ruler.technology.science[3] += ship.ruler.technology.get_mission_science()
+    ship.star.ruler.technology.science[3] += ship.ruler.technology.get_mission_science()
 
 def act_raid_minerals(ship):
     act_collect_minerals(ship)

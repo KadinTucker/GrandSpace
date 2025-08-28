@@ -36,6 +36,8 @@ class Colony(object):
     def do_tick(self, time):
         self.repair(time)
         self.produce(time)
+        self.demand.progress_demand(time)
+        self.ruler.scan(self.planet.star.location)
     
     def produce(self, time):
         if self.damage <= 0:
@@ -99,7 +101,8 @@ class Colony(object):
                         self.conqueror.milestone_progress[0] += 10 * p.colony.cities
                         p.colony.ruler = self.conqueror
                 self.conqueror.milestone_progress[5] += 25
-                self.planet.star.ruler = self.conqueror
+                self.planet.star.ruler.remove_ruled_star(self.planet.star)
+                self.planet.star.ruler.add_ruled_star(self.planet.star)
                 self.conqueror = None
                 self.conquered_shields = 0
                 self.damage = 0

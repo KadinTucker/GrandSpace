@@ -72,6 +72,7 @@ class Ship:
         return math.hypot(x_dist, y_dist)
 
     def act(self, time):
+        self.ruler.scan(self.location)
         if self.action == 0:
             if self.star is not None and ship_tasks.exists_enemy_ship(self, self.star):
                 if self.action_progress < 1.0:

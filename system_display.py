@@ -36,7 +36,9 @@ ACCESS_BLOCKED_IMG = pygame.image.load("assets/no-access.png")
 ACCESS_MISSING_IMG = pygame.image.load("assets/no-access-diplo.png")
 
 COLOR_BACKGROUND = (10, 10, 10)
+COLOR_HAZY_BACKGROUND = (35, 35, 35)
 COLOR_STAR = (200, 130, 25)
+COLOR_UNSEEN_STAR = (200, 195, 180)
 COLOR_ARTIFACT_RING = (150, 125, 35)
 COLOR_SHIP_SELECTION = (225, 225, 225)
 COLOR_BIOMASS_EMPTY = (95, 35, 15)
@@ -57,6 +59,7 @@ class SystemDisplay(pane.Pane):
         self.set_planet_locations()
         self.projectile_anim_progress = 0  # TEMP
         self.planet_displays = [planet_display.PlanetDisplay(game, player, p) for p in self.star.planets]
+        self.visible = False
         self.update()
 
     def set_planet_locations(self):
@@ -69,8 +72,13 @@ class SystemDisplay(pane.Pane):
                                           int(self.dimensions[1] / 2 + SYSTEM_VERTICAL_AXIS * math.sin(angle))))
 
     def sketch_primary_surface(self):
-        self.layers[0].fill(COLOR_BACKGROUND)
-        pygame.draw.circle(self.layers[0], COLOR_STAR,
+        star_color = COLOR_STAR
+        if self.visible:
+            self.layers[0].fill(COLOR_BACKGROUND)
+        else:
+            star_color = COLOR_UNSEEN_STAR
+            self.layers[0].fill(COLOR_HAZY_BACKGROUND)
+        pygame.draw.circle(self.layers[0], star_color,
                            (self.dimensions[0] // 2, self.dimensions[1] // 2), SYSTEM_STAR_RADIUS)
         for p in range(len(self.star.planets)):
             pygame.draw.circle(self.layers[0], galaxy.MINERAL_COLORS[self.star.planets[p].mineral],
@@ -107,37 +115,43 @@ class SystemDisplay(pane.Pane):
 
     def sketch_ship_surface(self):
         self.layers[3].fill(COLOR_BACKGROUND)
-        all_ships = []
-        all_ship_positions = []
-        star_ships = []
-        for s in self.star.ships:
-            if s.planet is None:
-                star_ships.append(s)
-        all_ships += star_ships
-        all_ship_positions += ship_display.draw_overlapping_ships(self.layers[3], star_ships,
-                                            (self.dimensions[0] // 2, self.dimensions[1] // 2),
-                                            self.player)
-        for p in range(len(self.star.planets)):
-            all_ships += self.star.planets[p].ships
-            all_ship_positions += ship_display.draw_overlapping_ships(self.layers[3], self.star.planets[p].ships,
-                                                                      self.planet_locations[p], self.player)
-        for i in range(len(all_ships)):
-            for j in range(len(all_ships)):
-                if ship_tasks.is_enemy_ship(all_ships[i], all_ships[j]):
-                    ship_display.draw_ship_projectile(self.layers[3], all_ship_positions[i], all_ship_positions[j],
-                                                      self.projectile_anim_progress
-                                                      / ship_display.SHIP_PROJECTILE_FRAMES)
-                    break
-        self.projectile_anim_progress += 1
-        self.projectile_anim_progress %= ship_display.SHIP_PROJECTILE_FRAMES
+        if self.visible:
+            all_ships = []
+            all_ship_positions = []
+            star_ships = []
+            for s in self.star.ships:
+                if s.planet is None:
+                    star_ships.append(s)
+            all_ships += star_ships
+            all_ship_positions += ship_display.draw_overlapping_ships(self.layers[3], star_ships,
+                                                (self.dimensions[0] // 2, self.dimensions[1] // 2),
+                                                self.player)
+            for p in range(len(self.star.planets)):
+                all_ships += self.star.planets[p].ships
+                all_ship_positions += ship_display.draw_overlapping_ships(self.layers[3], self.star.planets[p].ships,
+                                                                          self.planet_locations[p], self.player)
+            for i in range(len(all_ships)):
+                for j in range(len(all_ships)):
+                    if ship_tasks.is_enemy_ship(all_ships[i], all_ships[j]):
+                        ship_display.draw_ship_projectile(self.layers[3], all_ship_positions[i], all_ship_positions[j],
+                                                          self.projectile_anim_progress
+                                                          / ship_display.SHIP_PROJECTILE_FRAMES)
+                        break
+            self.projectile_anim_progress += 1
+            self.projectile_anim_progress %= ship_display.SHIP_PROJECTILE_FRAMES
 
     def sketch_planet_detail_surface(self):
         self.layers[2].fill(COLOR_BACKGROUND)
+        # TODO: make planet "snapshots" still update even if the display is not updated.
+        #  That is, make the relevant information change if a ship happens to pass by, e.g.
         for p in range(len(self.star.planets)):
-            # TODO: Only make planet display update when it is visible to the player,
-            #   with both in-game meaning of having a ship/colony there, and if the layer is drawn
-            self.planet_displays[p].update()
+            if self.visible:
+                self.planet_displays[p].update()
             self.planet_displays[p].draw(self.layers[2], self.planet_locations[p])
+
+    def update(self):
+        self.visible = self.player.visibility.get_visible(self.star.location)
+        super().update()
 
     def refresh_layer(self, index):
         super().refresh_layer(index)

@@ -5,6 +5,7 @@ import diplomacy
 import ship
 import ship_tasks
 import technology
+import visibility
 
 STARTING_MONEY = 1000
 BASE_MILESTONE_COST = 50
@@ -35,11 +36,15 @@ class Player:
         # self.colonies = []
         self.ruled_stars = []
         self.explored_stars = []
+        self.visibility = visibility.Visibility()
         self.reset_explored_stars()
         self.milestone_progress = [0, 0, 0, 0, 0, 0]
         self.technology = technology.TechnologyTree(self)
         self.controller = PlayerController(self)
         self.log = []
+
+    def scan(self, location):
+        self.visibility.scanners.append((location[0], location[1], self.technology.get_visibility_range()))
 
     def add_ship(self, planet):
         self.ships.append(ship.Ship(planet.star.location, self))
@@ -66,6 +71,9 @@ class Player:
 
     def reset_explored_stars(self):
         self.explored_stars = [False for _ in range(len(self.game.galaxy.stars))]
+
+    def reset_visibility(self):
+        self.visible_stars = [False for _ in range(len(self.game.galaxy.stars))]
 
     def log_message(self, message):
         self.log.append(f"[Player{self.id}] {message}")

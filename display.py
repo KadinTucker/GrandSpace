@@ -7,18 +7,16 @@ import macros
 import player
 
 import font
-import ship_tasks
 import ui_diplomacy
 import ui_main
 import uiframe
 import ui_technology
 
 import galaxy_display
-import planet_display
 import system_display
 import drag_pane
 
-MAX_FPS = 90
+MAX_FPS = 30
 
 DISPLAY_DIMENSIONS = (1300, 700)
 
@@ -56,8 +54,8 @@ def generate_galaxy_displays(game):
     for p in game.players:
         new_display = galaxy_display.GalaxyDisplay(game, p, GALAXY_PANE_DIMENSIONS, GALAXY_PANE_DIMENSIONS,
                                                    GALAXY_PANE_POSITION)
-        new_display.set_view_center(p.homeworld.star.location)
         new_display.set_scale(drag_pane.ZOOM_MAX, p.homeworld.star.location)
+        new_display.set_view_center(p.homeworld.star.location)
         galaxy_displays.append(new_display)
     return galaxy_displays
             
@@ -102,7 +100,7 @@ def main():
     galaxy_obj.populate_life(game)
     galaxy_obj.populate_artifacts()
 
-    # artifact_spawner = galaxy.ArtifactSpawner(galaxy_obj)
+    artifact_spawner = galaxy.ArtifactSpawner(galaxy_obj)
 
     active_player = game.players[0]
     active_player.selected_ship = active_player.ships[0]
@@ -158,7 +156,6 @@ def main():
                 sys.exit()
 
             # Handle ship selection events
-            # TODO: include in ship-specific event handling
             elif event.type == pygame.KEYDOWN:
                 # TEMP: change active player
                 if event.key == pygame.K_TAB:
@@ -170,6 +167,8 @@ def main():
                 # Centre view to selected ship
                 elif event.key == pygame.K_LSHIFT or event.key == pygame.K_RSHIFT:
                     center_view = not center_view
+                elif event.key == pygame.K_ESCAPE:
+                    center_view = False
 
                 # Ship action hotkeys
                 if event.key in macros.ACTION_KEYCONTROL_DICT.keys():
@@ -184,6 +183,18 @@ def main():
                 active_display = system_displays[active_player.id][next_id - 1]
 
         # Game Mechanics
+        # Visibility reset
+        for p in game.players:
+            p.visibility.reset()
+
+        # Galaxy loop
+        artifact_spawner.try_place_artifact(elapsed_time)
+        for s in galaxy_obj.stars:
+            for p in s.planets:
+                p.ecology.regenerate_biomass(elapsed_time)
+                if p.colony is not None:
+                    p.colony.do_tick(elapsed_time)
+
         # Player loop
         for p in game.players:
             for s in p.ships:
@@ -192,14 +203,6 @@ def main():
                     galaxy_displays[active_player.id].refresh_layer(0)
                     galaxy_displays[active_player.id].refresh_layer(1)
             p.milestone_progress[3] = game.diplomacy.get_milestone_state(p.id)
-        # Galaxy loop
-        # artifact_spawner.try_place_artifact(elapsed_time)
-        for s in galaxy_obj.stars:
-            for p in s.planets:
-                p.ecology.regenerate_biomass(elapsed_time)
-                if p.colony is not None:
-                    p.colony.demand.progress_demand(elapsed_time)
-                    p.colony.do_tick(elapsed_time)
 
         # Display
 
@@ -214,14 +217,17 @@ def main():
         display.fill(active_player.color)
         active_display.refresh_layer(len(active_display.layers) - 1)  # refresh top layer every tick
         if isinstance(active_display, system_display.SystemDisplay):
-            active_display.refresh_layer(1)
-            active_display.refresh_layer(2)
+            active_display.update()
+            # active_display.refresh_layer(1)
+            # active_display.refresh_layer(2)
         active_display.draw(display)
-        if elapsed_time > 0:
-            display.blit(font.get_text_surface(str(int(1 / (elapsed_time / timescale * 60)))), (0, 0))
 
         for uie in player_uis[active_player.id]:
             uie.draw(display)
+
+        if elapsed_time > 0:
+            display.blit(font.get_text_surface(str(int(1 / (elapsed_time / timescale * 60)))),
+                         (DISPLAY_DIMENSIONS[0] - 32, 0))
 
         # Update; end tick
         pygame.display.update()
