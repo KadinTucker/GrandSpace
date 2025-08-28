@@ -72,7 +72,6 @@ class Ship:
         return math.hypot(x_dist, y_dist)
 
     def act(self, time):
-        self.ruler.scan(self.location)
         if self.action == 0:
             if self.star is not None and ship_tasks.exists_enemy_ship(self, self.star):
                 if self.action_progress < 1.0:
@@ -121,7 +120,6 @@ class Ship:
                 dealing_player.money += 100
                 self.ruler.milestone_progress[0] += 5
                 dealing_player.milestone_progress[0] += 5
-
 
     def move(self, time):
         """

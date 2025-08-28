@@ -150,7 +150,7 @@ class SystemDisplay(pane.Pane):
             self.planet_displays[p].draw(self.layers[2], self.planet_locations[p])
 
     def update(self):
-        self.visible = self.player.visibility.get_visible(self.star.location)
+        self.visible = self.player.visibility.get_visible(self.star)
         super().update()
 
     def refresh_layer(self, index):

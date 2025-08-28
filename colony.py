@@ -37,7 +37,6 @@ class Colony(object):
         self.repair(time)
         self.produce(time)
         self.demand.progress_demand(time)
-        self.ruler.scan(self.planet.star.location)
     
     def produce(self, time):
         if self.damage <= 0:

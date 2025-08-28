@@ -57,20 +57,11 @@ class GalaxyDisplay(drag_pane.DragPane):
                 return s
         return None
 
-    def draw_fog(self, dest_surface, position):
-        fog_surface = pygame.Surface(self.dimensions, pygame.SRCALPHA)
-        fog_surface.set_colorkey((0, 0, 0))
-        fog_surface.fill(COLOR_FOG)
-        for s in self.player.visibility.scanners:
-            pygame.draw.circle(fog_surface, (0, 0, 0), self.project_coordinate((s[0], s[1])),
-                               self.view_scale * s[2])
-        fog_surface.set_alpha(64)
-        dest_surface.blit(fog_surface, position)
-
     def draw_vision(self, dest_surface):
-        for s in self.player.visibility.scanners:
+        for s in self.player.ruled_stars + self.player.ships:
             pygame.draw.circle(dest_surface, get_color_blend(self.player.color, COLOR_BACKGROUND, 0.1),
-                               self.project_coordinate((s[0], s[1])), self.view_scale * s[2])
+                               self.project_coordinate(s.location),
+                               self.view_scale * self.player.technology.get_visibility_range())
 
     def set_view_center(self, obj_center):
         self.view_corner = (self.dimensions[0] / 2 - self.view_scale * obj_center[0],
@@ -91,7 +82,7 @@ class GalaxyDisplay(drag_pane.DragPane):
             star_color = COLOR_UNEXPLORED_STAR
             if self.player.explored_stars[i]:
                 star_color = COLOR_UNSEEN_STAR
-                if self.player.visibility.get_visible(s.location):
+                if self.player.visibility.get_visible(s):
                     star_color = COLOR_STAR
             pygame.draw.circle(self.layers[1], star_color, self.project_coordinate(s.location),
                                int(self.view_scale * GALAXY_STAR_RADIUS))
@@ -128,29 +119,19 @@ class GalaxyDisplay(drag_pane.DragPane):
                                              int(CAPITAL_STAR_MAJOR_MODIFIER * self.view_scale * GALAXY_STAR_RADIUS))
 
     def sketch_ship_surface(self):
+        ship_display.draw_ship_selection(self.layers[2], self.project_coordinate(self.player.selected_ship.location))
+        ship_display.draw_ship_galaxy_range(self.layers[2], self.project_coordinate(self.player.selected_ship.location),
+                                            self.player.technology.get_ship_range(), self.view_scale)
         for p in self.game.players:
             for s in p.ships:
-                if s.ruler is p or p.visibility.get_visible(s.location):
+                if s.star is None and self.player.is_ship_visible(s):
                     # TODO: make ships only drawn if they are "visible" to the active player
                     # TODO: make ship pathing and movement affected by range
                     # TODO: make ships drawn overlapped, but as "ghosts", if in a star system,
                     #  from the galaxy perspective
                     if s.star is None:
                         ship_display.draw_ship(self.layers[2], s, self.project_coordinate(s.location), self.player)
-                    elif s is self.player.selected_ship:
-                        ship_display.draw_ship_selection(self.layers[2], self.project_coordinate(s.location))
-                    if s is self.player.selected_ship:
-                        ship_display.draw_ship_galaxy_range(self.layers[2], self.project_coordinate(s.location),
-                                                            self.player.technology.get_ship_range(), self.view_scale)
-                        if s.star is not None:
-                            stars_in_range = ship_tasks.find_stars_in_range(s.star,
-                                                                            self.player.technology.get_ship_range(),
-                                                                            self.game.galaxy)
-                            for r in stars_in_range:
-                                pygame.draw.circle(self.layers[2], COLOR_STAR_IN_RANGE,
-                                                   self.project_coordinate(self.game.galaxy.stars[r].location),
-                                                   IN_RANGE_INDICATOR_RADIUS * self.view_scale,
-                                                   int(IN_RANGE_INDICATOR_WIDTH * self.view_scale))
+
 
     def refresh_layer(self, index):
         super().refresh_layer(index)
@@ -170,9 +151,13 @@ class GalaxyDisplay(drag_pane.DragPane):
         if event.type == pygame.MOUSEBUTTONDOWN:
             if event.button == pygame.BUTTON_RIGHT:
                 self.player.selected_ship.reset_task()
+                if self.player.selected_ship.star is not None:
+                    self.player.selected_ship.set_destination_star(None)
                 clicked_star = self.find_star(self.get_relative_pane_pos(mouse_pos))
                 if clicked_star is not None:
-                    if (self.player.selected_ship.get_distance_to(clicked_star.location)
+                    if clicked_star is self.player.selected_ship.star:
+                        self.player.selected_ship.set_destination_star(None)
+                    elif (self.player.selected_ship.get_distance_to(clicked_star.location)
                             < self.player.technology.get_ship_range()):
                         self.player.selected_ship.set_destination_star(clicked_star)
             elif event.button == pygame.BUTTON_LEFT:

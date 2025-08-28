@@ -36,15 +36,12 @@ class Player:
         # self.colonies = []
         self.ruled_stars = []
         self.explored_stars = []
-        self.visibility = visibility.Visibility()
+        self.visibility = visibility.StarVisibility(self.game.galaxy, self)
         self.reset_explored_stars()
         self.milestone_progress = [0, 0, 0, 0, 0, 0]
         self.technology = technology.TechnologyTree(self)
         self.controller = PlayerController(self)
         self.log = []
-
-    def scan(self, location):
-        self.visibility.scanners.append((location[0], location[1], self.technology.get_visibility_range()))
 
     def add_ship(self, planet):
         self.ships.append(ship.Ship(planet.star.location, self))
@@ -53,6 +50,20 @@ class Player:
         self.ships[-1].enter_star()
         self.ships[-1].enter_planet()
 
+    def is_ship_visible(self, ship_obj):
+        if ship_obj.ruler is self:
+            print("reflexive")
+            return True
+        if ship_obj.star is not None:
+            print("ship at star and star is visible")
+            return self.visibility.get_visible(ship_obj.star)
+        for s in self.ships:
+            if s.star is None or s.star.ruler is not self:
+                if s.get_distance_to(ship_obj.location) < self.technology.get_visibility_range():
+                    print("ship seen by other ship")
+                    return True
+        return False
+
     def add_ruled_star(self, star):
         if star.ruler is not None:
             star.ruler.remove_ruled_star(star)
@@ -60,6 +71,7 @@ class Player:
             star.connected_star = self.game.galaxy.get_closest_star_from_player(star.id, self)
         star.ruler = self
         self.ruled_stars.append(star)
+        self.visibility.reset_permanent_visibility()
 
     def remove_ruled_star(self, star):
         if star in self.ruled_stars:
@@ -68,12 +80,10 @@ class Player:
                 if s.connected_star == star:
                     s.connected_star = star.connected_star
             star.ruler = None
+        self.visibility.reset_permanent_visibility()
 
     def reset_explored_stars(self):
         self.explored_stars = [False for _ in range(len(self.game.galaxy.stars))]
-
-    def reset_visibility(self):
-        self.visible_stars = [False for _ in range(len(self.game.galaxy.stars))]
 
     def log_message(self, message):
         self.log.append(f"[Player{self.id}] {message}")

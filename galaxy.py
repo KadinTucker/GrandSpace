@@ -161,6 +161,8 @@ class Galaxy:
                 planet.ecology.habitability += 1
                 planet.ecology.species[species[i]] = True
 
+
+
 class ArtifactSpawner:
 
     def __init__(self, galaxy):

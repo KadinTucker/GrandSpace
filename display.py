@@ -183,9 +183,6 @@ def main():
                 active_display = system_displays[active_player.id][next_id - 1]
 
         # Game Mechanics
-        # Visibility reset
-        for p in game.players:
-            p.visibility.reset()
 
         # Galaxy loop
         artifact_spawner.try_place_artifact(elapsed_time)
@@ -197,6 +194,7 @@ def main():
 
         # Player loop
         for p in game.players:
+            p.visibility.set_temporary_visibility()
             for s in p.ships:
                 s.act(elapsed_time)
                 if p == active_player:
