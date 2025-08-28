@@ -73,7 +73,8 @@ def get_pane_mouse_pos(pane_location):
 def generate_ui_elements(player_obj):
     window_container = uiframe.UIContainer(None, 177, TOP_BAR_HEIGHT, DISPLAY_DIMENSIONS[0] - 177,
                                            DISPLAY_DIMENSIONS[1] - TOP_BAR_HEIGHT - MAIN_PANE_HEIGHT)
-    window_container.elements.append(ui_technology.TechPane(window_container, 0, 2 * uiframe.FRAME_WIDTH))
+    window_container.elements.append(ui_technology.TechPane(window_container, 0, 2 * uiframe.FRAME_WIDTH,
+                                                            player_obj.technology))
     window_container.elements.append(ui_diplomacy.DiplomacyPane(window_container, player_obj,
                                                                 0, 2 * uiframe.FRAME_WIDTH))
 

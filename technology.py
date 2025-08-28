@@ -1,23 +1,26 @@
 
 
-CATEGORY_NAMES = "Empire Combat Discovery Trade Diplomacy Ecology"
-DOMAINS = [0, 0, 1, 1, 2, 2]
+CATEGORY_NAMES = "Empire Combat Discovery Ecology Diplomacy Commerce".split()
+DOMAINS = [0, 0, 1, 2, 2, 1]
 MAIN_TREE_NAMES = [
     "Construction Security".split(),
     "Warfare Shipbuilding".split(),
     "Spacefaring Research".split(),
-    "Economics Communication".split(),
+    "Geoengineering Astrobiology".split(),
     "Charisma Neuropsychology".split(),
-    "Geoengineering Astrobiology".split()
+    "Economics Communication".split(),
 ]
 WILDCARD_NAMES = [
     "Orbital Defence,Singularity Storage,".split(","),
     "The Forcefield,Darkmatter Weapons,".split(","),
     "Quantum Computer,Faster Than Light,".split(","),
-    "Nanotargeted Marketing,Hypercommerce".split(","),
+    "Genetic Programming,Mass Cloning,".split(","),
     "Intergalactic Ambassadors,Galactic Harmony,".split(","),
-    "Genetic Programming,Mass Cloning,".split(",")
+    "Nanotargeted Marketing,Hypercommerce".split(","),
 ]
+
+MAIN_TECH_COSTS = [10, 30, 60, 100, 150]
+WILDCARD_TECT_COSTS = [100, 150]
 
 BASE_BUILDING_COST = 500
 CONSTRUCTION_EFFECT = 50
@@ -81,11 +84,30 @@ class TechnologyTree:
     It is from here that the Player's attributes are retrieved
     """
     def __init__(self, player):
+        # TODO: fix tech references after the reindexing!
         self.player = player
-        # tech level, indexed first by category, next by tech type
+        # tech level, indexed first by category, next by tech type: first, second, wildcard
         self.tech_level = [[0, 0, 0] for _ in range(6)]
         # science available: power, prosperity, harmony, neutral
         self.science = [0, 0, 0, 0]
+
+    def has_prerequisites(self, category, tech_type, level):
+        if tech_type == 2:
+            if level == 1:
+                return self.tech_level[category][0] >= 2 or self.tech_level[category][1] >= 2
+            elif level == 2:
+                return (self.tech_level[category][2] == 1
+                        and (self.tech_level[category][0] >= 4 or self.tech_level[category][1] >= 4))
+        else:
+            return self.tech_level[category][tech_type] == level - 1
+        return False
+
+    def has_science(self, category, tech_type, level):
+        cost = MAIN_TECH_COSTS[level - 1]
+        if tech_type == 2:
+            cost = MAIN_TECH_COSTS[level + 2]
+        total_science = self.science[3] + self.science[DOMAINS[category]]
+        return total_science >= cost
 
     def get_building_cost(self):
         return BASE_BUILDING_COST - CONSTRUCTION_EFFECT * self.tech_level[0][0]
