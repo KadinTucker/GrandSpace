@@ -63,6 +63,8 @@ DEFENSE_ICON_WIDTH = 24
 DEFENSE_STACK_WIDTH = 4
 DEFENSE_STACK_HEIGHT = 2
 DEFENSE_ICON_IMG = pygame.image.load("assets/defense-slot.png")
+BESIEGED_ICON_IMG = pygame.image.load("assets/besieged-slot.png")
+CONQUEST_ICON_IMG = pygame.image.load("assets/conquest-bar.png")
 
 def get_ring_distribution_coordinates(center, radius, num_items):
     coordinates = [[0, 0] for _ in range(num_items)]
@@ -262,13 +264,16 @@ class DefenseSnapshot(snapshot.Snapshot):
                     pygame.draw.rect(self.surface, conquest_color,
                                      pygame.Rect(location, i * (DEFENSE_ICON_HEIGHT - 1),
                                                  DEFENSE_ICON_WIDTH, DEFENSE_ICON_HEIGHT))
-                elif count == self.colony.conquered_shields:
+                    self.surface.blit(CONQUEST_ICON_IMG, (location, i * (DEFENSE_ICON_HEIGHT - 1)))
+                elif self.colony.damage > 0 and count == self.colony.conquered_shields:
                     pygame.draw.rect(self.surface, conquest_color,
                                      pygame.Rect(location, i * (DEFENSE_ICON_HEIGHT - 1),
                                                  DEFENSE_ICON_WIDTH * (self.colony.damage / colony.SHIELD_HEALTH
                                                                        - self.colony.conquered_shields),
                                                  DEFENSE_ICON_HEIGHT))
-                self.surface.blit(DEFENSE_ICON_IMG, (location, i * (DEFENSE_ICON_HEIGHT - 1)))
+                    self.surface.blit(BESIEGED_ICON_IMG, (location, i * (DEFENSE_ICON_HEIGHT - 1)))
+                else:
+                    self.surface.blit(DEFENSE_ICON_IMG, (location, i * (DEFENSE_ICON_HEIGHT - 1)))
                 count += 1
 
 

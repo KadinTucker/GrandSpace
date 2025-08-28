@@ -191,7 +191,7 @@ def main():
                 p.ecology.regenerate_biomass(elapsed_time)
                 if p.colony is not None:
                     p.colony.demand.progress_demand(elapsed_time)
-                    p.colony.produce(elapsed_time)
+                    p.colony.do_tick(elapsed_time)
 
         # Display
 

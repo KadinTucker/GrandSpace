@@ -43,4 +43,6 @@ Dealing a point of damage to an enemy ship grants +1 Warfare milestone progress.
 
 Gain a bonus +5 Warfare milestone points for destroying an enemy ship, or having one of your ships destroyed in combat.
 
-Conquering a *shield* grants +25 Warfare milestone progress. Having a shield conquered grants +50 Warfare milestone progress.
+Damaging a [shield](glossary/shield.md) grants +1 Warfare milestone progress. Having one of your own shields damaged also grants +2 Warfare milestone progress.
+
+Successfully conquering a system grants +10 Warfare milestone progress per city in the system.

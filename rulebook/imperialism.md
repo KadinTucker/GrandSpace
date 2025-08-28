@@ -34,3 +34,7 @@ maximum of 3 cities and 9 development (at maximum habitability).
 Colonising a star system for the first time grants +25 Imperial milestone progress. Founding a colony grants +15 
 milestone progress. Building a city, including by founding a colony, grants +10 milestone progress, and improving the 
 development score of a colony by 1 grants +5 milestone progress.
+
+Conquering a star system militarily counts as colonising for the first time, and grants +25 Imperial milestone progress. 
+This applies even if you reconquer a system you had previously conquered.
+However, no points are scored for the colonies already founded in that star system.

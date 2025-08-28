@@ -32,15 +32,23 @@ class Colony(object):
     def get_maximum_development(self):
         return (self.planet.get_habitability() * self.cities * MAX_DEVELOPMENT_PER_CITY_PER_HABITABILITY
                 + self.cities * self.ruler.technology.get_bonus_development_per_city())
+
+    def do_tick(self, time):
+        self.repair(time)
+        self.produce(time)
     
     def produce(self, time):
-        if self.damage > 0:
-            self.damage -= HEALING_PER_MINUTE * time
-        else:
-            self.minerals = min(self.get_mineral_capacity(), self.minerals + self.get_production(time))
         if self.damage <= 0:
+            self.minerals = min(self.get_mineral_capacity(), self.minerals + self.get_production(time))
             self.conqueror = None
             self.damage = 0
+
+    def repair(self, time):
+        if self.damage > 0:
+            self.damage -= HEALING_PER_MINUTE * time
+            if self.damage < self.conquered_shields * SHIELD_HEALTH:
+                self.conquered_shields -= 1
+            print(self.damage, self.conquered_shields)
 
     def get_defense(self):
         return self.cities + self.ruler.technology.get_bonus_shields()
@@ -62,22 +70,31 @@ class Colony(object):
             self.conquered_shields += 1
             if self.get_defense() - self.conquered_shields <= self.cities:
                 # Collateral damage
-                self.development = max(self.development - 1, 0)
-            if self.conquered_shields >= self.get_defense():
-                # Get conquered: check if all colonies in the system are also conquered.
-                unconquered = False
+                # self.development = max(self.development - 1, 0)
+                # Edited out for now, because of possible looping repair<->damage to make for too much damage
+                pass
+            self.get_conquered()
+
+    def get_conquered(self):
+        if self.conquered_shields >= self.get_defense():
+            # Get conquered: check if all colonies in the system are also conquered.
+            unconquered = False
+            for p in self.planet.star.planets:
+                if p.colony is not None and not p.colony.is_conquered():
+                    unconquered = True
+                    break
+            if not unconquered:
                 for p in self.planet.star.planets:
-                    if p.colony is not None and not p.colony.is_conquered():
-                        unconquered = True
-                        break
-                if not unconquered:
-                    for p in self.planet.star.planets:
-                        if p.colony is not None:
-                            p.colony.ruler = self.conqueror
-                    self.planet.star.ruler = self.conqueror
-                    self.conqueror = None
-                    self.conquered_shields = 0
-                    self.damage = 0
+                    if p.colony is not None:
+                        self.conqueror.game.diplomacy.lose_leverage(self.conqueror.id, p.colony.ruler.id,
+                                                                    5 * p.colony.cities)
+                        self.conqueror.milestone_progress[0] += 10 * p.colony.cities
+                        p.colony.ruler = self.conqueror
+                self.conqueror.milestone_progress[5] += 25
+                self.planet.star.ruler = self.conqueror
+                self.conqueror = None
+                self.conquered_shields = 0
+                self.damage = 0
 
 
 class HomeworldColony(Colony):

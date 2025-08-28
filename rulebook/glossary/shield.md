@@ -2,7 +2,7 @@
 
 Shields are units of defence on *colonies*. A colony typically has a number of shields equal to its number of *cities*.
 
-When a ship besieges a city, it "places" itself on a shield and gradually damages the shield. Each shield has 15 health points, which does __not__ change with technology. When a shield is brought down to 0 health points, it is said to be conquered. When a shield is conquered, the colony suffers collateral damage in the form of losing 1 *development* score.
+When a ship besieges a city, it "places" itself on a shield and gradually damages the shield. Each shield has 20 health points, which does __not__ change with technology. When a shield is brought down to 0 health points, it is said to be conquered. When a shield is conquered, the colony suffers collateral damage in the form of losing 1 *development* score.
 
 After a shield has been conquered, it slowly regenerates health, at a rate of 3 per minute. If the shield reaches 15 health again, it is unconquered. Friendly ships can work to speed up this rate to 10 per minute.
 
