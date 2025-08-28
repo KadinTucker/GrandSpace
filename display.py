@@ -56,6 +56,7 @@ def generate_galaxy_displays(game):
     for p in game.players:
         new_display = galaxy_display.GalaxyDisplay(game, p, GALAXY_PANE_DIMENSIONS, GALAXY_PANE_DIMENSIONS,
                                                    GALAXY_PANE_POSITION)
+        new_display.set_view_center(p.homeworld.star.location)
         new_display.set_scale(drag_pane.ZOOM_MAX, p.homeworld.star.location)
         galaxy_displays.append(new_display)
     return galaxy_displays
@@ -137,6 +138,8 @@ def main():
     active_display = system_displays[active_player.id][active_player.homeworld.star.id]
     active_display.update()
 
+    center_view = False
+
     timestamp = pygame.time.get_ticks()
 
     while True:
@@ -164,6 +167,11 @@ def main():
                 # TEMP: spawn ship
                 elif event.key == pygame.K_s:
                     active_player.add_ship(active_player.homeworld)
+                # Centre view to selected ship
+                elif event.key == pygame.K_LSHIFT or event.key == pygame.K_RSHIFT:
+                    center_view = not center_view
+
+                # Ship action hotkeys
                 if event.key in macros.ACTION_KEYCONTROL_DICT.keys():
                     active_player.selected_ship.set_action(macros.ACTION_KEYCONTROL_DICT[event.key])
 
@@ -194,6 +202,14 @@ def main():
                     p.colony.do_tick(elapsed_time)
 
         # Display
+
+        if center_view:
+            if active_player.selected_ship.action == 1:
+                galaxy_displays[active_player.id].set_view_center(active_player.selected_ship.location)
+            if active_player.selected_ship.star is not None:
+                active_display = system_displays[active_player.id][active_player.selected_ship.star.id]
+            else:
+                active_display = galaxy_displays[active_player.id]
 
         display.fill(active_player.color)
         active_display.refresh_layer(len(active_display.layers) - 1)  # refresh top layer every tick

@@ -78,6 +78,7 @@ class Ship:
                     self.action_progress = max(0.0, self.action_progress +
                                                self.ruler.technology.get_ship_firerate() * time)
                 else:
+                    # TODO: make auto-attacking separate from action 0
                     for s in self.star.ships:
                         if ship_tasks.is_enemy_ship(self, s):
                             s.receive_damage(1, self.ruler)

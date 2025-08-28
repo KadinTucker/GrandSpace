@@ -54,13 +54,19 @@ class GalaxyDisplay(drag_pane.DragPane):
             if math.hypot(s.location[0] - location[0], s.location[1] - location[1]) <= GALAXY_STAR_RADIUS:
                 return s
         return None
+
+    def set_view_center(self, obj_center):
+        self.view_corner = (self.dimensions[0] / 2 - self.view_scale * obj_center[0],
+                            self.dimensions[1] / 2 - self.view_scale * obj_center[1])
+        self.update()
     
     def find_player_ship(self, click_location):
         location = self.deproject_coordinate(click_location)
         for s in self.player.ships:
-            if math.hypot(s.location[0] - location[0],
-                          s.location[1] - location[1]) <= GALAXY_SHIP_RADIUS / self.view_scale:
-                return s
+            if s.star is None:
+                if math.hypot(s.location[0] - location[0],
+                              s.location[1] - location[1]) <= GALAXY_SHIP_RADIUS / self.view_scale:
+                    return s
 
     def sketch_primary_surface(self):
         for i in range(len(self.game.galaxy.stars)):
@@ -104,9 +110,12 @@ class GalaxyDisplay(drag_pane.DragPane):
         for p in self.game.players:
             for s in p.ships:
                 # TODO: make ships only drawn if they are "visible" to the active player
-                # TODO: make ship range a function of player's technology
                 # TODO: make ship pathing and movement affected by range
-                ship_display.draw_ship(self.layers[2], s, self.project_coordinate(s.location), self.player)
+                # TODO: make ships drawn overlapped, but as "ghosts", if in a star system, from the galaxy perspective
+                if s.star is None:
+                    ship_display.draw_ship(self.layers[2], s, self.project_coordinate(s.location), self.player)
+                elif s is self.player.selected_ship:
+                    ship_display.draw_ship_selection(self.layers[2], self.project_coordinate(s.location))
                 if s is self.player.selected_ship:
                     ship_display.draw_ship_galaxy_range(self.layers[2], self.project_coordinate(s.location),
                                                         self.player.technology.get_ship_range(), self.view_scale)
@@ -152,16 +161,16 @@ class GalaxyDisplay(drag_pane.DragPane):
                 self.set_scale(min(drag_pane.ZOOM_MAX, self.view_scale + drag_pane.ZOOM_RATE), mouse_pos)
             elif event.key == pygame.K_MINUS:
                 self.set_scale(max(drag_pane.ZOOM_MIN, self.view_scale - drag_pane.ZOOM_RATE), mouse_pos)
-            if event.key == pygame.K_LEFT:
-                self.view_corner = (self.view_corner[0] + SCROLL_SPEED * self.dimensions[0] / self.view_scale,
-                                    self.view_corner[1])
-            elif event.key == pygame.K_RIGHT:
-                self.view_corner = (self.view_corner[0] - SCROLL_SPEED * self.dimensions[0] / self.view_scale,
-                                    self.view_corner[1])
-            elif event.key == pygame.K_UP:
-                self.view_corner = (self.view_corner[0],
-                                    self.view_corner[1] + SCROLL_SPEED * self.dimensions[1] / self.view_scale)
-            elif event.key == pygame.K_DOWN:
-                self.view_corner = (self.view_corner[0],
-                                    self.view_corner[1] - SCROLL_SPEED * self.dimensions[1] / self.view_scale)
+            # if event.key == pygame.K_LEFT:
+            #     self.view_corner = (self.view_corner[0] + SCROLL_SPEED * self.dimensions[0] / self.view_scale,
+            #                         self.view_corner[1])
+            # elif event.key == pygame.K_RIGHT:
+            #     self.view_corner = (self.view_corner[0] - SCROLL_SPEED * self.dimensions[0] / self.view_scale,
+            #                         self.view_corner[1])
+            # elif event.key == pygame.K_UP:
+            #     self.view_corner = (self.view_corner[0],
+            #                         self.view_corner[1] + SCROLL_SPEED * self.dimensions[1] / self.view_scale)
+            # elif event.key == pygame.K_DOWN:
+            #     self.view_corner = (self.view_corner[0],
+            #                         self.view_corner[1] - SCROLL_SPEED * self.dimensions[1] / self.view_scale)
 
