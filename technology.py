@@ -68,6 +68,8 @@ RESEARCH_LEVERAGE_BOOST = 1
 
 TERRAFORM_MONEY_COST_BASE = 1500
 TERRAFORM_MONEY_COST_BONUS = 300
+TERRAFORM_RATE = 2.0
+TERRAFORM_RATE_BONUS = 1.5
 
 BIOMASS_COLLECTION_RATE_BASE = 5.0
 BIOMASS_COLLECTION_RATE_BONUS = 1.5
@@ -112,7 +114,7 @@ class TechnologyTree:
     def has_science(self, category, tech_type, level):
         cost = MAIN_TECH_COSTS[level - 1]
         if tech_type == 2:
-            cost = WILDCARD_TECH_COSTS[level + 2]
+            cost = WILDCARD_TECH_COSTS[level]
         total_science = self.science[3] + self.science[DOMAINS[category]]
         return total_science >= cost
 
@@ -183,6 +185,9 @@ class TechnologyTree:
 
     def get_terraform_monetary_cost(self):
         return TERRAFORM_MONEY_COST_BASE - TERRAFORM_MONEY_COST_BONUS * self.tech_level[3][0]
+
+    def get_terraform_rate(self):
+        return TERRAFORM_RATE_BASE * TERRAFORM_RATE_BONUS ** self.tech_level[3][0]
 
     def get_biomass_collection_rate(self):
         return BIOMASS_COLLECTION_RATE_BASE * BIOMASS_COLLECTION_RATE_BONUS ** self.tech_level[3][1]

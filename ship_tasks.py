@@ -4,14 +4,14 @@ import colony
 import ecology
 
 FULL_HEAL_RATE = 2.0
-COLONY_PLACEMENT_RATE = 30.0
-CITY_PLACEMENT_RATE = 60.0
-DEVELOPMENT_PLACEMENT_RATE = 60.0
-TERRAFORM_RATE = 3.0
+COLONY_PLACEMENT_RATE = 15.0
+CITY_PLACEMENT_RATE = 30.0
+DEVELOPMENT_PLACEMENT_RATE = 30.0
 CARGO_TRANSFER_RATE = 240.0
 RESEARCH_RATE = 1.0
 MINERAL_RAID_RATE = 20.0
 RESEARCH_MONEY = 100
+SCIENCE_PER_BIOLOGY = 1
 
 def find_nearest_star(position, galaxy, blacklist=()):
     """
@@ -243,6 +243,17 @@ def cond_plunder(ship):
         ship.ruler.log_message("Cannot plunder: ship not at planet")
     return False
 
+def cond_consolidate(ship):
+    if ship.planet is not None:
+        if len(ship.planet.ships) > 1:
+            return True
+        else:
+            ship.ruler.log_message("Cannot consolidate cargo: no other ships to take cargo from")
+    else:
+        ship.ruler.log_message("Cannot consolidate cargo: ship not at planet")
+    return False
+
+
 def act_collect_minerals(ship):
     ship.cargo.minerals[ship.planet.mineral] += 1
     ship.planet.colony.minerals -= 1
@@ -294,15 +305,18 @@ def act_terraform(ship):
     ship.planet.ecology.species[ship.cargo.biomass.selected] = True
     cost = ship.planet.ecology.get_terraform_cost()
     ship.planet.ecology.habitability += 1
+    ship.planet.ecology.biomass_level = ((ship.ruler.technology.get_biomass_refund() +
+                                         (ship.planet.ecology.habitability - 1) * ship.planet.ecology.biomass_level)
+                                         / ship.planet.ecology.habitability)
     spent = ship.cargo.biomass.empty()
     ship.ruler.money -= ship.ruler.technology.get_terraform_monetary_cost()
     ship.ruler.milestone_progress[2] += spent + 25
-    ship.ruler.technology.science[2] += (spent - cost) / 5
+    ship.ruler.technology.science[2] += (spent - cost) * SCIENCE_PER_BIOLOGY
 
 def act_biology(ship):
     spent = ship.cargo.biomass.empty()
     ship.ruler.milestone_progress[2] += spent
-    ship.ruler.technology.science[2] += spent / 5
+    ship.ruler.technology.science[2] += spent * SCIENCE_PER_BIOLOGY
 
 def act_fund_science(ship):
     ship.ruler.money -= 100
@@ -342,6 +356,11 @@ def act_plunder(ship):
     ship.ruler.milestone_progress[4] += 10
     ship.ruler.milestone_progress[0] += 10
     ship.ruler.game.diplomacy.lose_leverage(ship.ruler.id, ship.star.ruler.id, 10)
+
+def act_consolidate(ship):
+    for s in ship.planet.ships:
+        if s is not ship and s.ruler is ship.ruler:
+            ship.cargo.take_from(s.cargo)
 
 def task_null(ship, game):
     pass
@@ -396,7 +415,7 @@ SHIP_ACTIONS = [
     (cond_develop_colony, act_develop_colony, lambda t: lambda: DEVELOPMENT_PLACEMENT_RATE, False),
     (cond_establish_colony, act_establish_colony, lambda t: lambda: COLONY_PLACEMENT_RATE, False),
     (cond_collect_biomass, act_collect_biomass, lambda t: t.get_biomass_collection_rate, False),
-    (cond_terraform, act_terraform, lambda t: lambda: TERRAFORM_RATE, False),
+    (cond_terraform, act_terraform, lambda t: t.get_terraform_rate, False),
     (cond_collect_minerals, act_collect_minerals, lambda t: lambda: CARGO_TRANSFER_RATE, True),
     (lambda ship: cond_sell_minerals(ship, 0), lambda ship: act_sell_minerals(ship, 0),
      lambda t: lambda: CARGO_TRANSFER_RATE, True),
@@ -419,5 +438,6 @@ SHIP_ACTIONS = [
     (cond_raid_minerals, act_raid_minerals, lambda t: lambda: MINERAL_RAID_RATE, True),
     (cond_raid_biomass, act_raid_biomass, lambda t: t.get_biomass_collection_rate, False),
     (cond_besiege, act_besiege, lambda t: t.get_ship_firerate, True),
-    (cond_plunder, act_plunder, lambda t: lambda: MINERAL_RAID_RATE, False)
+    (cond_plunder, act_plunder, lambda t: lambda: MINERAL_RAID_RATE, False),
+    (cond_consolidate, act_consolidate, lambda t: lambda: CARGO_TRANSFER_RATE, False),
 ]

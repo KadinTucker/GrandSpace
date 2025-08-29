@@ -21,6 +21,9 @@ MILESTONE_WIDTH = 20
 DIPLOMACY_TEXT_OFFSET = 34
 
 ACTION_ICONS = [
+    (macros.ACTION_SELL_ARTIFACT, uiframe.get_panel_from_image(macros.ICONS["sell_artifact"])),
+    (macros.ACTION_CONSOLIDATE, uiframe.get_panel_from_image(macros.ICONS["trade"])),
+    (macros.ACTION_BUY_BUILDING, uiframe.get_panel_from_image(macros.ICONS["buy_building"])),
     (macros.ACTION_BUILD_CITY, uiframe.get_panel_from_image(macros.ICONS["build_city"])),
     (macros.ACTION_DEVELOP, uiframe.get_panel_from_image(macros.ICONS["develop"])),
     (macros.ACTION_COLONISE, uiframe.get_panel_from_image(macros.ICONS["colonise"])),
@@ -324,7 +327,7 @@ class CargoPane(uiframe.UIElement):
         self.player = player_obj
         self.artifact_icon = uiframe.get_panel_from_image(macros.ICONS["discovery"])
         self.sell_artifact_icon = uiframe.get_panel_from_image(macros.ICONS["sell_artifact"])
-        self.building_icon = uiframe.get_panel_from_image(macros.ICONS["empire"])
+        self.building_icon = uiframe.get_panel_from_image(macros.ICONS["building"])
         self.mineral_icons = [uiframe.get_panel_from_image(macros.ICONS["mineral_" + x]) for x in "rgbcmy"]
         self.sell_mineral_icons = [uiframe.get_panel_from_image(macros.ICONS["sell_mineral_" + x]) for x in "rgbcmy"]
         self.artifact_pos = 0

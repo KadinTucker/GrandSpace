@@ -15,6 +15,11 @@ class Biomass:
         self.selected = -1
         self.value = self.get_biological_value()
 
+    def add(self, other):
+        for i in range(len(self.quantities)):
+            self.quantities[i] += other.quantities[i]
+        self.value = self.get_biological_value()
+
     def select(self, new_selection):
         self.selected = new_selection
         self.value = self.get_biological_value()

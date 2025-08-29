@@ -27,6 +27,7 @@ ACTION_RAID_MINERALS = 20
 ACTION_RAID_BIOMASS = 21
 ACTION_BESIEGE = 22
 ACTION_PLUNDER = 23
+ACTION_CONSOLIDATE = 24
 
 # Key Controls
 ACTION_KEYCONTROL_DICT = {
@@ -73,6 +74,7 @@ ICONS = {
     "science_green": pygame.image.load("assets/icon-research-green.png"),
     "science_blue": pygame.image.load("assets/icon-research-blue.png"),
     "sell_artifact": pygame.image.load("assets/icon-sell-artifact.png"),
+    "building": pygame.image.load("assets/icon-building.png"),
     "build_city": pygame.image.load("assets/icon-build-city.png"),
     "develop": pygame.image.load("assets/icon-build-development.png"),
     "colonise": pygame.image.load("assets/icon-colonial.png"),
@@ -87,5 +89,6 @@ ICONS = {
     "raid_biomass": pygame.image.load("assets/icon-raid-biomass.png"),
     "besiege": pygame.image.load("assets/icon-besiege.png"),
     "plunder": pygame.image.load("assets/icon-loot.png"),
+    "repair": pygame.image.load("assets/icon-repair.png"),
 }
 

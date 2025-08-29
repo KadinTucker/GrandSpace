@@ -330,6 +330,14 @@ class Cargo:
         self.biomass = ecology.Biomass(ship)
         self.buildings = 0
 
+    def take_from(self, other):
+        for i in range(6):
+            self.minerals[i] += other.minerals[i]
+        self.artifacts += other.artifacts
+        self.buildings += other.buildings
+        self.biomass.add(other.biomass)
+        other.empty()
+
     def empty(self):
         self.minerals = [0, 0, 0, 0, 0, 0]
         self.artifacts = 0
