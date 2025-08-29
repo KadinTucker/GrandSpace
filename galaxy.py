@@ -178,7 +178,7 @@ class ArtifactSpawner:
     def try_place_artifact(self, time):
         if self.progress >= 1.0:
             star_chosen = random.randint(0, len(self.galaxy.stars) - 1)
-            if (not self.has_star_artifact(star_chosen)
+            if (self.galaxy.stars[star_chosen].ruler is None and not self.galaxy.stars[star_chosen].has_artifact()
                     and random.random() < self.get_system_artifact_chance(star_chosen)):
                 random.choice(self.galaxy.stars[star_chosen].planets).artifacts += 1
                 self.progress = 0.0

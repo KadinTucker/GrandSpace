@@ -18,7 +18,7 @@ WILDCARD_NAMES = [
     "Quantum Computer,Faster Than Light,".split(","),
     "Genetic Programming,Mass Cloning,".split(","),
     "Intergalactic Ambassadors,Galactic Harmony,".split(","),
-    "Nanotargeted Marketing,Hypercommerce".split(","),
+    "Hypercommerce,Nanomarketing".split(","),
 ]
 ROMAN_NUMERALS = "I II III IV V".split()
 
@@ -68,7 +68,7 @@ RESEARCH_LEVERAGE_BOOST = 1
 
 TERRAFORM_MONEY_COST_BASE = 1500
 TERRAFORM_MONEY_COST_BONUS = 300
-TERRAFORM_RATE = 2.0
+TERRAFORM_RATE_BASE = 2.0
 TERRAFORM_RATE_BONUS = 1.5
 
 BIOMASS_COLLECTION_RATE_BASE = 5.0
@@ -86,6 +86,15 @@ IMPROVED_SCIENCE_RATE = 2
 
 BASE_MINIMUM_PRICE = 50
 IMPROVED_MINIMUM_PRICE = 100
+
+BASE_CARGO_TRANSFER_RATE = 180.0
+# NOTE: maybe we want to make it more automatic than this.
+# because this is limited by FPS.
+# i.e., make ships get the ability to take all or sell all.
+BONUS_CARGO_TRANSFER_RATE = 1020.0
+
+BASE_RAID_RATE = 30.0
+BONUS_RAID_RATE = 90.0
 
 class TechnologyTree:
     """
@@ -114,19 +123,20 @@ class TechnologyTree:
     def has_science(self, category, tech_type, level):
         cost = MAIN_TECH_COSTS[level - 1]
         if tech_type == 2:
-            cost = WILDCARD_TECH_COSTS[level]
+            cost = WILDCARD_TECH_COSTS[level - 1]
         total_science = self.science[3] + self.science[DOMAINS[category]]
         return total_science >= cost
 
     def try_research(self, category, tech_type, level):
+        print(level)
+        cost = MAIN_TECH_COSTS[level - 1]
+        if tech_type == 2:
+            cost = WILDCARD_TECH_COSTS[level - 1]
+            name = WILDCARD_NAMES[category][level - 1]
+        else:
+            name = MAIN_TREE_NAMES[category][tech_type] + " " + ROMAN_NUMERALS[level - 1]
         if self.has_prerequisites(category, tech_type, level):
             if self.has_science(category, tech_type, level):
-                cost = MAIN_TECH_COSTS[level - 1]
-                if tech_type == 2:
-                    cost = MAIN_TECH_COSTS[level + 2]
-                    name = WILDCARD_NAMES[category][level]
-                else:
-                    name = MAIN_TREE_NAMES[category][tech_type] + " " + ROMAN_NUMERALS[level - 1]
                 domain_science_used = min(cost, self.science[DOMAINS[category]])
                 neutral_science_used = cost - domain_science_used
                 self.tech_level[category][tech_type] = level
@@ -136,6 +146,10 @@ class TechnologyTree:
                 self.player.visibility.reset_permanent_visibility()
                 self.player.log_message(f"Researched {name} for {domain_science_used} {DOMAIN_NAMES[DOMAINS[category]]}"
                                         f" and {neutral_science_used} Neutral science.")
+            else:
+                self.player.log_message(f"Cannot research {name}: not enough science ({cost} required).")
+        else:
+            self.player.log_message(f"Cannot research {name}: prerequisites not met.")
 
     def get_building_cost(self):
         return BASE_BUILDING_COST - CONSTRUCTION_EFFECT * self.tech_level[0][0]
@@ -225,9 +239,13 @@ class TechnologyTree:
         return self.tech_level[2][2] >= 2
 
     def get_minimum_price(self):
-        if self.tech_level[5][2] >= 1:
-            return IMPROVED_MINIMUM_PRICE
         return BASE_MINIMUM_PRICE
+
+    def get_cargo_transfer_rate(self):
+        return BASE_CARGO_TRANSFER_RATE + BONUS_CARGO_TRANSFER_RATE * int(self.tech_level[5][2] >= 1)
+
+    def get_raid_rate(self):
+        return BASE_RAID_RATE + BONUS_RAID_RATE * int(self.tech_level[5][2] >= 1)
 
     def has_hypercommerce(self):
         return self.tech_level[5][2] >= 2

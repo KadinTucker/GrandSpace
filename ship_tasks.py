@@ -7,11 +7,14 @@ FULL_HEAL_RATE = 2.0
 COLONY_PLACEMENT_RATE = 15.0
 CITY_PLACEMENT_RATE = 30.0
 DEVELOPMENT_PLACEMENT_RATE = 30.0
-CARGO_TRANSFER_RATE = 240.0
+CARGO_TRANSFER_RATE = 180.0
 RESEARCH_RATE = 1.0
 MINERAL_RAID_RATE = 20.0
 RESEARCH_MONEY = 100
+
 SCIENCE_PER_BIOLOGY = 1
+MONEY_MILESTONE_VALUE = 500
+MINERAL_SALE_MILESTONE_MODIFIER = 5
 
 def find_nearest_star(position, galaxy, blacklist=()):
     """
@@ -78,15 +81,16 @@ def rules_system(ship):
 def rules_planet(ship):
     return ship.planet is not None and ship.planet.colony is not None and ship.planet.colony.ruler is ship.ruler
 
-def has_species(ship, species_index):
-    return species_index != -1 and ship.planet is not None and ship.planet.ecology.species[species_index]
+def planet_has_species(ship, species_index):
+    return ship.planet.ecology.species[species_index] > 0
 
 def can_be_terraformed(ship):
     return ship.planet is not None and ship.planet.ecology.habitability < ecology.MAX_HABITABILITY
 
 def can_terraform(ship):
     return (can_be_terraformed(ship) and has_enough_biomass_to_terraform(ship)
-            and not has_species(ship, ship.cargo.biomass.selected))
+            and not planet_has_species(ship, ship.cargo.biomass.selected)
+            and ship.cargo.biomass.selected != -1)
 
 def has_colony(ship):
     return ship.planet is not None and ship.planet.colony is not None
@@ -136,32 +140,98 @@ def cond_sell_minerals(ship, mineral_index):
     return False
 
 def cond_sell_artifact(ship):
-    return rules_planet(ship) and ship.cargo.artifacts > 0
+    if rules_planet(ship):
+        if ship.cargo.artifacts > 0:
+            return True
+        else:
+            ship.ruler.log_message("Cannot sell artifacts: no artifacts to sell")
+    else:
+        ship.ruler.log_message("Cannot sell artifacts: not at own colony")
+    return False
 
 def cond_buy_building(ship):
-    return rules_planet(ship) and has_enough_money(ship, ship.ruler.technology.get_building_cost())
+    if rules_planet(ship):
+        if has_enough_money(ship, ship.ruler.technology.get_building_cost()):
+            return True
+        else:
+            ship.ruler.log_message("Cannot buy building: not enough money")
+    else:
+        ship.ruler.log_message("Cannot buy building: not at own colony")
+    return False
 
 def cond_establish_colony(ship):
-    return ((is_system_neutral(ship) or rules_system(ship) and not has_colony(ship))
-            and has_buildings(ship, 2) and ship.planet is not None)
+    if ship.planet is not None:
+        if is_system_neutral(ship) or rules_system(ship) and not has_colony(ship):
+            if has_buildings(ship, 2):
+                return True
+            else:
+                ship.ruler.log_message("Cannot establish colony: not enough buildings in cargo")
+        else:
+            ship.ruler.log_message("Cannot establish colony: must be in a neutral system or own system at a planet "
+                                   "without an existing colony")
+    else:
+        ship.ruler.log_message("Cannot establish colony: must be at planet")
+    return False
 
 def cond_collect_biomass(ship):
-    return has_active_access(ship, 0) and ship.planet is not None and ship.planet.ecology.biomass_level >= 1
+    if ship.planet is not None:
+        if has_active_access(ship, 0):
+            if ship.planet.ecology.biomass_level >= 1:
+                return True
+            else:
+                ship.ruler.log_message("Cannot collect biomass: biomass on planet still regenerating")
+        else:
+            ship.ruler.log_message("Cannot collect biomass: need biological access")
+    else:
+        ship.ruler.log_message("Cannot collect biomass: must be at planet")
+    return False
 
 def cond_build_city(ship):
-    return has_space_for_city(ship) and has_buildings(ship, 2)
+    if has_space_for_city(ship):
+        if has_buildings(ship, 2):
+            return True
+        else:
+            ship.ruler.log_message("Cannot build city: not enough buildings")
+    else:
+        ship.ruler.log_message("Cannot build city: must be at own colony with number of cities not higher than "
+                               "habitability")
 
 def cond_develop_colony(ship):
-    return has_space_for_development(ship) and has_buildings(ship, 1)
+    if has_space_for_development(ship):
+        if has_buildings(ship, 1):
+            return True
+        else:
+            ship.ruler.log_message("Cannot develop: not enough buildings")
+    else:
+        ship.ruler.log_message("Cannot develop: must be at own colony with space for more development")
 
 def cond_terraform(ship):
-    return can_terraform(ship) and has_enough_money(ship, ship.ruler.technology.get_terraform_monetary_cost())
+    if ship.planet is not None:
+        if ship.planet.ecology.habitability < ecology.MAX_HABITABILITY:
+            if ship.cargo.biomass.selected != -1:
+                if has_enough_biomass_to_terraform(ship):
+                    if not planet_has_species(ship, ship.cargo.biomass.selected):
+                        if has_enough_money(ship, ship.ruler.technology.get_terraform_monetary_cost()):
+                            return True
+                        else:
+                            ship.ruler.log_message("Cannot terraform: not enough money")
+                    else:
+                        ship.ruler.log_message("Cannot terraform: selected species already present")
+                else:
+                    ship.ruler.log_message("Cannot terraform: not enough biomass value in cargo")
+            else:
+                ship.ruler.log_message("Cannot terraform: must select a species to add to planet")
+        else:
+            ship.ruler.log_message("Cannot terraform: planet already at maximum habitability")
+    else:
+        ship.ruler.log_message("Cannot terraform: not at planet")
+    return False
 
 def cond_biology(ship):
-    if has_enough_biomass(ship, 5):
+    if has_enough_biomass(ship, 1):
         return True
     else:
-        ship.ruler.log_message("Cannot do biology: minimum 5 biomass in cargo required")
+        ship.ruler.log_message("Cannot do biology: minimum 1 biomass in cargo required")
     return False
 
 def cond_fund_science(ship):
@@ -262,13 +332,13 @@ def act_sell_minerals(ship, mineral_index):
     ship.cargo.minerals[mineral_index] -= 1
     price = (ship.planet.colony.demand.get_price(mineral_index, ship.ruler))
     ship.ruler.money += price
-    ship.ruler.milestone_progress[4] += 50 / price + 1
+    ship.ruler.milestone_progress[4] += price * MINERAL_SALE_MILESTONE_MODIFIER / MONEY_MILESTONE_VALUE + 1
 
 def act_sell_artifact(ship):
     ship.cargo.artifacts -= 1
     ship.ruler.money += 500
     ship.ruler.technology.science[3] += ship.ruler.technology.get_artifact_science()
-    ship.ruler.milestone_progress[4] += 10
+    ship.ruler.milestone_progress[4] += 500 / MONEY_MILESTONE_VALUE
 
 def act_buy_building(ship):
     ship.ruler.money -= ship.ruler.technology.get_building_cost()
@@ -332,7 +402,7 @@ def act_research(ship):
                                                 ship.ruler.technology.get_research_leverage())
         ship.ruler.milestone_progress[3] += ship.ruler.technology.get_research_leverage()
     ship.ruler.money += RESEARCH_MONEY
-    ship.ruler.milestone_progress[4] += RESEARCH_MONEY // 50
+    ship.ruler.milestone_progress[4] += RESEARCH_MONEY / MONEY_MILESTONE_VALUE
     ship.ruler.technology.science[3] += ship.ruler.technology.get_mission_science()
     ship.star.ruler.technology.science[3] += ship.ruler.technology.get_mission_science()
 
@@ -353,7 +423,7 @@ def act_besiege(ship):
 def act_plunder(ship):
     ship.planet.colony.lose_city()
     ship.ruler.money += 500
-    ship.ruler.milestone_progress[4] += 10
+    ship.ruler.milestone_progress[4] += 500 / MONEY_MILESTONE_VALUE
     ship.ruler.milestone_progress[0] += 10
     ship.ruler.game.diplomacy.lose_leverage(ship.ruler.id, ship.star.ruler.id, 10)
 
@@ -416,28 +486,28 @@ SHIP_ACTIONS = [
     (cond_establish_colony, act_establish_colony, lambda t: lambda: COLONY_PLACEMENT_RATE, False),
     (cond_collect_biomass, act_collect_biomass, lambda t: t.get_biomass_collection_rate, False),
     (cond_terraform, act_terraform, lambda t: t.get_terraform_rate, False),
-    (cond_collect_minerals, act_collect_minerals, lambda t: lambda: CARGO_TRANSFER_RATE, True),
+    (cond_collect_minerals, act_collect_minerals, lambda t: t.get_cargo_transfer_rate, True),
     (lambda ship: cond_sell_minerals(ship, 0), lambda ship: act_sell_minerals(ship, 0),
-     lambda t: lambda: CARGO_TRANSFER_RATE, True),
+     lambda t: t.get_cargo_transfer_rate, True),
     (lambda ship: cond_sell_minerals(ship, 1), lambda ship: act_sell_minerals(ship, 1),
-     lambda t: lambda: CARGO_TRANSFER_RATE, True),
+     lambda t: t.get_cargo_transfer_rate, True),
     (lambda ship: cond_sell_minerals(ship, 2), lambda ship: act_sell_minerals(ship, 2),
-     lambda t: lambda: CARGO_TRANSFER_RATE, True),
+     lambda t: t.get_cargo_transfer_rate, True),
     (lambda ship: cond_sell_minerals(ship, 3), lambda ship: act_sell_minerals(ship, 3),
-     lambda t: lambda: CARGO_TRANSFER_RATE, True),
+     lambda t: t.get_cargo_transfer_rate, True),
     (lambda ship: cond_sell_minerals(ship, 4), lambda ship: act_sell_minerals(ship, 4),
-     lambda t: lambda: CARGO_TRANSFER_RATE, True),
+     lambda t: t.get_cargo_transfer_rate, True),
     (lambda ship: cond_sell_minerals(ship, 5), lambda ship: act_sell_minerals(ship, 5),
-     lambda t: lambda: CARGO_TRANSFER_RATE, True),
-    (cond_sell_artifact, act_sell_artifact, lambda t: lambda: CARGO_TRANSFER_RATE, False),
-    (cond_buy_building, act_buy_building, lambda t: lambda: CARGO_TRANSFER_RATE, False),
-    (cond_biology, act_biology, lambda t: lambda: CARGO_TRANSFER_RATE, False),
-    (cond_fund_science, act_fund_science, lambda t: lambda: CARGO_TRANSFER_RATE, False),
+     lambda t: t.get_cargo_transfer_rate, True),
+    (cond_sell_artifact, act_sell_artifact, lambda t: t.get_cargo_transfer_rate, False),
+    (cond_buy_building, act_buy_building, lambda t: t.get_cargo_transfer_rate, False),
+    (cond_biology, act_biology, lambda t: t.get_cargo_transfer_rate, False),
+    (cond_fund_science, act_fund_science, lambda t: lambda: 2400.0, False),
     (cond_schmooze, act_schmooze, lambda t: t.get_schmooze_power, True),
     (cond_research, act_research, lambda t: lambda: RESEARCH_RATE, True),
-    (cond_raid_minerals, act_raid_minerals, lambda t: lambda: MINERAL_RAID_RATE, True),
+    (cond_raid_minerals, act_raid_minerals, lambda t: t.get_raid_rate, True),
     (cond_raid_biomass, act_raid_biomass, lambda t: t.get_biomass_collection_rate, False),
     (cond_besiege, act_besiege, lambda t: t.get_ship_firerate, True),
-    (cond_plunder, act_plunder, lambda t: lambda: MINERAL_RAID_RATE, False),
-    (cond_consolidate, act_consolidate, lambda t: lambda: CARGO_TRANSFER_RATE, False),
+    (cond_plunder, act_plunder, lambda t: t.get_raid_rate, False),
+    (cond_consolidate, act_consolidate, lambda t: t.get_cargo_transfer_rate, False),
 ]

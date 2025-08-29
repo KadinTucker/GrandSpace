@@ -111,8 +111,9 @@ def main():
     if len(sys.argv) > 1 and sys.argv[1] == 'cheat':
         print("*** CHEAT MODE ACTIVATED ***")
         for p in game.players:
-            for t in range(len(p.technology.tech_level)):
-                p.technology.tech_level[t] = [5, 5, 2]
+            p.money += 10000
+            # for t in range(len(p.technology.tech_level)):
+            #     p.technology.tech_level[t] = [5, 5, 2]
         ecology.BIOMASS_REGENERATION_PER_MINUTE = 15.0
         for i in range(1, len(game.players)):
             import random

@@ -1,4 +1,5 @@
 import math
+import random
 
 import pygame
 
@@ -118,7 +119,7 @@ class TechPane(uiframe.Draggable):
     def __init__(self, container, x, y, tech_obj):
         surface = pygame.Surface((PANE_WIDTH, PANE_HEIGHT))
         super().__init__(container, surface, x, y, PANE_WIDTH, PANE_HEIGHT)
-        self.category = 0
+        self.category = random.randint(0, 5)
         self.technology = tech_obj
         self.update()
 
@@ -151,11 +152,11 @@ class TechPane(uiframe.Draggable):
                 tech_type_candidate = get_tech_type_from_x(rel_mouse[0])
                 if tech_type_candidate == 0 or tech_type_candidate == 1:
                     level_candidate = get_tech_level_main(rel_mouse[1])
-                    if level_candidate != -1:
+                    if 0 < level_candidate <= 5:
                         self.technology.try_research(self.category, tech_type_candidate, level_candidate)
                         self.update()
                 elif tech_type_candidate == 2:
                     level_candidate = get_tech_level_wildcard(rel_mouse[1])
-                    if level_candidate != -1:
+                    if 0 < level_candidate <= 2:
                         self.technology.try_research(self.category, tech_type_candidate, level_candidate)
                         self.update()

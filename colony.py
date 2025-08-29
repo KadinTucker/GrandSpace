@@ -101,7 +101,7 @@ class Colony(object):
                         p.colony.ruler = self.conqueror
                 self.conqueror.milestone_progress[5] += 25
                 self.planet.star.ruler.remove_ruled_star(self.planet.star)
-                self.planet.star.ruler.add_ruled_star(self.planet.star)
+                self.conqueror.add_ruled_star(self.planet.star)
                 self.conqueror = None
                 self.conquered_shields = 0
                 self.damage = 0
