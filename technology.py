@@ -2,6 +2,8 @@
 
 CATEGORY_NAMES = "Empire Combat Discovery Ecology Diplomacy Commerce".split()
 DOMAINS = [0, 0, 1, 2, 2, 1]
+DOMAIN_NAMES = "Power Prosperity Harmony".split()
+
 MAIN_TREE_NAMES = [
     "Construction Security".split(),
     "Warfare Shipbuilding".split(),
@@ -18,6 +20,7 @@ WILDCARD_NAMES = [
     "Intergalactic Ambassadors,Galactic Harmony,".split(","),
     "Nanotargeted Marketing,Hypercommerce".split(","),
 ]
+ROMAN_NUMERALS = "I II III IV V".split()
 
 MAIN_TECH_COSTS = [20, 30, 50, 80, 120]
 WILDCARD_TECH_COSTS = [100, 150]
@@ -119,12 +122,18 @@ class TechnologyTree:
                 cost = MAIN_TECH_COSTS[level - 1]
                 if tech_type == 2:
                     cost = MAIN_TECH_COSTS[level + 2]
+                    name = WILDCARD_NAMES[category][level]
+                else:
+                    name = MAIN_TREE_NAMES[category][tech_type] + " " + ROMAN_NUMERALS[level - 1]
                 domain_science_used = min(cost, self.science[DOMAINS[category]])
                 neutral_science_used = cost - domain_science_used
                 self.tech_level[category][tech_type] = level
                 self.science[DOMAINS[category]] -= domain_science_used
                 self.science[3] -= neutral_science_used
                 self.player.milestone_progress[1] += cost
+                self.player.visibility.reset_permanent_visibility()
+                self.player.log_message(f"Researched {name} for {domain_science_used} {DOMAIN_NAMES[DOMAINS[category]]}"
+                                        f" and {neutral_science_used} Neutral science.")
 
     def get_building_cost(self):
         return BASE_BUILDING_COST - CONSTRUCTION_EFFECT * self.tech_level[0][0]

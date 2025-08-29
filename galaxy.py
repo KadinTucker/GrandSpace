@@ -62,6 +62,12 @@ class Star:
         self.connected_star = None  # for the purpose of drawing connection lines
         self.ships = []
 
+    def has_artifact(self):
+        for p in self.planets:
+            if p.artifacts >= 1:
+                return True
+        return False
+
 class Galaxy:
     def __init__(self, stars):
         # list of Star objects, indexed by their id fields

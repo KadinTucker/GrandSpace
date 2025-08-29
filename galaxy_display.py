@@ -12,6 +12,8 @@ GALAXY_STAR_RADIUS = 8
 GALAXY_PLANET_RADIUS = 2
 GALAXY_SHIP_RADIUS = 10  # At view scale 1.0
 
+GALAXY_RING_WIDTH = 1
+
 SCROLL_SPEED = 0.125  # As a fraction of pane size
 
 EMPIRE_CONTROL_LINE_WIDTH = 5
@@ -21,6 +23,8 @@ COLOR_UNEXPLORED_STAR = (50, 50, 50)
 COLOR_UNSEEN_STAR = (175, 165, 135)
 COLOR_STAR = (200, 170, 25)
 COLOR_STAR_IN_RANGE = (230, 190, 50)
+COLOR_ARTIFACT_RING = (150, 125, 35)
+COLOR_CIVILIZATION_RING = (35, 125, 150)
 COLOR_FOG = (165, 165, 165)
 IN_RANGE_INDICATOR_RADIUS = 8
 IN_RANGE_INDICATOR_WIDTH = 2
@@ -76,14 +80,30 @@ class GalaxyDisplay(drag_pane.DragPane):
                               s.location[1] - location[1]) <= GALAXY_SHIP_RADIUS / self.view_scale:
                     return s
 
+    def draw_rings(self, dest_surface, color, star):
+        pygame.draw.circle(dest_surface, color, self.project_coordinate(star.location),
+                           int(self.view_scale * (GALAXY_STAR_RADIUS + GALAXY_RING_WIDTH * 2)),
+                           int(self.view_scale * GALAXY_RING_WIDTH))
+        pygame.draw.circle(dest_surface, color, self.project_coordinate(star.location),
+                           int(self.view_scale * (GALAXY_STAR_RADIUS + GALAXY_RING_WIDTH * 4)),
+                           int(self.view_scale * GALAXY_RING_WIDTH))
+
     def sketch_primary_surface(self):
         for i in range(len(self.game.galaxy.stars)):
             s = self.game.galaxy.stars[i]
-            star_color = COLOR_UNEXPLORED_STAR
-            if self.player.explored_stars[i]:
+            star_color = COLOR_STAR
+            explored = self.player.explored_stars[i]
+            visible = self.player.visibility.get_visible(s)
+            if visible:
+                if s.has_artifact():
+                    self.draw_rings(self.layers[1], COLOR_ARTIFACT_RING, s)
+            else:
                 star_color = COLOR_UNSEEN_STAR
-                if self.player.visibility.get_visible(s):
-                    star_color = COLOR_STAR
+            if not explored:
+                star_color = COLOR_UNEXPLORED_STAR
+                if visible and s.ruler is not None:
+                    self.draw_rings(self.layers[1], COLOR_CIVILIZATION_RING, s)
+
             pygame.draw.circle(self.layers[1], star_color, self.project_coordinate(s.location),
                                int(self.view_scale * GALAXY_STAR_RADIUS))
             if self.player.explored_stars[i]:

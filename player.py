@@ -10,6 +10,9 @@ import visibility
 STARTING_MONEY = 1000
 BASE_MILESTONE_COST = 50
 
+MILESTONE_NAMES = "Warfare Discovery Ecology Diplomacy Commerce Imperialism".split()
+MILESTONE_DOMAINS = [0, 1, 2, 2, 1, 0]
+
 class Game:
 
     def __init__(self, n_players, galaxy_obj):
@@ -39,9 +42,18 @@ class Player:
         self.visibility = visibility.StarVisibility(self.game.galaxy, self)
         self.reset_explored_stars()
         self.milestone_progress = [0, 0, 0, 0, 0, 0]
+        self.achieved_milestones = [0, 0, 0, 0, 0, 0]
         self.technology = technology.TechnologyTree(self)
         self.controller = PlayerController(self)
         self.log = []
+
+    def check_milestones(self):
+        for i in range(6):
+            if get_milestone_from_progress(self.milestone_progress[i]) > self.achieved_milestones[i] + 1:
+                # Achieve milestone
+                self.achieved_milestones[i] += 1
+                self.technology.science[MILESTONE_DOMAINS[i]] += 20
+                self.log_message(f"Achieved milestone {self.achieved_milestones[i]} in {MILESTONE_NAMES[i]}!")
 
     def add_ship(self, planet):
         self.ships.append(ship.Ship(planet.star.location, self))

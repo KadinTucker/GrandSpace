@@ -70,8 +70,7 @@ class StarVisibility:
                 self.temporary_visible[ship.star.id] = True
                 for j in self.galaxy.star_distance_hierarchy[ship.star.id]:
                     if self.galaxy.star_distance_matrix[ship.star.id][j] < visibility_range:
-                        if self.galaxy.stars[j].ruler is self.player:
-                            self.temporary_visible[j] = True
+                        self.temporary_visible[j] = True
                     else:
                         break
 

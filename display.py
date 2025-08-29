@@ -202,6 +202,7 @@ def main():
                     galaxy_displays[active_player.id].refresh_layer(0)
                     galaxy_displays[active_player.id].refresh_layer(1)
             p.milestone_progress[3] = game.diplomacy.get_milestone_state(p.id)
+            p.check_milestones()
 
         # Display
 
