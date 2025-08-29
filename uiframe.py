@@ -131,7 +131,8 @@ class UIContainer(UIElement):
 
     def handle_event(self, event, mouse_pos):
         for elt in self.elements:
-            elt.handle_event(event, mouse_pos)
+            if elt.visible:
+                elt.handle_event(event, mouse_pos)
 
     def draw(self, dest_surface):
         if self.visible:

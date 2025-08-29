@@ -85,7 +85,7 @@ class Ship:
                             self.ruler.game.diplomacy.lose_leverage(self.ruler.id, s.ruler.id,
                                                                     10 / s.ruler.technology.get_ship_max_health())
                             self.ruler.milestone_progress[0] += 1
-                            self.ruler.technology.science[0] += 10 / s.ruler.technology.get_ship_max_health()
+                            self.ruler.technology.science[0] += 1
                             self.action_progress = 0.0
                             break
             elif (self.health < self.ruler.technology.get_ship_max_health()
@@ -109,7 +109,7 @@ class Ship:
 
     def receive_damage(self, damage, dealing_player):
         self.health -= damage
-        self.ruler.technology.science[0] += 10 / self.ruler.technology.get_ship_max_health()
+        self.ruler.technology.science[0] += 1
         self.ruler.milestone_progress[0] += 2
         if self.health <= 0:
             if (self.planet is not None and self.planet.colony is not None

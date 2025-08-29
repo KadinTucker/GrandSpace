@@ -52,15 +52,12 @@ class Player:
 
     def is_ship_visible(self, ship_obj):
         if ship_obj.ruler is self:
-            print("reflexive")
             return True
         if ship_obj.star is not None:
-            print("ship at star and star is visible")
             return self.visibility.get_visible(ship_obj.star)
         for s in self.ships:
             if s.star is None or s.star.ruler is not self:
                 if s.get_distance_to(ship_obj.location) < self.technology.get_visibility_range():
-                    print("ship seen by other ship")
                     return True
         return False
 

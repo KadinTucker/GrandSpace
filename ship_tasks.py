@@ -276,7 +276,7 @@ def act_collect_biomass(ship):
     for i in range(len(ship.planet.ecology.species)):
         if ship.planet.ecology.species[i]:
             ship.cargo.biomass.change_quantity(i, 1)
-    ship.planet.ecology.biomass_level = 0
+    ship.planet.ecology.biomass_level = ship.ruler.technology.get_biomass_refund()
     ship.ruler.milestone_progress[2] += 2 * ship.planet.ecology.habitability
 
 def act_build_city(ship):

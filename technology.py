@@ -45,10 +45,10 @@ SHIP_BONUS_SPEED_SPACEFARING = 400
 SHIP_BASE_RANGE = 90
 SHIP_BONUS_RANGE = 30
 
-SCIENCE_ARTIFACT_BASE = 5
+SCIENCE_ARTIFACT_BASE = 2
 SCIENCE_ARTIFACT_BONUS = 2
 
-SCIENCE_MISSION_BASE = 3
+SCIENCE_MISSION_BASE = 1
 SCIENCE_MISSION_BONUS = 1
 
 TRADE_BONUS = 10
@@ -64,7 +64,8 @@ TERRAFORM_MONEY_COST_BASE = 1500
 TERRAFORM_MONEY_COST_BONUS = 300
 
 BIOMASS_COLLECTION_RATE_BASE = 5.0
-BIOMASS_COLLECTION_RATE_BONUS = 11.0
+BIOMASS_COLLECTION_RATE_BONUS = 1.5
+BIOMASS_REFUND = 0.1
 
 ORBITAL_SHIELD_BONUS = 1
 
@@ -109,6 +110,19 @@ class TechnologyTree:
         total_science = self.science[3] + self.science[DOMAINS[category]]
         return total_science >= cost
 
+    def try_research(self, category, tech_type, level):
+        if self.has_prerequisites(category, tech_type, level):
+            if self.has_science(category, tech_type, level):
+                cost = MAIN_TECH_COSTS[level - 1]
+                if tech_type == 2:
+                    cost = MAIN_TECH_COSTS[level + 2]
+                domain_science_used = min(cost, self.science[DOMAINS[category]])
+                neutral_science_used = cost - domain_science_used
+                self.tech_level[category][tech_type] = level
+                self.science[DOMAINS[category]] -= domain_science_used
+                self.science[3] -= neutral_science_used
+                self.player.milestone_progress[1] += 2 * cost
+
     def get_building_cost(self):
         return BASE_BUILDING_COST - CONSTRUCTION_EFFECT * self.tech_level[0][0]
 
@@ -141,10 +155,10 @@ class TechnologyTree:
         return SCIENCE_MISSION_BASE + SCIENCE_MISSION_BONUS * self.tech_level[2][1]
 
     def get_trade_bonus(self):
-        return TRADE_BONUS * self.tech_level[3][0]
+        return TRADE_BONUS * self.tech_level[5][0]
 
     def get_visibility_range(self):
-        return VISION_RANGE_BASE + VISION_RANGE_BONUS * self.tech_level[3][1]
+        return VISION_RANGE_BASE + VISION_RANGE_BONUS * self.tech_level[5][1]
 
     def get_leverage_refund(self):
         return CHARISMA_FRACTION * self.tech_level[4][0]
@@ -153,10 +167,13 @@ class TechnologyTree:
         return SCHMOOZE_POWER * self.tech_level[4][1]
 
     def get_terraform_monetary_cost(self):
-        return TERRAFORM_MONEY_COST_BASE - TERRAFORM_MONEY_COST_BONUS * self.tech_level[5][0]
+        return TERRAFORM_MONEY_COST_BASE - TERRAFORM_MONEY_COST_BONUS * self.tech_level[3][0]
 
     def get_biomass_collection_rate(self):
-        return BIOMASS_COLLECTION_RATE_BASE + BIOMASS_COLLECTION_RATE_BONUS * self.tech_level[5][1]
+        return BIOMASS_COLLECTION_RATE_BASE * BIOMASS_COLLECTION_RATE_BONUS ** self.tech_level[3][1]
+
+    def get_biomass_refund(self):
+        return BIOMASS_REFUND * self.tech_level[3][1]
 
     def get_bonus_shields(self):
         if self.tech_level[0][2] >= 1:
@@ -188,12 +205,12 @@ class TechnologyTree:
         return self.tech_level[2][2] >= 2
 
     def get_minimum_price(self):
-        if self.tech_level[3][2] >= 1:
+        if self.tech_level[5][2] >= 1:
             return IMPROVED_MINIMUM_PRICE
         return BASE_MINIMUM_PRICE
 
     def has_hypercommerce(self):
-        return self.tech_level[3][2] >= 2
+        return self.tech_level[5][2] >= 2
 
     def has_embassy(self):
         return self.tech_level[4][2] >= 1
@@ -202,7 +219,7 @@ class TechnologyTree:
         return self.tech_level[4][2] >= 2
 
     def has_genetics(self):
-        return self.tech_level[5][2] >= 1
+        return self.tech_level[3][2] >= 1
 
     def has_cloning(self):
-        return self.tech_level[5][2] >= 2
+        return self.tech_level[3][2] >= 2

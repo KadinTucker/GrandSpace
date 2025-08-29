@@ -1,3 +1,5 @@
+import math
+
 import pygame
 
 import technology
@@ -70,15 +72,45 @@ def get_wildcard_label(category, level, unlocked):
                                      (base_surface.get_height()) * (l + 1) // (len(lines) + 1) - 8))
     return uiframe.get_panel_from_image(base_surface)
 
+def get_tech_label_location(tech_type, level):
+    if tech_type == 0:
+        return TECH_MARGIN, TECH_MARGIN * (level + 1) + TECH_HEIGHT * level
+    elif tech_type == 1:
+        return PANE_WIDTH - TECH_MARGIN - TECH_WIDTH, TECH_MARGIN * (level + 1) + TECH_HEIGHT * level
+    else:
+        return (PANE_WIDTH - TECH_WIDTH) // 2, (TECH_HEIGHT + TECH_MARGIN) * (2 * level + 2)
+
+def get_tech_type_from_x(rel_mouse_x):
+    if 0 <= rel_mouse_x - TECH_MARGIN <= TECH_WIDTH:
+        return 0
+    elif 0 <= rel_mouse_x - (PANE_WIDTH - TECH_MARGIN - TECH_WIDTH) <= TECH_WIDTH:
+        return 1
+    elif 0 <= rel_mouse_x - (PANE_WIDTH - TECH_WIDTH) // 2 <= TECH_WIDTH:
+        return 2
+    return -1
+
+def get_tech_level_main(rel_mouse_y):
+    level_candidate = (rel_mouse_y - TECH_MARGIN) / (TECH_MARGIN + TECH_HEIGHT)
+    if 0 <= rel_mouse_y - level_candidate * (TECH_MARGIN + TECH_HEIGHT) - TECH_MARGIN <= TECH_HEIGHT:
+        return math.floor(level_candidate) + 1
+    return -1
+
+def get_tech_level_wildcard(rel_mouse_y):
+    if 0 <= rel_mouse_y - (TECH_HEIGHT + TECH_MARGIN) * 2 <= WILDCARD_HEIGHT:
+        return 1
+    elif 0 <= rel_mouse_y - (TECH_HEIGHT + TECH_MARGIN) * 4 <= WILDCARD_HEIGHT:
+        return 2
+    return -1
+
 
 MAIN_TREE_IMGS = [
     [[[get_tech_label(i, j, k, unlocked) for k in range(5)] for j in range(2)] for i in range(6)]
-     for unlocked in [False, True]
+    for unlocked in [False, True]
 ]
 
 WILDCARD_IMGS = [
     [[get_wildcard_label(i, j, unlocked) for j in range(2)] for i in range(6)]
-     for unlocked in [False, True]
+    for unlocked in [False, True]
 ]
 
 class TechPane(uiframe.Draggable):
@@ -94,20 +126,19 @@ class TechPane(uiframe.Draggable):
         self.surface.fill(DOMAIN_COLORS[technology.DOMAINS[self.category]])
         for j in range(5):
             unlocked = int(self.technology.tech_level[self.category][0] > j)
-            print(len(MAIN_TREE_IMGS))
             self.surface.blit(MAIN_TREE_IMGS[unlocked][self.category][0][j],
-                              (TECH_MARGIN, TECH_MARGIN * (j + 1) + TECH_HEIGHT * j))
+                              get_tech_label_location(0, j))
         for j in range(5):
             unlocked = int(self.technology.tech_level[self.category][1] > j)
             self.surface.blit(MAIN_TREE_IMGS[unlocked][self.category][1][j],
-                              (PANE_WIDTH - TECH_MARGIN - TECH_WIDTH, TECH_MARGIN * (j + 1) + TECH_HEIGHT * j))
+                              get_tech_label_location(1, j))
         for j in range(2):
             unlocked = int(self.technology.tech_level[self.category][2] > j)
-            self.surface.blit(WILDCARD_IMGS[unlocked][self.category][j], ((PANE_WIDTH - TECH_WIDTH) // 2,
-                                                                (TECH_HEIGHT + TECH_MARGIN) * (2 * j + 2)))
+            self.surface.blit(WILDCARD_IMGS[unlocked][self.category][j], get_tech_label_location(2, j))
 
     def handle_event(self, event, mouse_pos):
         super().handle_event(event, mouse_pos)
+        rel_mouse = (mouse_pos[0] - self.x - self.container.x, mouse_pos[1] - self.y - self.container.y)
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_q:
                 self.category = (self.category - 1) % 6
@@ -115,4 +146,16 @@ class TechPane(uiframe.Draggable):
             elif event.key == pygame.K_e:
                 self.category = (self.category + 1) % 6
                 self.update()
-            print(self.category)
+        elif event.type == pygame.MOUSEBUTTONDOWN:
+            if event.button == pygame.BUTTON_LEFT:
+                tech_type_candidate = get_tech_type_from_x(rel_mouse[0])
+                if tech_type_candidate == 0 or tech_type_candidate == 1:
+                    level_candidate = get_tech_level_main(rel_mouse[1])
+                    if level_candidate != -1:
+                        self.technology.try_research(self.category, tech_type_candidate, level_candidate)
+                        self.update()
+                elif tech_type_candidate == 2:
+                    level_candidate = get_tech_level_wildcard(rel_mouse[1])
+                    if level_candidate != -1:
+                        self.technology.try_research(self.category, tech_type_candidate, level_candidate)
+                        self.update()

@@ -10,7 +10,7 @@ Upon achieving the fifth milestone in three different paths, a player wins the g
 
 [Discovery](../../rulebook/discovery.md):
 - +5 for collecting an *artifact*
-- +30 for discovering a new *technology*
+- +2 per science spent for discovering a new *technology*
 
 [Empire](../../rulebook/imperialism.md):
 - +25 for *colonising* a new *star system*
@@ -33,9 +33,9 @@ Upon achieving the fifth milestone in three different paths, a player wins the g
 
 [Warfare](../../rulebook/warfare.md):
 - +1 per mineral or biomass sample stolen
-- +1 per damage dealt to an enemy ship
-- +2 for receiving damage to a ship
+- +1 per damage dealt to an enemy ship or shield
+- +2 for receiving damage to a ship or shield
 - +5 for destroying an enemy ship
 - +5 for having a ship destroyed in combat
-- +25 for conquering an enemy *shield*
-- +50 for having an enemy conquer one of your shields
+- +10 per city conquered when conquering a system
+- +10 for plundering a city
