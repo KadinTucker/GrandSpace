@@ -1,12 +1,13 @@
 import random
 
-TRADE_MAX_DEMAND = 9
-TRADE_DEMAND_INCREASE_CHANCE = 5
-TRADE_DEMAND_DECREASE_CHANCE = 4
+TRADE_MAX_DEMAND = 5
+TRADE_DEMAND_INCREASE_CHANCE = 6
+TRADE_DEMAND_DECREASE_CHANCE = 3
 TRADE_DEMAND_RESET_CHANCE = 1
+TRADE_DEMAND_CITY_BOOST = 2
 TRADE_DEMAND_MODIFY_PER_MINUTE = 2.0  # in changes per minute
 
-TRADE_PRICE_PER_DEMAND = 50
+TRADE_PRICE_PER_DEMAND = 100
 
 class Demand:
 
@@ -33,6 +34,7 @@ class Demand:
         """
         Modify the mineral demand randomly, as happens periodically
         The chance for demand to increase increases with number of cities
+        (THE FOLLOWING TABLE IS DEPRECATED)
         The following table is for base increase change of 5, base decrease of 4, base reset of 1:
          - num cities | increase chance | decrease chance | reset chance
          -      1              50%              40%             10%
@@ -42,10 +44,20 @@ class Demand:
          -      5              83%              13%             3%          * values are rounded
          -      6              86%              11%             3%          * values are rounded
          -      7              87%              11%             2%          * values are rounded
+        (CURRENT TABLE)
+        The following table is for base increase change of 6, base decrease of 3, base reset of 1:
+         - num cities | increase chance | decrease chance | reset chance
+         -      1              60%              30%             10%
+         -      2              67%              25%             8%          * values are rounded
+         -      3              71%              21%             7%
+         -      4              75%              19%             6%
+         -      5              78%              17%             6%          * values are rounded
+         -      6              80%              15%             5%          * values are rounded
+         -      7              82%              13%             5%          * values are rounded
         """
-        roll = random.random() * (TRADE_DEMAND_INCREASE_CHANCE * self.colony.cities + TRADE_DEMAND_INCREASE_CHANCE
+        roll = random.random() * (TRADE_DEMAND_CITY_BOOST * (self.colony.cities - 1) + TRADE_DEMAND_INCREASE_CHANCE
                                   + TRADE_DEMAND_RESET_CHANCE)
-        if roll < TRADE_DEMAND_INCREASE_CHANCE * self.colony.cities:
+        if roll < TRADE_DEMAND_CITY_BOOST * (self.colony.cities - 1):
             self.demand_quantity += 1
         elif roll < TRADE_DEMAND_DECREASE_CHANCE + TRADE_DEMAND_INCREASE_CHANCE * self.colony.cities:
             self.demand_quantity -= 1

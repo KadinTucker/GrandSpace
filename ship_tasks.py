@@ -11,6 +11,7 @@ TERRAFORM_RATE = 3.0
 CARGO_TRANSFER_RATE = 240.0
 RESEARCH_RATE = 1.0
 MINERAL_RAID_RATE = 20.0
+RESEARCH_MONEY = 100
 
 def find_nearest_star(position, galaxy, blacklist=()):
     """
@@ -313,10 +314,11 @@ def act_schmooze(ship):
 
 def act_research(ship):
     if ship.star.ruler is not ship.ruler:
-        ship.ruler.game.diplomacy.gain_leverage(ship.ruler.id, ship.star.ruler.id, 5)
-        ship.ruler.milestone_progress[3] += 5
-    ship.ruler.money += 200
-    ship.ruler.milestone_progress[4] += 4
+        ship.ruler.game.diplomacy.gain_leverage(ship.ruler.id, ship.star.ruler.id,
+                                                ship.ruler.technology.get_research_leverage())
+        ship.ruler.milestone_progress[3] += ship.ruler.technology.get_research_leverage()
+    ship.ruler.money += RESEARCH_MONEY
+    ship.ruler.milestone_progress[4] += RESEARCH_MONEY // 50
     ship.ruler.technology.science[3] += ship.ruler.technology.get_mission_science()
     ship.star.ruler.technology.science[3] += ship.ruler.technology.get_mission_science()
 

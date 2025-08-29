@@ -8,23 +8,23 @@ Neutral science can be used to purchase all technologies, while the other three 
 
 Science can be earned in the following ways:
 
-| Source                         | Amount          | Remarks                                                                                                                                                                                                                      |
-|--------------------------------|-----------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Selling artifacts              | 2 Neutral       |                                                                                                                                                                                                                              |
-| Completing a *research* action | Varies; Neutral | Base of 1 science for completing the action, and 1 science for the colony ruler. Boosted by the [Research](../technology/research.md) technology.                                                                            |
-| Earning a milestone            | 20              | The type of science depends on the milestone: Warfare and Imperial milestones earn Power science; Discovery and Commercial milestones earn Prosperity science; and Diplomatic and Ecological milestones earn Harmony science |
-| Participating in Combat        | Varies; Power   | Get 1 Power science per damage dealt or taken.                                                                                                                                                                               |
-| Purchasing with Money          | X Prosperity    | Where X is 1 per 100 money spent                                                                                                                                                                                             |
-| Converting Biomass             | X Harmony       | Where X is 1 per 5 biomass value consumed                                                                                                                                                                                    |
+| Source                                                 | Amount          | Remarks                                                                                                                                                                                                                      |
+|--------------------------------------------------------|-----------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Selling artifacts                                      | 2 Neutral       |                                                                                                                                                                                                                              |
+| Completing a [research](../actions/research.md) action | Varies; Neutral | Base of 1 science for completing the action, and 1 science for the colony ruler. Boosted by the [Research](../technology/research.md) technology.                                                                            |
+| Earning a milestone                                    | 20              | The type of science depends on the milestone: Warfare and Imperial milestones earn Power science; Discovery and Commercial milestones earn Prosperity science; and Diplomatic and Ecological milestones earn Harmony science |
+| Participating in Combat                                | Varies; Power   | Get 1 Power science per damage dealt or taken.                                                                                                                                                                               |
+| Purchasing with Money                                  | X Prosperity    | Where X is 1 per 100 money spent                                                                                                                                                                                             |
+| Converting Biomass                                     | X Harmony       | Where X is 1 per 5 biomass value consumed                                                                                                                                                                                    |
 
 The following table summarises technology costs:
 
 | Tech Description        | Cost | Examples                               |
 |-------------------------|------|----------------------------------------|
-| Tier I Technology       | 10   | Construction I, Astrobiology I         |
+| Tier I Technology       | 20   | Construction I, Astrobiology I         |
 | Tier II Technology      | 30   | Geoengineering II, Charisma II         |
-| Tier III Technology     | 60   | Weapons III, Economics III             |
-| Tier IV Technology      | 100  | Spacefaring IV, Neuropsychology IV     |
-| Tier V Technology       | 150  | Shipbuilding V, Research V             |
+| Tier III Technology     | 50   | Weapons III, Economics III             |
+| Tier IV Technology      | 80   | Spacefaring IV, Neuropsychology IV     |
+| Tier V Technology       | 120  | Shipbuilding V, Research V             |
 | First Bonus Technology  | 100  | Nanotargeted Marketing, The Forcefield |
 | Second Bonus Technology | 150  | Mass Cloning, Singularity              |

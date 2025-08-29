@@ -19,8 +19,8 @@ WILDCARD_NAMES = [
     "Nanotargeted Marketing,Hypercommerce".split(","),
 ]
 
-MAIN_TECH_COSTS = [10, 30, 60, 100, 150]
-WILDCARD_TECT_COSTS = [100, 150]
+MAIN_TECH_COSTS = [20, 30, 50, 80, 120]
+WILDCARD_TECH_COSTS = [100, 150]
 
 BASE_BUILDING_COST = 500
 CONSTRUCTION_EFFECT = 50
@@ -54,11 +54,14 @@ SCIENCE_MISSION_BONUS = 1
 TRADE_BONUS = 10
 
 VISION_RANGE_BASE = 50
-VISION_RANGE_BONUS = 50
+VISION_RANGE_BONUS = 25
 
 CHARISMA_FRACTION = 0.05  # how much of spent leverage is refunded per level of charisma
 
-SCHMOOZE_POWER = 10.0  # in leverage points per minute
+SCHMOOZE_POWER = 5.0  # in leverage points per minute
+
+BASE_RESEARCH_LEVERAGE = 2
+RESEARCH_LEVERAGE_BOOST = 1
 
 TERRAFORM_MONEY_COST_BASE = 1500
 TERRAFORM_MONEY_COST_BONUS = 300
@@ -106,7 +109,7 @@ class TechnologyTree:
     def has_science(self, category, tech_type, level):
         cost = MAIN_TECH_COSTS[level - 1]
         if tech_type == 2:
-            cost = MAIN_TECH_COSTS[level + 2]
+            cost = WILDCARD_TECH_COSTS[level + 2]
         total_science = self.science[3] + self.science[DOMAINS[category]]
         return total_science >= cost
 
@@ -121,7 +124,7 @@ class TechnologyTree:
                 self.tech_level[category][tech_type] = level
                 self.science[DOMAINS[category]] -= domain_science_used
                 self.science[3] -= neutral_science_used
-                self.player.milestone_progress[1] += 2 * cost
+                self.player.milestone_progress[1] += cost
 
     def get_building_cost(self):
         return BASE_BUILDING_COST - CONSTRUCTION_EFFECT * self.tech_level[0][0]
@@ -165,6 +168,9 @@ class TechnologyTree:
 
     def get_schmooze_power(self):
         return SCHMOOZE_POWER * self.tech_level[4][1]
+
+    def get_research_leverage(self):
+        return BASE_RESEARCH_LEVERAGE + RESEARCH_LEVERAGE_BOOST * self.tech_level[4][1]
 
     def get_terraform_monetary_cost(self):
         return TERRAFORM_MONEY_COST_BASE - TERRAFORM_MONEY_COST_BONUS * self.tech_level[3][0]

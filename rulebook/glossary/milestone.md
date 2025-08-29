@@ -10,7 +10,7 @@ Upon achieving the fifth milestone in three different paths, a player wins the g
 
 [Discovery](../../rulebook/discovery.md):
 - +5 for collecting an *artifact*
-- +2 per science spent for discovering a new *technology*
+- +1 per science spent for discovering a new *technology*
 
 [Empire](../../rulebook/imperialism.md):
 - +25 for *colonising* a new *star system*
@@ -28,8 +28,9 @@ Upon achieving the fifth milestone in three different paths, a player wins the g
 - +25 per completed *terraform* action
 
 [Diplomacy](../../rulebook/diplomacy.md):
-- Complicated; points are in proportion to the amount more *leverage* gained over each rival than gained over you.
-- See its own rulebook entry.
+- +1 per leverage earned through Research and Schmoozing
+- +1 per total leverage earned minus leverage lost through hostile actions, relative to each other player's same achievement.
+  - See [this page](../reference/diplomacy_milestones.md).
 
 [Warfare](../../rulebook/warfare.md):
 - +1 per mineral or biomass sample stolen

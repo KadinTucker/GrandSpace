@@ -48,4 +48,4 @@ much more science. For details on the costs of each technology, see [here](../ru
 
 Collecting an artifact grants 5 Discovery milestone progress.
 
-Researching a technology grants 30 Discovery milestone points. 
+Each science point spent researching technologies grants 1 Discovery milestone progress. 
