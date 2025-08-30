@@ -46,6 +46,6 @@ much more science. For details on the costs of each technology, see [here](../ru
 
 ## [Milestones](../rulebook/glossary/milestone.md)
 
-Collecting an artifact grants 5 Discovery milestone progress.
+Collecting an artifact grants 5 Discovery milestone progress. Selling the artifact grants a further 5 Discovery milestone progress.
 
-Each science point spent researching technologies grants 1 Discovery milestone progress. 
+Every 5 science points spent researching technologies grants 1 Discovery milestone progress. 

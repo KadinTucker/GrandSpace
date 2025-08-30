@@ -1,4 +1,4 @@
-
+import trade
 
 CATEGORY_NAMES = "Empire Combat Discovery Ecology Diplomacy Commerce".split()
 DOMAINS = [0, 0, 1, 2, 2, 1]
@@ -30,6 +30,9 @@ CONSTRUCTION_EFFECT = 50
 
 TURRET_FIRERATE_PER_TIER = 10.0
 
+BASE_SHIELD_REPAIR_BOOST = 5.0
+SHIELD_REPAIR_BOOST_PER_TIER = 6.0
+
 SHIP_BASE_FIRERATE = 20.0
 SHIP_BONUS_FIRERATE = 10.0
 
@@ -56,8 +59,8 @@ SCIENCE_MISSION_BONUS = 1
 
 TRADE_BONUS = 10
 
-VISION_RANGE_BASE = 50
-VISION_RANGE_BONUS = 25
+VISION_RANGE_BASE = 10
+VISION_RANGE_BONUS = 20
 
 CHARISMA_FRACTION = 0.05  # how much of spent leverage is refunded per level of charisma
 
@@ -84,8 +87,7 @@ MAX_DEVELOPMENT_PER_CITY_BONUS = 1
 BASE_SCIENCE_RATE = 4
 IMPROVED_SCIENCE_RATE = 2
 
-BASE_MINIMUM_PRICE = 50
-IMPROVED_MINIMUM_PRICE = 100
+BASE_MINIMUM_PRICE = trade.TRADE_MINIMUM_PRICE
 
 BASE_CARGO_TRANSFER_RATE = 180.0
 # NOTE: maybe we want to make it more automatic than this.
@@ -156,6 +158,9 @@ class TechnologyTree:
 
     def get_turret_firerate(self):
         return TURRET_FIRERATE_PER_TIER * self.tech_level[0][1]
+
+    def get_repair_boost(self):
+        return BASE_SHIELD_REPAIR_BOOST + self.tech_level[0][1] * SHIELD_REPAIR_BOOST_PER_TIER
 
     def get_ship_firerate(self):
         return SHIP_BASE_FIRERATE + SHIP_BONUS_FIRERATE * self.tech_level[1][0]

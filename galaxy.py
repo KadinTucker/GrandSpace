@@ -20,7 +20,7 @@ ARTIFACT_TOTAL_PER_STAR = 0.5
 AVERAGE_PLANETS = 3
 LIFE_DENSITY = 0.5  # approximate fraction of stars one expects to have life (in reality, less if higher)
 
-GALAXY_ARTIFACTS_PER_MINUTE = 1.0  # how many artifacts (try to) spawn per minute in an empty galaxy
+GALAXY_ARTIFACTS_PER_MINUTE_PLAYER = 0.1  # how many artifacts (try to) spawn per minute per player in an empty galaxy
 
 def generate_galaxy_boxes(width, height, radius):
     stars = []
@@ -171,8 +171,9 @@ class Galaxy:
 
 class ArtifactSpawner:
 
-    def __init__(self, galaxy):
+    def __init__(self, galaxy, n_players):
         self.galaxy = galaxy
+        self.n_players = n_players
         self.progress = 0.0
 
     def try_place_artifact(self, time):
@@ -180,16 +181,10 @@ class ArtifactSpawner:
             star_chosen = random.randint(0, len(self.galaxy.stars) - 1)
             if (self.galaxy.stars[star_chosen].ruler is None and not self.galaxy.stars[star_chosen].has_artifact()
                     and random.random() < self.get_system_artifact_chance(star_chosen)):
-                random.choice(self.galaxy.stars[star_chosen].planets).artifacts += 1
-                self.progress = 0.0
+                random.choice(self.galaxy.stars[star_chosen].planets).artifacts = 1
+            self.progress = 0.0
         else:
-            self.progress += GALAXY_ARTIFACTS_PER_MINUTE * time
-
-    def has_star_artifact(self, star_id):
-        for p in self.galaxy.stars[star_id].planets:
-            if p.artifacts > 0:
-                return True
-        return False
+            self.progress += GALAXY_ARTIFACTS_PER_MINUTE_PLAYER * self.n_players * time
 
     def get_system_artifact_chance(self, star_id):
         return 0.5 + 0.1 * len(self.galaxy.stars[star_id].planets)

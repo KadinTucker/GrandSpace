@@ -14,5 +14,5 @@ The following kinds of access exist:
 |------------|----------------|--------------------------------------------------------------------------------------------------------------------------|
 | Biological | 25             | Allows the other player to collect [biomass](biomass.md) and [terraform](terraforming.md) in one's systems               |
 | Diplomatic | 20             | Allows the other player to do [research](../actions/research.md) and [schmooze](../actions/schmooze.md) in one's systems |
-| Commercial | 15             | Allows the other player to [sell minerals](../actions/sell_minerals.md) in one's systems                                 |
+| Commercial | 15             | Allows the other player to buy and [sell minerals](../actions/sell_minerals.md) in one's systems                         |
 | Passage    | 10             | Allows the other player's ships to enter and travel within the system without incurring a leverage penalty of 1          |

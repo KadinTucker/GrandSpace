@@ -5,7 +5,7 @@ HOSTILE_ACCESS_NAMES = "defence piracy battle siege".split()
 # The value, in leverage, of granting each type of access to another player,
 # or of requiring that access from another player
 # In the case of hostile access types, the value is the negative access required to take that action
-ACCESS_LEVERAGE_VALUE = [35, 10, 10, 10]
+ACCESS_LEVERAGE_VALUE = [25, 20, 15, 10]
 HOSTILE_LEVERAGE_THRESHOLD = [0, -10, -30, -50]
 # The default access level at the game start
 DEFAULT_ACCESS = [False, True, True, True]

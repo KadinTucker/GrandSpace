@@ -5,7 +5,7 @@ HOMEWORLD_PRODUCTION_FACTOR = 1  # amount by which production is divided for hom
 MAX_DEVELOPMENT_PER_CITY_PER_HABITABILITY = 1
 
 SHIELD_HEALTH = 20
-HEALING_PER_MINUTE = 3
+HEALING_PER_MINUTE = 5.0
 
 class Colony(object):
 
@@ -34,8 +34,8 @@ class Colony(object):
                 + self.cities * self.ruler.technology.get_bonus_development_per_city())
 
     def do_tick(self, time):
-        self.repair(time)
         self.produce(time)
+        self.repair(time)
         self.demand.progress_demand(time)
     
     def produce(self, time):

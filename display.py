@@ -7,6 +7,7 @@ import macros
 import player
 
 import font
+import trade
 import ui_diplomacy
 import ui_main
 import uiframe
@@ -101,7 +102,7 @@ def main():
     galaxy_obj.populate_life(game)
     galaxy_obj.populate_artifacts()
 
-    artifact_spawner = galaxy.ArtifactSpawner(galaxy_obj)
+    artifact_spawner = galaxy.ArtifactSpawner(galaxy_obj, len(game.players))
 
     active_player = game.players[0]
     active_player.selected_ship = active_player.ships[0]
@@ -115,6 +116,7 @@ def main():
             # for t in range(len(p.technology.tech_level)):
             #     p.technology.tech_level[t] = [5, 5, 2]
         ecology.BIOMASS_REGENERATION_PER_MINUTE = 15.0
+        trade.TRADE_DEMAND_MODIFY_PER_MINUTE = 20.0
         for i in range(1, len(game.players)):
             import random
             game.diplomacy.lose_leverage(0, i, random.randint(0, 100))

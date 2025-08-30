@@ -1,16 +1,16 @@
 # Science
 
-Science points are used by a player to unlock *technology*.
+Science points are used by a player to unlock [technology](technology.md).
 
 Science points come in four types: Neutral, Power, Prosperity, and Harmony.
 
-Neutral science can be used to purchase all technologies, while the other three types can only be used to purchase technologies that they apply to. See the *technology tree* for which technologies can be unlocked with which type of science.
+Neutral science can be used to purchase all technologies, while the other three types can only be used to purchase technologies that they apply to. See the [technology tree](../reference/technology_tree.md) for which technologies can be unlocked with which type of science.
 
 Science can be earned in the following ways:
 
 | Source                                                 | Amount          | Remarks                                                                                                                                                                                                                      |
 |--------------------------------------------------------|-----------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Selling artifacts                                      | 2 Neutral       |                                                                                                                                                                                                                              |
+| Selling artifacts                                      | 2 Neutral       |              Boosted by the [Research](../technology/research.md) technology.                                                                                                                                                                                                                |
 | Completing a [research](../actions/research.md) action | Varies; Neutral | Base of 1 science for completing the action, and 1 science for the colony ruler. Boosted by the [Research](../technology/research.md) technology.                                                                            |
 | Earning a milestone                                    | 20              | The type of science depends on the milestone: Warfare and Imperial milestones earn Power science; Discovery and Commercial milestones earn Prosperity science; and Diplomatic and Ecological milestones earn Harmony science |
 | Participating in Combat                                | Varies; Power   | Get 1 Power science per damage dealt or taken.                                                                                                                                                                               |

@@ -193,8 +193,7 @@ def cond_build_city(ship):
         else:
             ship.ruler.log_message("Cannot build city: not enough buildings")
     else:
-        ship.ruler.log_message("Cannot build city: must be at own colony with number of cities not higher than "
-                               "habitability")
+        ship.ruler.log_message("Cannot build city: number of cities cannot exceed habitability")
 
 def cond_develop_colony(ship):
     if has_space_for_development(ship):
@@ -208,19 +207,22 @@ def cond_develop_colony(ship):
 def cond_terraform(ship):
     if ship.planet is not None:
         if ship.planet.ecology.habitability < ecology.MAX_HABITABILITY:
-            if ship.cargo.biomass.selected != -1:
-                if has_enough_biomass_to_terraform(ship):
-                    if not planet_has_species(ship, ship.cargo.biomass.selected):
-                        if has_enough_money(ship, ship.ruler.technology.get_terraform_monetary_cost()):
-                            return True
+            if ship.star.ruler is None or has_active_access(ship, 0):
+                if ship.cargo.biomass.selected != -1:
+                    if has_enough_biomass_to_terraform(ship):
+                        if not planet_has_species(ship, ship.cargo.biomass.selected):
+                            if has_enough_money(ship, ship.ruler.technology.get_terraform_monetary_cost()):
+                                return True
+                            else:
+                                ship.ruler.log_message("Cannot terraform: not enough money")
                         else:
-                            ship.ruler.log_message("Cannot terraform: not enough money")
+                            ship.ruler.log_message("Cannot terraform: selected species already present")
                     else:
-                        ship.ruler.log_message("Cannot terraform: selected species already present")
+                        ship.ruler.log_message("Cannot terraform: not enough biomass value in cargo")
                 else:
-                    ship.ruler.log_message("Cannot terraform: not enough biomass value in cargo")
+                    ship.ruler.log_message("Cannot terraform: must select a species to add to planet")
             else:
-                ship.ruler.log_message("Cannot terraform: must select a species to add to planet")
+                ship.ruler.log_message("Cannot terraform: need ecological access to terraform")
         else:
             ship.ruler.log_message("Cannot terraform: planet already at maximum habitability")
     else:
