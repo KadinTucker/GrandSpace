@@ -167,7 +167,6 @@ class Galaxy:
                 planet.ecology.species[species[i]] = True
 
 
-
 class ArtifactSpawner:
 
     def __init__(self, galaxy, n_players):

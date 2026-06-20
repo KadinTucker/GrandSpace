@@ -30,6 +30,7 @@ ACTION_ICONS = [
     (macros.ACTION_COLLECT_BIOMASS, uiframe.get_panel_from_image(macros.ICONS["collect_biomass"])),
     (macros.ACTION_TERRAFORM, uiframe.get_panel_from_image(macros.ICONS["terraform"])),
     (macros.ACTION_COLLECT, uiframe.get_panel_from_image(macros.ICONS["collect_minerals"])),
+    (macros.ACTION_WHOLESALE, uiframe.get_panel_from_image(macros.ICONS["wholesale_minerals"])),
     (macros.ACTION_RESEARCH, uiframe.get_panel_from_image(macros.ICONS["science"])),
     (macros.ACTION_BIOLOGY, uiframe.get_panel_from_image(macros.ICONS["biology"])),
     (macros.ACTION_FUND_SCIENCE, uiframe.get_panel_from_image(macros.ICONS["fund_science"])),

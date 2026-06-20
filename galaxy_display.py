@@ -177,8 +177,9 @@ class GalaxyDisplay(drag_pane.DragPane):
                 if clicked_star is not None:
                     if clicked_star is self.player.selected_ship.star:
                         self.player.selected_ship.set_destination_star(None)
-                    elif (self.player.selected_ship.get_distance_to(clicked_star.location)
-                            < self.player.technology.get_ship_range()):
+                    # elif (self.player.selected_ship.get_distance_to(clicked_star.location)
+                    #         < self.player.technology.get_ship_range()):
+                    else:
                         self.player.selected_ship.set_destination_star(clicked_star)
             elif event.button == pygame.BUTTON_LEFT:
                 new_ship = self.find_player_ship(self.get_relative_pane_pos(mouse_pos))

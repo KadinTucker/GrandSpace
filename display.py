@@ -107,14 +107,14 @@ def main():
     active_player = game.players[0]
     active_player.selected_ship = active_player.ships[0]
 
-    timescale = 1.0
+    timescale = 2.0
 
     if len(sys.argv) > 1 and sys.argv[1] == 'cheat':
         print("*** CHEAT MODE ACTIVATED ***")
         for p in game.players:
-            p.money += 10000
-            # for t in range(len(p.technology.tech_level)):
-            #     p.technology.tech_level[t] = [5, 5, 2]
+            p.money += 100000
+            for t in range(len(p.technology.tech_level)):
+                p.technology.tech_level[t] = [5, 5, 2]
         ecology.BIOMASS_REGENERATION_PER_MINUTE = 15.0
         trade.TRADE_DEMAND_MODIFY_PER_MINUTE = 20.0
         for i in range(1, len(game.players)):

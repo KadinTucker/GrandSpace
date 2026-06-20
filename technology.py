@@ -49,7 +49,7 @@ SHIP_BONUS_FIRERATE = 10.0
 SHIP_BASE_HEALTH = 10
 SHIP_BONUS_HEALTH = 5
 
-SHIP_BONUS_SPEED_SHIPBUILDING = 1.05
+SHIP_BONUS_SPEED_SHIPBUILDING = 1.1
 SHIP_BASE_STAR_CHANGE = 60.0
 SHIP_BONUS_STAR_CHANGE = 1.2
 SHIP_BASE_PLANET_CHANGE = 120.0
@@ -57,6 +57,8 @@ SHIP_BONUS_PLANET_CHANGE = 1.2
 
 SHIP_BASE_SPEED = 700
 SHIP_BONUS_SPEED_SPACEFARING = 1.25
+
+SHIP_WARP_RATE_BASE = 3.5
 
 SHIP_BASE_RANGE = 85
 SHIP_BONUS_RANGE = 10
@@ -85,11 +87,11 @@ RESEARCH_LEVERAGE_BOOST = 1
 TERRAFORM_MONEY_COST_BASE = ecology.TERRAFORM_MONETARY_COST
 TERRAFORM_MONEY_COST_BONUS = 400
 TERRAFORM_RATE_BASE = 1.5
-TERRAFORM_RATE_BONUS = 1.5
+TERRAFORM_RATE_BONUS = 1.2
 TERRAFORM_SCIENCE_YIELD_BONUS = 5
 
 BIOMASS_COLLECTION_RATE_BASE = 3.0
-BIOMASS_COLLECTION_RATE_BONUS = 1.0
+BIOMASS_COLLECTION_RATE_BONUS = 1.2
 BIOMASS_REFUND = 0.1
 
 ORBITAL_SHIELD_BONUS = 1
@@ -272,6 +274,10 @@ class TechnologyTree:
     def has_lightspeed(self):
         return self.tech_level[2][2] >= 2
 
+    def get_warp_rate(self):
+        return (SHIP_WARP_RATE_BASE * SHIP_BONUS_SPEED_SPACEFARING ** self.tech_level[2][0]
+                * SHIP_BONUS_SPEED_SHIPBUILDING ** self.tech_level[1][1])
+
     def get_minimum_price(self):
         return BASE_MINIMUM_PRICE
 
@@ -281,7 +287,7 @@ class TechnologyTree:
     def get_raid_rate(self):
         return BASE_RAID_RATE + BONUS_RAID_RATE * int(self.tech_level[5][2] >= 1)
 
-    def has_hypercommerce(self):
+    def has_nanomarketing(self):
         return self.tech_level[5][2] >= 2
 
     def has_embassy(self):

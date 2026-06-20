@@ -2,6 +2,7 @@ import math
 
 import colony
 import ecology
+import trade
 
 FULL_HEAL_RATE = 3.0
 FUND_SCIENCE_COST = 500
@@ -15,8 +16,8 @@ RESEARCH_MONEY = 100
 MONEY_PER_ARTIFACT = 250
 
 SCIENCE_PER_BIOLOGY = 2
-MONEY_MILESTONE_VALUE = 500
-MINERAL_SALE_MILESTONE_MODIFIER = 5
+MONEY_MILESTONE_VALUE = 250
+MINERAL_SALE_MILESTONE_MODIFIER = 2
 
 def find_nearest_star(position, galaxy, blacklist=()):
     """
@@ -126,6 +127,19 @@ def cond_collect_minerals(ship):
             ship.ruler.log_message("Cannot collect minerals: no minerals to collect")
     else:
         ship.ruler.log_message("Cannot collect minerals: not at planet/planet not ruled by player")
+    return False
+
+def cond_wholesale_minerals(ship):
+    if not rules_planet(ship):
+        if has_active_access(ship, 2):
+            if ship.planet.colony.minerals >= 1:
+                return True
+            else:
+                ship.ruler.log_message("Cannot wholesale minerals: no minerals to collect")
+        else:
+            ship.ruler.log_message("Cannot wholesale minerals: no trade access in this system")
+    else:
+        ship.ruler.log_message("Cannot wholesale minerals: not at planet/planet not foreign")
     return False
 
 def cond_sell_minerals(ship, mineral_index):
@@ -281,7 +295,7 @@ def cond_raid_minerals(ship):
     return False
 
 def cond_raid_biomass(ship):
-    if ship.planet is not None:
+    if ship.planet is not None and ship.planet.colony is not None:
         if has_hostile_access_versus(ship, ship.planet.colony.ruler, 1):
             if ship.planet.ecology.biomass_level >= 1:
                 return True
@@ -334,6 +348,11 @@ def cond_consolidate(ship):
 def act_collect_minerals(ship):
     ship.cargo.minerals[ship.planet.mineral] += 1
     ship.planet.colony.minerals -= 1
+
+def act_wholesale_minerals(ship):
+    ship.cargo.minerals[ship.planet.mineral] += 1
+    ship.planet.colony.minerals -= 1
+    ship.planet.colony.ruler.money += trade.TRADE_WHOLESALE_PRICE
 
 def act_sell_minerals(ship, mineral_index):
     ship.cargo.minerals[mineral_index] -= 1
@@ -504,6 +523,8 @@ SHIP_ACTIONS = [
     (cond_collect_biomass, act_collect_biomass, lambda t: t.get_biomass_collection_rate(), lambda t: 0, False),
     (cond_terraform, act_terraform, lambda t: t.get_terraform_rate(), lambda t: t.get_terraform_monetary_cost(), False),
     (cond_collect_minerals, act_collect_minerals, lambda t: t.get_cargo_transfer_rate(), lambda t: 0, True),
+    (cond_wholesale_minerals, act_wholesale_minerals, lambda t: t.get_cargo_transfer_rate(),
+     lambda t: trade.TRADE_WHOLESALE_PRICE, True),
     (lambda ship: cond_sell_minerals(ship, 0), lambda ship: act_sell_minerals(ship, 0),
      lambda t: t.get_cargo_transfer_rate(), lambda t: 0, True),
     (lambda ship: cond_sell_minerals(ship, 1), lambda ship: act_sell_minerals(ship, 1),
@@ -518,7 +539,7 @@ SHIP_ACTIONS = [
      lambda t: t.get_cargo_transfer_rate(), lambda t: 0, True),
     (cond_sell_artifact, act_sell_artifact, lambda t: t.get_cargo_transfer_rate(), lambda t: 0, False),
     (cond_buy_building, act_buy_building, lambda t: t.get_cargo_transfer_rate(), lambda t: t.get_building_cost(), False),
-    (cond_biology, act_biology, lambda t: t.get_cargo_transfer_rate(), lambda t: lambda: 0, False),
+    (cond_biology, act_biology, lambda t: t.get_cargo_transfer_rate(), lambda t: 0, False),
     (cond_fund_science, act_fund_science, lambda t: 2400.0, lambda t: FUND_SCIENCE_COST, False),
     (cond_schmooze, act_schmooze, lambda t: t.get_schmooze_rate(), lambda t: 0, True),
     (cond_research, act_research, lambda t: RESEARCH_RATE, lambda t: 0, True),

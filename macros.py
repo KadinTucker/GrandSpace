@@ -11,23 +11,24 @@ ACTION_COLONISE = 4
 ACTION_COLLECT_BIOMASS = 5
 ACTION_TERRAFORM = 6
 ACTION_COLLECT = 7
-ACTION_SELL_RED = 8
-ACTION_SELL_GREEN = 9
-ACTION_SELL_BLUE = 10
-ACTION_SELL_CYAN = 11
-ACTION_SELL_MAGENTA = 12
-ACTION_SELL_YELLOW = 13
-ACTION_SELL_ARTIFACT = 14
-ACTION_BUY_BUILDING = 15
-ACTION_BIOLOGY = 16
-ACTION_FUND_SCIENCE = 17
-ACTION_SCHMOOZE = 18
-ACTION_RESEARCH = 19
-ACTION_RAID_MINERALS = 20
-ACTION_RAID_BIOMASS = 21
-ACTION_BESIEGE = 22
-ACTION_PLUNDER = 23
-ACTION_CONSOLIDATE = 24
+ACTION_WHOLESALE = 8
+ACTION_SELL_RED = 9
+ACTION_SELL_GREEN = 10
+ACTION_SELL_BLUE = 11
+ACTION_SELL_CYAN = 12
+ACTION_SELL_MAGENTA = 13
+ACTION_SELL_YELLOW = 14
+ACTION_SELL_ARTIFACT = 15
+ACTION_BUY_BUILDING = 16
+ACTION_BIOLOGY = 17
+ACTION_FUND_SCIENCE = 18
+ACTION_SCHMOOZE = 19
+ACTION_RESEARCH = 20
+ACTION_RAID_MINERALS = 21
+ACTION_RAID_BIOMASS = 22
+ACTION_BESIEGE = 23
+ACTION_PLUNDER = 24
+ACTION_CONSOLIDATE = 25
 
 # Key Controls
 ACTION_KEYCONTROL_DICT = {
@@ -54,9 +55,9 @@ ICONS = {
     "mineral_r": pygame.image.load("assets/minerals-red.png"),
     "mineral_g": pygame.image.load("assets/minerals-green.png"),
     "mineral_b": pygame.image.load("assets/minerals-blue.png"),
-    "mineral_c" : pygame.image.load("assets/minerals-cyan.png"),
+    "mineral_c": pygame.image.load("assets/minerals-cyan.png"),
     "mineral_m": pygame.image.load("assets/minerals-magenta.png"),
-    "mineral_y" : pygame.image.load("assets/minerals-yellow.png"),
+    "mineral_y": pygame.image.load("assets/minerals-yellow.png"),
     "sell_mineral_r": pygame.image.load("assets/icon-sell-red.png"),
     "sell_mineral_g": pygame.image.load("assets/icon-sell-green.png"),
     "sell_mineral_b": pygame.image.load("assets/icon-sell-blue.png"),
@@ -81,6 +82,7 @@ ICONS = {
     "collect_biomass": pygame.image.load("assets/icon-collect-biomass.png"),
     "terraform": pygame.image.load("assets/icon-terraform.png"),
     "collect_minerals": pygame.image.load("assets/icon-collect.png"),
+    "wholesale_minerals": pygame.image.load("assets/icon-wholesale.png"),
     "buy_building": pygame.image.load("assets/icon-buy-building.png"),
     "biology": pygame.image.load("assets/icon-biology.png"),
     "fund_science": pygame.image.load("assets/icon-fund-science.png"),

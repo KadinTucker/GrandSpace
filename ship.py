@@ -2,6 +2,7 @@ import math
 
 import ecology
 import ship_tasks
+import technology
 
 """
 Ship tasks:
@@ -160,13 +161,27 @@ class Ship:
             y_dist = self.destination[1] - self.location[1]
             distance_to_destination = math.hypot(x_dist, y_dist)
             if distance_to_destination != 0:
-                self.action_progress = 0.0  # If a ship moves in the galaxy, it does not do anything else
-                distance_travelled = time * self.ruler.technology.get_ship_speed()
-                if distance_travelled >= distance_to_destination:
-                    self.location = self.destination
+                # Warp
+                if (self.ruler.technology.has_lightspeed() and
+                        (distance_to_destination / self.ruler.technology.get_ship_speed()
+                         > 1 / self.ruler.technology.get_warp_rate()
+                         or distance_to_destination > self.ruler.technology.get_ship_range())):
+                    self.action_progress += time * (self.ruler.technology.get_warp_rate()
+                                                    - self.ruler.technology.get_ship_star_change_rate())
+                    if self.action_progress >= 1.0:
+                        self.location = self.destination
+                        self.action_progress = 0.0
+                elif distance_to_destination <= self.ruler.technology.get_ship_range():
+                    self.action_progress = 0.0  # If a ship moves in the galaxy, it does not do anything else
+                    distance_travelled = time * self.ruler.technology.get_ship_speed()
+                    if distance_travelled >= distance_to_destination:
+                        self.location = self.destination
+                    else:
+                        self.location = (self.location[0] + x_dist * distance_travelled / distance_to_destination,
+                                         self.location[1] + y_dist * distance_travelled / distance_to_destination)
                 else:
-                    self.location = (self.location[0] + x_dist * distance_travelled / distance_to_destination,
-                                     self.location[1] + y_dist * distance_travelled / distance_to_destination)
+                    # Reset action if not possible to move with warp or otherwise
+                    self.set_action(0)
 
     def move_between_system(self):
         """

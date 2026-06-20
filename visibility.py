@@ -37,9 +37,11 @@ class StarVisibility:
         # Search through the player's ruled stars, and set the closest N stars as visible.
         for star in self.player.ruled_stars:
             self.permanent_visible[star.id] = True
+            self.player.explored_stars[star.id] = True
             for j in self.galaxy.star_distance_hierarchy[star.id]:
                 if self.galaxy.star_distance_matrix[star.id][j] < visibility_range:
                     self.permanent_visible[j] = True
+                    self.player.explored_stars[j] = True
                 else:
                     break
 
@@ -64,13 +66,17 @@ class StarVisibility:
                             visible = True
                             break
             self.temporary_visible[i] = visible
+            if visible:
+                self.player.explored_stars[i] = True
         # Treat ships at stars as though this star is ruled
         for ship in self.player.ships:
             if ship.star is not None:
                 self.temporary_visible[ship.star.id] = True
+                self.player.explored_stars[ship.star.id] = True
                 for j in self.galaxy.star_distance_hierarchy[ship.star.id]:
                     if self.galaxy.star_distance_matrix[ship.star.id][j] < visibility_range:
                         self.temporary_visible[j] = True
+                        self.player.explored_stars[j] = True
                     else:
                         break
 

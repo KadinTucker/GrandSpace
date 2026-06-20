@@ -8,7 +8,7 @@ import technology
 import visibility
 
 STARTING_MONEY = 1500
-BASE_MILESTONE_COST = 100
+BASE_MILESTONE_COST = 50
 
 MILESTONE_NAMES = "Warfare Discovery Ecology Diplomacy Commerce Imperialism".split()
 MILESTONE_DOMAINS = [0, 1, 2, 2, 1, 0]
@@ -39,8 +39,8 @@ class Player:
         # self.colonies = []
         self.ruled_stars = []
         self.explored_stars = []
-        self.visibility = visibility.StarVisibility(self.game.galaxy, self)
         self.reset_explored_stars()
+        self.visibility = visibility.StarVisibility(self.game.galaxy, self)
         self.milestone_progress = [0, 0, 0, 0, 0, 0]
         self.achieved_milestones = [0, 0, 0, 0, 0, 0]
         self.technology = technology.TechnologyTree(self)
