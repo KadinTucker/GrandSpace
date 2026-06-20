@@ -154,7 +154,6 @@ class Galaxy:
                 game.players[p].homeworld.ecology.species[species[p * 3 + i]] = True
                 game.players[p].homeworld.ecology.habitability += 1
             game.players[p].homeworld.colony.cities = game.players[p].homeworld.colony.get_maximum_cities()
-            game.players[p].homeworld.colony.development = game.players[p].homeworld.colony.get_maximum_development()//2
         num_species = len(game.players) * 3
         for _ in range(int(len(self.stars) * LIFE_DENSITY / num_species)):
             for i in range(num_species):

@@ -1,15 +1,20 @@
 import random
 
 TRADE_MAX_DEMAND = 9
+
 TRADE_DEMAND_INCREASE_CHANCE = 65
 TRADE_DEMAND_DECREASE_CHANCE = 25
 TRADE_DEMAND_RESET_CHANCE = 5
 TRADE_DEMAND_CITY_BOOST = 5
-TRADE_DEMAND_MODIFY_PER_MINUTE = 4.0  # in changes per minute
 
-TRADE_PRICE_PER_DEMAND = 50
-TRADE_MINIMUM_PRICE = 50
-TRADE_WHOLESALE_PRICE = 100
+TRADE_DEMAND_BASE_PROB = 0.25
+TRADE_DEMAND_PROB_CITY_BOOST = 0.1
+
+TRADE_DEMAND_MODIFY_PER_MINUTE = 1.0  # in changes per minute
+
+TRADE_PRICE_PER_DEMAND = 25
+TRADE_MINIMUM_PRICE = 25
+TRADE_WHOLESALE_PRICE = 50
 
 class Demand:
 
@@ -66,7 +71,7 @@ class Demand:
         else:
             self.reset_demand()
 
-    def progress_demand(self, time):
+    def progress_demand_deprecated(self, time):
         self.change_progress += TRADE_DEMAND_MODIFY_PER_MINUTE * time
         if self.change_progress > 1.0:
             if self.mineral_demanded == -1:
@@ -77,8 +82,29 @@ class Demand:
                     self.reset_demand()
             self.change_progress -= 1.0
 
+    def progress_demand(self, time):
+        """
+        New demand progression function
+        Instead resets the demand to a random mineral color, with a higher probability of higher demand with more cities.
+        Expected demand:
+         - 1 city: 3.8
+         - 2 cities: 4.6
+         - 3 cities: 5.4
+         - 4+ cities: 6.2
+        """
+        self.change_progress += TRADE_DEMAND_MODIFY_PER_MINUTE * time
+        if self.change_progress > 1.0:
+            self.set_new_mineral_demand()
+            new_demand = 1
+            increase_chance = TRADE_DEMAND_BASE_PROB + TRADE_DEMAND_PROB_CITY_BOOST * min(self.colony.cities, 4)
+            for i in range(TRADE_MAX_DEMAND - 1):
+                if random.random() < increase_chance:
+                    new_demand += 1
+            self.demand_quantity = new_demand
+            self.change_progress -= 1.0
+
     def get_price(self, mineral, buyer):
         if self.mineral_demanded != -1 and mineral == self.mineral_demanded:
             return (buyer.technology.get_minimum_price() + (TRADE_PRICE_PER_DEMAND + buyer.technology.get_trade_bonus())
                     * self.demand_quantity)
-        return buyer.technology.get_minimum_price() + buyer.technology.get_trade_bonus()
+        return buyer.technology.get_minimum_price()

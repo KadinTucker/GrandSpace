@@ -1,7 +1,7 @@
 import trade
 
 MINERAL_PER_DEVELOPMENT_PER_MINUTE = 1
-HOMEWORLD_PRODUCTION_FACTOR = 1  # amount by which production is divided for homeworld
+HOMEWORLD_STARTING_DEVELOPMENT = 1
 MAX_DEVELOPMENT_PER_CITY_PER_HABITABILITY = 1
 
 SHIELD_HEALTH = 20
@@ -99,7 +99,7 @@ class Colony(object):
                                                                     5 * p.colony.cities)
                         self.conqueror.milestone_progress[0] += 10 * p.colony.cities
                         p.colony.ruler = self.conqueror
-                self.conqueror.milestone_progress[5] += 25
+                # self.conqueror.milestone_progress[5] += 25
                 self.planet.star.ruler.remove_ruled_star(self.planet.star)
                 self.conqueror.add_ruled_star(self.planet.star)
                 self.conqueror = None
@@ -112,7 +112,7 @@ class HomeworldColony(Colony):
     def __init__(self, player, planet):
         super(HomeworldColony, self).__init__(player, planet)
         self.cities = self.get_maximum_cities()
-        self.development = self.get_maximum_development() // 2
+        self.development = HOMEWORLD_STARTING_DEVELOPMENT
 
     def get_maximum_cities(self):
         return 1 + 2 * self.planet.get_habitability()
@@ -121,4 +121,4 @@ class HomeworldColony(Colony):
         return self.cities * (1 + self.ruler.technology.get_bonus_development_per_city())
     
     def get_production(self, time):
-        return super(HomeworldColony, self).get_production(time) / HOMEWORLD_PRODUCTION_FACTOR
+        return super(HomeworldColony, self).get_production(time)

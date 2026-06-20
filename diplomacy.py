@@ -6,9 +6,9 @@ HOSTILE_ACCESS_NAMES = "defence piracy battle siege".split()
 # or of requiring that access from another player
 # In the case of hostile access types, the value is the negative access required to take that action
 ACCESS_LEVERAGE_VALUE = [25, 20, 15, 10]
-HOSTILE_LEVERAGE_THRESHOLD = [0, -10, -30, -50]
+HOSTILE_LEVERAGE_THRESHOLD = [0, -10, -20, -30]
 # The default access level at the game start
-DEFAULT_ACCESS = [False, True, True, True]
+DEFAULT_ACCESS = [True, True, True, True]
 REFLEXIVE_ACCESS = [True, True, True, True]
 
 # The multiplier by which leverage is additionally lost for failing to repay a favour when asked
@@ -19,7 +19,7 @@ class Diplomacy:
     def __init__(self, game):
         self.game = game
         # Matrix is ordered by: [i][j] gives leverage of player i over player j.
-        self.leverage_matrix = [[0 for _ in range(len(game.players))] for _ in range(len(game.players))]
+        self.leverage_matrix = [[5 for _ in range(len(game.players))] for _ in range(len(game.players))]
         # Which active and hostile, respectively, access types each player grants to each other
         # ordered by: [i][j][x] True means player j has access x in player i systems
         self.active_access_matrix = [[[DEFAULT_ACCESS[i] for i in range(len(ACTIVE_ACCESS_NAMES))]

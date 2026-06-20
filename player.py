@@ -7,8 +7,8 @@ import ship_tasks
 import technology
 import visibility
 
-STARTING_MONEY = 1000
-BASE_MILESTONE_COST = 50
+STARTING_MONEY = 1500
+BASE_MILESTONE_COST = 100
 
 MILESTONE_NAMES = "Warfare Discovery Ecology Diplomacy Commerce Imperialism".split()
 MILESTONE_DOMAINS = [0, 1, 2, 2, 1, 0]
@@ -55,6 +55,9 @@ class Player:
                 self.technology.science[MILESTONE_DOMAINS[i]] += 20
                 self.log_message(f"Achieved milestone {self.achieved_milestones[i]} in {MILESTONE_NAMES[i]}!")
 
+    def get_empire_milestone_from_spread(self):
+        return max(0, 25 * (len(self.ruled_stars) - 1))
+
     def add_ship(self, planet):
         self.ships.append(ship.Ship(planet.star.location, self))
         self.ships[-1].destination_star = planet.star
@@ -81,6 +84,7 @@ class Player:
         star.ruler = self
         self.ruled_stars.append(star)
         self.visibility.reset_permanent_visibility()
+        self.milestone_progress[5] += 25
 
     def remove_ruled_star(self, star):
         if star in self.ruled_stars:
@@ -90,6 +94,7 @@ class Player:
                     s.connected_star = star.connected_star
             star.ruler = None
         self.visibility.reset_permanent_visibility()
+        self.milestone_progress[5] -= 25
 
     def reset_explored_stars(self):
         self.explored_stars = [False for _ in range(len(self.game.galaxy.stars))]
@@ -102,7 +107,7 @@ class PlayerController:
 
     def __init__(self, player):
         self.player = player
-        self.actions = [ship_tasks.Action(item[0], item[1], item[2](self.player.technology), item[3])
+        self.actions = [ship_tasks.Action(item[0], item[1], item[2], item[3], item[4])
                         for item in ship_tasks.SHIP_ACTIONS]
 
     def do_action(self, action_idx, ship_obj, time):

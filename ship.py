@@ -65,6 +65,7 @@ class Ship:
         self.task = 0
         self.action = 0
         self.action_progress = 0.0
+        self.reserved_money = 0
 
     def get_distance_to(self, position):
         x_dist = position[0] - self.location[0]
@@ -106,6 +107,19 @@ class Ship:
         if self.action != action_idx:
             self.action = action_idx
             self.action_progress = 0.0
+            self.ruler.money += self.reserved_money
+            self.reserved_money = 0
+
+    def try_reserve_money(self, amount):
+        if self.reserved_money >= amount:
+            self.ruler.money += self.reserved_money - amount
+            self.reserved_money = amount
+            return True
+        elif self.ruler.money >= amount - self.reserved_money:
+            self.ruler.money -= (amount - self.reserved_money)
+            self.reserved_money = amount
+            return True
+        return False
 
     def receive_damage(self, damage, dealing_player):
         self.health -= damage
@@ -319,7 +333,6 @@ class Ship:
         self.enter_star()
         self.enter_planet()
         self.health = 1
-        self.cargo.empty()
 
 class Cargo:
 

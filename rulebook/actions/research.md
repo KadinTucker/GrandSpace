@@ -7,3 +7,5 @@ A single Research action takes 1 minute, and earns 100 money, 1 Neutral science 
 The leverage gained from this action, if any, is boosted by 1 per level of Neuropsychology the player has. 
 
 A player may only perform the research action at a planet where they have Diplomacy access (this always includes their own). 
+
+The amount of science gained from the Research action is boosted by the Research technology. Whenever a player gains science from a Research action, whether from their own ship or another player's, they gain extra science equal to the level of Research technology. 

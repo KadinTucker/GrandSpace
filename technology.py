@@ -1,3 +1,5 @@
+import ecology
+import ship_tasks
 import trade
 
 CATEGORY_NAMES = "Empire Combat Discovery Ecology Diplomacy Commerce".split()
@@ -25,8 +27,16 @@ ROMAN_NUMERALS = "I II III IV V".split()
 MAIN_TECH_COSTS = [20, 30, 50, 80, 120]
 WILDCARD_TECH_COSTS = [100, 150]
 
-BASE_BUILDING_COST = 500
+BASE_BUILDING_COST = 750
 CONSTRUCTION_EFFECT = 50
+
+BASE_COLONISATION_RATE = ship_tasks.COLONY_PLACEMENT_RATE
+BASE_CITY_PLACE_RATE = ship_tasks.CITY_PLACEMENT_RATE
+BASE_DEVELOPMENT_RATE = ship_tasks.DEVELOPMENT_PLACEMENT_RATE
+
+BONUS_COLONISATION_RATE = 5.0
+BONUS_CITY_PLACE_RATE = 10.0
+BONUS_DEVELOPMENT_RATE = 10.0
 
 TURRET_FIRERATE_PER_TIER = 10.0
 
@@ -39,43 +49,47 @@ SHIP_BONUS_FIRERATE = 10.0
 SHIP_BASE_HEALTH = 10
 SHIP_BONUS_HEALTH = 5
 
-SHIP_BONUS_SPEED_SHIPBUILDING = 150
+SHIP_BONUS_SPEED_SHIPBUILDING = 1.05
 SHIP_BASE_STAR_CHANGE = 60.0
-SHIP_BONUS_STAR_CHANGE = 30.0
+SHIP_BONUS_STAR_CHANGE = 1.2
 SHIP_BASE_PLANET_CHANGE = 120.0
-SHIP_BONUS_PLANET_CHANGE = 60.0
+SHIP_BONUS_PLANET_CHANGE = 1.2
 
-SHIP_BASE_SPEED = 800
-SHIP_BONUS_SPEED_SPACEFARING = 400
+SHIP_BASE_SPEED = 700
+SHIP_BONUS_SPEED_SPACEFARING = 1.25
 
-SHIP_BASE_RANGE = 90
-SHIP_BONUS_RANGE = 30
+SHIP_BASE_RANGE = 85
+SHIP_BONUS_RANGE = 10
 
 SCIENCE_ARTIFACT_BASE = 2
-SCIENCE_ARTIFACT_BONUS = 2
+SCIENCE_ARTIFACT_BONUS = 1
 
 SCIENCE_MISSION_BASE = 1
 SCIENCE_MISSION_BONUS = 1
 
-TRADE_BONUS = 10
+TRADE_BONUS = 5
 
-VISION_RANGE_BASE = 10
-VISION_RANGE_BONUS = 20
+VISION_RANGE_BASE = 5
+VISION_RANGE_BONUS = 35
 
 CHARISMA_FRACTION = 0.05  # how much of spent leverage is refunded per level of charisma
 
-SCHMOOZE_POWER = 5.0  # in leverage points per minute
+SCHMOOZE_RATE = 12.0
+SCHMOOZE_RATE_BONUS = 3.0
+SCHMOOZE_POWER_BASE = 0
+SCHMOOZE_POWER_BONUS = 1
 
-BASE_RESEARCH_LEVERAGE = 2
+BASE_RESEARCH_LEVERAGE = 1
 RESEARCH_LEVERAGE_BOOST = 1
 
-TERRAFORM_MONEY_COST_BASE = 1500
-TERRAFORM_MONEY_COST_BONUS = 300
-TERRAFORM_RATE_BASE = 2.0
+TERRAFORM_MONEY_COST_BASE = ecology.TERRAFORM_MONETARY_COST
+TERRAFORM_MONEY_COST_BONUS = 400
+TERRAFORM_RATE_BASE = 1.5
 TERRAFORM_RATE_BONUS = 1.5
+TERRAFORM_SCIENCE_YIELD_BONUS = 5
 
-BIOMASS_COLLECTION_RATE_BASE = 5.0
-BIOMASS_COLLECTION_RATE_BONUS = 1.5
+BIOMASS_COLLECTION_RATE_BASE = 3.0
+BIOMASS_COLLECTION_RATE_BONUS = 1.0
 BIOMASS_REFUND = 0.1
 
 ORBITAL_SHIELD_BONUS = 1
@@ -156,6 +170,15 @@ class TechnologyTree:
     def get_building_cost(self):
         return BASE_BUILDING_COST - CONSTRUCTION_EFFECT * self.tech_level[0][0]
 
+    def get_colonise_rate(self):
+        return BASE_COLONISATION_RATE + BONUS_COLONISATION_RATE * self.tech_level[0][0]
+
+    def get_city_build_rate(self):
+        return BASE_CITY_PLACE_RATE + BONUS_CITY_PLACE_RATE * self.tech_level[0][0]
+
+    def get_development_rate(self):
+        return BASE_DEVELOPMENT_RATE + BONUS_DEVELOPMENT_RATE * self.tech_level[0][0]
+
     def get_turret_firerate(self):
         return TURRET_FIRERATE_PER_TIER * self.tech_level[0][1]
 
@@ -169,17 +192,17 @@ class TechnologyTree:
         return SHIP_BASE_HEALTH + SHIP_BONUS_HEALTH * self.tech_level[1][1]
 
     def get_ship_star_change_rate(self):
-        return SHIP_BASE_STAR_CHANGE + SHIP_BONUS_STAR_CHANGE * self.tech_level[1][1]
+        return SHIP_BASE_STAR_CHANGE * SHIP_BONUS_STAR_CHANGE ** self.tech_level[1][1]
 
     def get_ship_planet_change_rate(self):
-        return SHIP_BASE_PLANET_CHANGE + SHIP_BONUS_PLANET_CHANGE * self.tech_level[1][1]
+        return SHIP_BASE_PLANET_CHANGE * SHIP_BONUS_PLANET_CHANGE ** self.tech_level[1][1]
 
     def get_ship_speed(self):
-        return (SHIP_BASE_SPEED + SHIP_BONUS_SPEED_SPACEFARING * self.tech_level[2][0] + SHIP_BONUS_SPEED_SHIPBUILDING
-                * self.tech_level[1][1])
+        return (SHIP_BASE_SPEED * SHIP_BONUS_SPEED_SPACEFARING ** self.tech_level[2][0] * SHIP_BONUS_SPEED_SHIPBUILDING
+                ** self.tech_level[1][1])
 
     def get_ship_range(self):
-        return SHIP_BASE_RANGE + SHIP_BONUS_RANGE * self.tech_level[2][0]
+        return SHIP_BASE_RANGE + SHIP_BONUS_RANGE * (self.tech_level[2][0] + self.tech_level[5][1])
 
     def get_artifact_science(self):
         return SCIENCE_ARTIFACT_BASE + SCIENCE_ARTIFACT_BONUS * self.tech_level[2][1]
@@ -196,14 +219,20 @@ class TechnologyTree:
     def get_leverage_refund(self):
         return CHARISMA_FRACTION * self.tech_level[4][0]
 
+    def get_schmooze_rate(self):
+        return SCHMOOZE_RATE + SCHMOOZE_RATE_BONUS * self.tech_level[4][1]
+
     def get_schmooze_power(self):
-        return SCHMOOZE_POWER * self.tech_level[4][1]
+        return SCHMOOZE_POWER_BASE + SCHMOOZE_POWER_BONUS * self.tech_level[4][1]
 
     def get_research_leverage(self):
         return BASE_RESEARCH_LEVERAGE + RESEARCH_LEVERAGE_BOOST * self.tech_level[4][1]
 
     def get_terraform_monetary_cost(self):
         return TERRAFORM_MONEY_COST_BASE - TERRAFORM_MONEY_COST_BONUS * self.tech_level[3][0]
+
+    def get_terraform_science_bonus(self):
+        return TERRAFORM_SCIENCE_YIELD_BONUS * self.tech_level[3][0]
 
     def get_terraform_rate(self):
         return TERRAFORM_RATE_BASE * TERRAFORM_RATE_BONUS ** self.tech_level[3][0]

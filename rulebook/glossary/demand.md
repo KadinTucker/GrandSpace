@@ -10,27 +10,17 @@ The degree of demand determines how much higher the price for the demanded colou
 
 Degree ranges from 1 to 9, and each degree increases the price by 50. If the player has researched [Economics](../technology/economics.md), this amount increases by 5 per tier, up to a maximum of 75.
 
-Demand changes every 30 seconds, and either increases in degree, decreases in degree, or resets entirely. 
-If the degree of the demand is increased above 9 or decreased below 1, the demand will reset.
+The demand of a colony changes every minute. When the demand changes, a mineral colour is randomly chosen, excepting the colour of the colony's planet. 
+The degree of demand is also randomly chosen, with a tendency to larger values the more cities a colony has. 
 
-When demand is reset, no mineral colour is demanded. When the demand changes again, it will choose a new colour to demand, with a starting degree of 1.
+The degree of demand is chosen according to a binomial distribution. 8 trials are simulated, and the degree of demand equals 1 plus the number of successful trials. 
+The probability of success changes with the number of cities; exceeding 4 cities does not further increase the probability of success. 
 
-The chances of demand increasing, decreasing, and resetting depends on the number of cities the colony has. 
-In general, with more *cities*, the chance of demand increasing is higher, and the chances of demand decreasing or resetting are lower.
+The likelihood of each demand degree outcome is summarised in the following table:
 
-The odds of each possible change are summarised below:
-
-| Number of Cities | Increase Chance | Decrease Chance | Reset Chance |
-|------------------|-----------------|-----------------|--------------|
-| 1                | 50%             | 40%             | 10%          |
-| 2                | 67%             | 26%             | 7%           |
-| 3                | 75%             | 20%             | 5%           |
-| 7**              | 87%             | 11%             | 2%           |
-
-** The demand values for 4-6 cities are not shown due to these numbers of cities occurring very rarely in the game. The formula for the chances is, for N cities:
-  * Increase: (5 * N + 5) / (5 * N + 10);
-  * Decrease: 4 / (5 * N + 10)
-  * Reset: 1 / (5 * N + 10)
-
-In general, colonies with higher numbers of cities have more stable demand that is more likely to higher and more likely to keep the same colour.
-Colonies with fewer cities are likely to have low degree demands and change colour often.
+| Number of Cities | Probability of Trial Success | Expected Demand | Demand 1 | Demand 2 | Demand 3 | Demand 4 | Demand 5 | Demand 6 | Demand 7 | Demand 8 | Demand 9 | 
+|------------------|------------------------------|-----------------|----------|----------|----------|----------|----------|----------|----------|----------|----------|
+| 1                | 35%                          | 3.8             | 3%       | 14%      | 26%      | 28%      | 19%      | 8%       | 2%       | 0%       | 0%       |
+| 2                | 45%                          | 4.6             | 1%       | 5%       | 16%      | 26%      | 26%      | 17%      | 7%       | 2%       | 0%       |
+| 3                | 55%                          | 5.4             | 0%       | 2%       | 7%       | 17%      | 26%      | 26%      | 16%      | 5%       | 1%       |
+| ≥4               | 65%                          | 6.2             | 0%       | 0%       | 2%       | 8%       | 19%      | 28%      | 26%      | 14%      | 3%       |

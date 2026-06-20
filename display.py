@@ -95,7 +95,7 @@ def generate_ui_elements(player_obj):
 def main():
 
     galaxy_obj = galaxy.Galaxy(galaxy.generate_galaxy_boxes(GALAXY_WIDTH, GALAXY_HEIGHT, GALAXY_ZONE_RADIUS))
-    game = player.Game(5, galaxy_obj)
+    game = player.Game(8, galaxy_obj)
     galaxy_obj.generate_star_distance_matrix()
     galaxy_obj.generate_star_distance_hierarchy()
     galaxy_obj.populate_homeworlds(game)
@@ -107,7 +107,7 @@ def main():
     active_player = game.players[0]
     active_player.selected_ship = active_player.ships[0]
 
-    timescale = 1.5
+    timescale = 1.0
 
     if len(sys.argv) > 1 and sys.argv[1] == 'cheat':
         print("*** CHEAT MODE ACTIVATED ***")

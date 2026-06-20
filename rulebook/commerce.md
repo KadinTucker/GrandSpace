@@ -18,10 +18,9 @@ icon means that there is no particular mineral demanded.
 Minerals can be sold for a base value of 50 [money](../rulebook/glossary/money.md) each. Minerals of the demanded colour sell for between 100 and 500, 
 in increments of 50, depending on of the degree of the demand.
 
-A colony's demand changes every 30 seconds, and will either increase, decrease, or reset. An increase in demand means 
-the same mineral color is demanded, but the price increases by 50. A decrease in demand is the same, except that the 
-price decreases by 50. Lastly, resetting demand means the colony will have no mineral colour demanded, until the demand 
-changes again.
+A colony's demand changes every minute. When changing demand, a colony will choose a random mineral colour, excepting the 
+mineral colour of the colony's planet. The degree of the demand is randomly chosen, with a tendency toward higher demand in
+higher level colonies. For details, see [demand](../rulebook/glossary/demand.md).
 
 In the case that the price would decrease to 50 or increase above 500, the demand is also reset. 
 
