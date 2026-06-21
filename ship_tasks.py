@@ -274,7 +274,10 @@ def cond_schmooze(ship):
 def cond_research(ship):
     if ship.planet is not None and ship.planet.colony is not None:
         if has_active_access(ship, 1):
-            return True
+            if ship.planet.colony.research >= 1.0:
+                return True
+            else:
+                ship.ruler.log_message("Cannot research: mission not yet available at colony (check back soon)")
         else:
             ship.ruler.log_message("Cannot research: need diplomatic access")
     else:
@@ -434,6 +437,7 @@ def act_research(ship):
     ship.ruler.milestone_progress[4] += RESEARCH_MONEY / MONEY_MILESTONE_VALUE
     ship.ruler.technology.science[3] += ship.ruler.technology.get_mission_science()
     ship.star.ruler.technology.science[3] += ship.star.ruler.technology.get_mission_science()
+    ship.planet.colony.research = 0.0
 
 def act_raid_minerals(ship):
     act_collect_minerals(ship)
@@ -542,7 +546,7 @@ SHIP_ACTIONS = [
     (cond_biology, act_biology, lambda t: t.get_cargo_transfer_rate(), lambda t: 0, False),
     (cond_fund_science, act_fund_science, lambda t: 2400.0, lambda t: FUND_SCIENCE_COST, False),
     (cond_schmooze, act_schmooze, lambda t: t.get_schmooze_rate(), lambda t: 0, True),
-    (cond_research, act_research, lambda t: RESEARCH_RATE, lambda t: 0, True),
+    (cond_research, act_research, lambda t: RESEARCH_RATE, lambda t: 0, False),
     (cond_raid_minerals, act_raid_minerals, lambda t: t.get_raid_rate(), lambda t: 0, True),
     (cond_raid_biomass, act_raid_biomass, lambda t: t.get_biomass_collection_rate(), lambda t: 0, False),
     (cond_besiege, act_besiege, lambda t: t.get_ship_firerate(), lambda t: 0, True),

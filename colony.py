@@ -6,6 +6,7 @@ MAX_DEVELOPMENT_PER_CITY_PER_HABITABILITY = 1
 
 SHIELD_HEALTH = 20
 HEALING_PER_MINUTE = 5.0
+RESEARCH_REGEN_PER_MINUTE_CITY = 0.5
 
 class Colony(object):
 
@@ -19,6 +20,7 @@ class Colony(object):
         self.conqueror = None
         self.conquered_shields = 0
         self.damage = 0
+        self.research = 0.0
 
     def get_maximum_cities(self):
         return max(1, self.planet.get_habitability())
@@ -36,6 +38,7 @@ class Colony(object):
     def do_tick(self, time):
         self.produce(time)
         self.repair(time)
+        self.research = min(1.0, self.research + time * min(4, self.cities) * RESEARCH_REGEN_PER_MINUTE_CITY)
         self.demand.progress_demand(time)
     
     def produce(self, time):

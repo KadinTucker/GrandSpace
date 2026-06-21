@@ -168,15 +168,20 @@ def main():
                 # TEMP: spawn ship
                 elif event.key == pygame.K_s:
                     active_player.add_ship(active_player.homeworld)
-                # Centre view to selected ship
+                # Permanently centre view to selected ship
                 elif event.key == pygame.K_LSHIFT or event.key == pygame.K_RSHIFT:
                     center_view = not center_view
                 elif event.key == pygame.K_ESCAPE:
                     center_view = False
-
+                elif event.key == pygame.K_SPACE:
+                    center_view = True
                 # Ship action hotkeys
                 if event.key in macros.ACTION_KEYCONTROL_DICT.keys():
                     active_player.selected_ship.set_action(macros.ACTION_KEYCONTROL_DICT[event.key])
+            elif event.type == pygame.KEYUP:
+                if event.key == pygame.K_SPACE:
+                    center_view = False
+
 
         if active_display.next_pane_id != -1:
             next_id = active_display.next_pane_id

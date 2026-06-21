@@ -53,6 +53,8 @@ COLONY_DEMAND_PROGRESS_WIDTH = 3
 COLONY_DEMAND_PROGRESS_HEIGHT = 16
 COLONY_CITY_ICON_IMG = uiframe.get_panel_from_image(pygame.image.load("assets/icon-city.png"))
 COLONY_DEVELOPMENT_ICON_IMG = uiframe.get_panel_from_image(pygame.image.load("assets/icon-development.png"))
+COLONY_RESEARCH_ICON_IMG = pygame.image.load("assets/icon-research-gold.png")
+COLONY_MISSION_ICON_IMG = uiframe.get_panel_from_image(COLONY_RESEARCH_ICON_IMG)
 COLOR_DEMAND_PROGRESS = (180, 180, 180)
 
 PRODUCTION_SPACING = 8
@@ -188,6 +190,17 @@ class ColonySnapshot(snapshot.Snapshot):
             return
         self.surface.blit(COLONY_CITY_ICON_IMG, (COLONY_MARGIN, 0))
         self.surface.blit(COLONY_DEVELOPMENT_ICON_IMG, (COLONY_MARGIN + COLONY_ICON_WIDTH + COLONY_SUMMARY_SPACING, 0))
+        # Research image
+        if self.colony.research < 1:
+            self.surface.blit(COLONY_RESEARCH_ICON_IMG,
+                              (COLONY_MARGIN + 2 * (COLONY_ICON_WIDTH + COLONY_SUMMARY_SPACING) + 3,
+                               COLONY_RESEARCH_ICON_IMG.get_height() * (1 - self.colony.research) + 3),
+                              pygame.Rect(0, COLONY_RESEARCH_ICON_IMG.get_height() * (1 - self.colony.research),
+                                          COLONY_RESEARCH_ICON_IMG.get_width(),
+                                          COLONY_RESEARCH_ICON_IMG.get_height() * self.colony.research))
+        else:
+            self.surface.blit(COLONY_MISSION_ICON_IMG,
+                              (COLONY_MARGIN + 2 * (COLONY_ICON_WIDTH + COLONY_SUMMARY_SPACING), 0))
         city_img = font.get_text_surface(str(int(self.colony.cities)))
         self.surface.blit(city_img, (COLONY_MARGIN + (COLONY_ICON_WIDTH - TEXT_WIDTH) // 2, COLONY_ICON_HEIGHT))
         development_img = font.get_text_surface(str(int(self.colony.development)) + "/"
