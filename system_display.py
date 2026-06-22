@@ -200,6 +200,8 @@ class SystemDisplay(pane.Pane):
                 new_ship = self.find_ship(self.get_relative_pane_pos(mouse_pos))
                 if new_ship is not None and new_ship.ruler is self.player:
                     self.player.selected_ship = new_ship
+            elif event.button == pygame.BUTTON_WHEELDOWN:
+                self.next_pane_id = 0
         elif event.type == pygame.KEYDOWN:
             if event.key == pygame.K_ESCAPE:
                 self.next_pane_id = 0

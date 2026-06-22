@@ -29,6 +29,7 @@ ACTION_RAID_BIOMASS = 22
 ACTION_BESIEGE = 23
 ACTION_PLUNDER = 24
 ACTION_CONSOLIDATE = 25
+ACTION_COLLECT_ARTIFACT = 26
 
 # Key Controls
 ACTION_KEYCONTROL_DICT = {
@@ -92,5 +93,6 @@ ICONS = {
     "besiege": pygame.image.load("assets/icon-besiege.png"),
     "plunder": pygame.image.load("assets/icon-loot.png"),
     "repair": pygame.image.load("assets/icon-repair.png"),
+    "collect_artifact": pygame.image.load("assets/icon-collect-artifact.png"),
 }
 

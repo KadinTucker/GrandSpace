@@ -278,11 +278,11 @@ class Ship:
     def explore_location(self):
         if self.star is not None:
             self.ruler.explored_stars[self.star.id] = True
-        if self.planet is not None:
-            if self.planet.artifacts > 0:
-                self.ruler.milestone_progress[1] += 5
-                self.cargo.artifacts += 1
-                self.planet.artifacts -= 1
+        # if self.planet is not None:
+        #     if self.planet.artifacts > 0:
+        #         self.ruler.milestone_progress[1] += 5
+        #         self.cargo.artifacts += 1
+        #         self.planet.artifacts -= 1
 
     def enter_star(self):
         """

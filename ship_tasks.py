@@ -10,6 +10,7 @@ COLONY_PLACEMENT_RATE = 10.0
 CITY_PLACEMENT_RATE = 20.0
 DEVELOPMENT_PLACEMENT_RATE = 20.0
 CARGO_TRANSFER_RATE = 180.0
+ARTIFACT_PICKUP_RATE = 20.0
 RESEARCH_RATE = 4.0
 MINERAL_RAID_RATE = 20.0
 RESEARCH_MONEY = 100
@@ -347,6 +348,15 @@ def cond_consolidate(ship):
         ship.ruler.log_message("Cannot consolidate cargo: ship not at planet")
     return False
 
+def cond_collect_artifact(ship):
+    if ship.planet is not None:
+        if ship.planet.artifacts >= 1:
+            return True
+        else:
+            ship.ruler.log_message("Cannot collect artifacts: no artifacts to take")
+    else:
+        ship.ruler.log_message("Cannot collect artifacts: ship not at planet")
+    return False
 
 def act_collect_minerals(ship):
     ship.cargo.minerals[ship.planet.mineral] += 1
@@ -465,6 +475,10 @@ def act_consolidate(ship):
         if s is not ship and s.ruler is ship.ruler:
             ship.cargo.take_from(s.cargo)
 
+def act_collect_artifact(ship):
+    ship.cargo.artifacts += 1
+    ship.planet.artifacts -= 1
+
 def task_null(ship, game):
     pass
 
@@ -552,4 +566,5 @@ SHIP_ACTIONS = [
     (cond_besiege, act_besiege, lambda t: t.get_ship_firerate(), lambda t: 0, True),
     (cond_plunder, act_plunder, lambda t: t.get_raid_rate(), lambda t: 0, False),
     (cond_consolidate, act_consolidate, lambda t: t.get_cargo_transfer_rate(), lambda t: 0, False),
+    (cond_collect_artifact, act_collect_artifact, lambda t: ARTIFACT_PICKUP_RATE, lambda t: 0, False),
 ]

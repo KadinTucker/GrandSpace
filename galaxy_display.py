@@ -190,21 +190,15 @@ class GalaxyDisplay(drag_pane.DragPane):
                     if star is not None and self.player.explored_stars[star.id]:
                         self.next_pane_id = system_display.get_pane_id(star.id)
                     self.num_clicks = 0
+            elif event.button == pygame.BUTTON_WHEELUP:
+                if self.player.selected_ship.star is not None:
+                    if self.view_scale >= drag_pane.ZOOM_MAX:
+                        self.next_pane_id = system_display.get_pane_id(self.player.selected_ship.star.id)
         elif event.type == pygame.KEYDOWN:
             if event.key == pygame.K_PLUS:
                 self.set_scale(min(drag_pane.ZOOM_MAX, self.view_scale + drag_pane.ZOOM_RATE), mouse_pos)
             elif event.key == pygame.K_MINUS:
                 self.set_scale(max(drag_pane.ZOOM_MIN, self.view_scale - drag_pane.ZOOM_RATE), mouse_pos)
-            # if event.key == pygame.K_LEFT:
-            #     self.view_corner = (self.view_corner[0] + SCROLL_SPEED * self.dimensions[0] / self.view_scale,
-            #                         self.view_corner[1])
-            # elif event.key == pygame.K_RIGHT:
-            #     self.view_corner = (self.view_corner[0] - SCROLL_SPEED * self.dimensions[0] / self.view_scale,
-            #                         self.view_corner[1])
-            # elif event.key == pygame.K_UP:
-            #     self.view_corner = (self.view_corner[0],
-            #                         self.view_corner[1] + SCROLL_SPEED * self.dimensions[1] / self.view_scale)
-            # elif event.key == pygame.K_DOWN:
-            #     self.view_corner = (self.view_corner[0],
-            #                         self.view_corner[1] - SCROLL_SPEED * self.dimensions[1] / self.view_scale)
-
+            elif event.key == pygame.K_RETURN:
+                if self.player.selected_ship.star is not None:
+                    self.next_pane_id = system_display.get_pane_id(self.player.selected_ship.star.id)

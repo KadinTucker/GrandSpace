@@ -21,6 +21,7 @@ MILESTONE_WIDTH = 20
 DIPLOMACY_TEXT_OFFSET = 34
 
 ACTION_ICONS = [
+    (macros.ACTION_COLLECT_ARTIFACT, uiframe.get_panel_from_image(macros.ICONS["collect_artifact"])),
     (macros.ACTION_SELL_ARTIFACT, uiframe.get_panel_from_image(macros.ICONS["sell_artifact"])),
     (macros.ACTION_CONSOLIDATE, uiframe.get_panel_from_image(macros.ICONS["trade"])),
     (macros.ACTION_BUY_BUILDING, uiframe.get_panel_from_image(macros.ICONS["buy_building"])),
@@ -303,19 +304,20 @@ class BiomassPane(uiframe.UIElement):
     def handle_event(self, event, mouse_pos):
         if event.type == pygame.MOUSEBUTTONDOWN:
             if event.button == pygame.BUTTON_LEFT:
-                letter = self.get_biomass_letter_from_x(mouse_pos[0] - self.container.x - self.x) + 1
-                if 0 <= letter < 26:
-                    biomasses = 0
-                    for i in range(len(self.player.selected_ship.cargo.biomass.quantities)):
-                        if self.player.selected_ship.cargo.biomass.quantities[i] > 0:
-                            biomasses += 1
-                            if biomasses == letter:
-                                if i == self.player.selected_ship.cargo.biomass.selected:
-                                    self.player.selected_ship.cargo.biomass.select(-1)
-                                else:
-                                    self.player.selected_ship.cargo.biomass.select(i)
-                                self.update()
-                                break
+                if 0 <= mouse_pos[1] - self.container.y - self.y <= self.height:
+                    letter = self.get_biomass_letter_from_x(mouse_pos[0] - self.container.x - self.x) + 1
+                    if 0 <= letter < 26:
+                        biomasses = 0
+                        for i in range(len(self.player.selected_ship.cargo.biomass.quantities)):
+                            if self.player.selected_ship.cargo.biomass.quantities[i] > 0:
+                                biomasses += 1
+                                if biomasses == letter:
+                                    if i == self.player.selected_ship.cargo.biomass.selected:
+                                        self.player.selected_ship.cargo.biomass.select(-1)
+                                    else:
+                                        self.player.selected_ship.cargo.biomass.select(i)
+                                    self.update()
+                                    break
 
 class CargoPane(uiframe.UIElement):
 
