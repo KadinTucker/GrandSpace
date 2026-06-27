@@ -16,9 +16,10 @@ MINERAL_RAID_RATE = 20.0
 RESEARCH_MONEY = 100
 MONEY_PER_ARTIFACT = 250
 
-SCIENCE_PER_BIOLOGY = 2
+SCIENCE_PER_BIOLOGY = 1
 MONEY_MILESTONE_VALUE = 250
 MINERAL_SALE_MILESTONE_MODIFIER = 2
+LEVERAGE_PER_TERRAFORM = 20
 
 def find_nearest_star(position, galaxy, blacklist=()):
     """
@@ -131,7 +132,7 @@ def cond_collect_minerals(ship):
     return False
 
 def cond_wholesale_minerals(ship):
-    if not rules_planet(ship):
+    if is_at_colony(ship) and not rules_planet(ship):
         if has_active_access(ship, 2):
             if ship.planet.colony.minerals >= 1:
                 return True
@@ -140,7 +141,7 @@ def cond_wholesale_minerals(ship):
         else:
             ship.ruler.log_message("Cannot wholesale minerals: no trade access in this system")
     else:
-        ship.ruler.log_message("Cannot wholesale minerals: not at planet/planet not foreign")
+        ship.ruler.log_message("Cannot wholesale minerals: not at colony/colony not foreign")
     return False
 
 def cond_sell_minerals(ship, mineral_index):
@@ -423,6 +424,9 @@ def act_terraform(ship):
     ship.ruler.technology.science[2] += (spent - cost) * SCIENCE_PER_BIOLOGY
     ship.ruler.technology.science[2] += (ship.planet.ecology.habitability
                                          * ship.ruler.technology.get_terraform_science_bonus())
+    if ship.star.ruler is not None and ship.star.ruler is not ship.ruler:
+        ship.ruler.game.diplomacy.gain_leverage(ship.ruler.id, ship.star.ruler.id, LEVERAGE_PER_TERRAFORM)
+        ship.ruler.milestone_progress[3] += LEVERAGE_PER_TERRAFORM
 
 def act_biology(ship):
     spent = ship.cargo.biomass.empty()

@@ -122,7 +122,8 @@ class GalaxyDisplay(drag_pane.DragPane):
         self.draw_vision(self.layers[0])
         for p in self.game.players:
             for s in p.ruled_stars:
-                if self.player.explored_stars[s.id] and s.connected_star is not None:
+                if (self.player.explored_stars[s.id] and s.connected_star is not None
+                        and self.player.explored_stars[s.connected_star.id]):
                     pygame.draw.line(self.layers[0], p.color, self.project_coordinate(s.location),
                                      self.project_coordinate(s.connected_star.location),
                                      int(self.view_scale * EMPIRE_CONTROL_LINE_WIDTH))

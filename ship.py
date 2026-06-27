@@ -50,6 +50,10 @@ STAR_ENTRY_DISTANCE = 1
 # TODO: make these tasks (or above constants) vary with technology
 TASKS = [ship_tasks.task_null, ship_tasks.task_explore_superficial]
 
+CARGO_MINERAL_MAX = 20
+CARGO_BUILDING_MAX = 3
+CARGO_ARTIFACT_MAX = 5
+
 class Ship:
 
     def __init__(self, location, ruler):
@@ -125,7 +129,7 @@ class Ship:
     def receive_damage(self, damage, dealing_player):
         self.health -= damage
         self.ruler.technology.science[0] += 1
-        self.ruler.milestone_progress[0] += 2
+        self.ruler.milestone_progress[0] += 1
         if self.health <= 0:
             if (self.planet is not None and self.planet.colony is not None
                     and self.planet.colony is self.ruler.homeworld):
@@ -359,6 +363,7 @@ class Cargo:
         self.buildings = 0
 
     def take_from(self, other):
+        # TODO: make consolidation limited by cargo capacity
         for i in range(6):
             self.minerals[i] += other.minerals[i]
         self.artifacts += other.artifacts
@@ -371,6 +376,15 @@ class Cargo:
         self.artifacts = 0
         self.biomass.empty()
         self.buildings = 0
+
+    def is_full_minerals(self):
+        return sum(self.minerals) >= CARGO_MINERAL_MAX
+
+    def is_full_artifacts(self):
+        return self.artifacts >= CARGO_ARTIFACT_MAX
+
+    def is_full_buildings(self):
+        return self.buildings >= CARGO_BUILDING_MAX
     
     def get_fullness(self):
         total = 0
